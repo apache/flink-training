@@ -30,9 +30,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TaxiRideTestBase<OUT> {
-	public static class TestRideSource extends TestSource implements ResultTypeQueryable<TaxiRide> {
+	public static class TestRideSource extends TestSource<TaxiRide> implements ResultTypeQueryable<TaxiRide> {
 		public TestRideSource(Object ... eventsOrWatermarks) {
 			this.testStream = eventsOrWatermarks;
+		}
+
+		@Override
+		long getTimestamp(TaxiRide ride) {
+			return ride.getEventTime();
 		}
 
 		@Override
@@ -41,9 +46,14 @@ public abstract class TaxiRideTestBase<OUT> {
 		}
 	}
 
-	public static class TestFareSource extends TestSource implements ResultTypeQueryable<TaxiFare> {
+	public static class TestFareSource extends TestSource<TaxiFare> implements ResultTypeQueryable<TaxiFare> {
 		public TestFareSource(Object ... eventsOrWatermarks) {
 			this.testStream = eventsOrWatermarks;
+		}
+
+		@Override
+		long getTimestamp(TaxiFare fare) {
+			return fare.getEventTime();
 		}
 
 		@Override
@@ -52,9 +62,14 @@ public abstract class TaxiRideTestBase<OUT> {
 		}
 	}
 
-	public static class TestStringSource extends TestSource implements ResultTypeQueryable<String> {
+	public static class TestStringSource extends TestSource<String> implements ResultTypeQueryable<String> {
 		public TestStringSource(Object ... eventsOrWatermarks) {
 			this.testStream = eventsOrWatermarks;
+		}
+
+		@Override
+		long getTimestamp(String s) {
+			return 0L;
 		}
 
 		@Override
@@ -69,13 +84,13 @@ public abstract class TaxiRideTestBase<OUT> {
 		public static final List VALUES = new ArrayList<>();
 
 		@Override
-		public void invoke(OUT value, Context context) throws Exception {
+		public void invoke(OUT value, Context context) {
 			VALUES.add(value);
 		}
 	}
 
 	public interface Testable {
-		public abstract void main() throws Exception;
+		void main() throws Exception;
 	}
 
 	protected List<OUT> runApp(TestRideSource source, TestSink<OUT> sink, Testable exercise, Testable solution) throws Exception {

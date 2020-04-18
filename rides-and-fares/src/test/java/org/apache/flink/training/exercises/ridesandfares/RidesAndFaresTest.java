@@ -35,7 +35,7 @@ import static org.junit.Assert.assertThat;
 
 public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFare>> {
 
-	static Testable javaExercise = () -> RidesAndFaresExercise.main(new String[]{});
+	static final Testable JAVA_EXERCISE = () -> RidesAndFaresExercise.main(new String[]{});
 
 
 	final TaxiRide ride1 = testRide(1);
@@ -49,8 +49,8 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 		TestFareSource fares = new TestFareSource(fare1, fare2);
 
 		List<Tuple2<TaxiRide, TaxiFare>> expected = Arrays.asList(
-				new Tuple2<>(ride1, fare1),
-				new Tuple2<>(ride2, fare2));
+				Tuple2.of(ride1, fare1),
+				Tuple2.of(ride2, fare2));
 
 		assertThat("Join results don't match", results(rides, fares), containsInAnyOrder(expected.toArray()));
 	}
@@ -61,8 +61,8 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 		TestFareSource fares = new TestFareSource(fare2, fare1);
 
 		List<Tuple2<TaxiRide, TaxiFare>> expected = Arrays.asList(
-				new Tuple2<>(ride1, fare1),
-				new Tuple2<>(ride2, fare2));
+				Tuple2.of(ride1, fare1),
+				Tuple2.of(ride2, fare2));
 
 		assertThat("Join results don't match", results(rides, fares), containsInAnyOrder(expected.toArray()));
 	}
@@ -78,7 +78,7 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 
 	protected List<?> results(TestRideSource rides, TestFareSource fares) throws Exception {
 		Testable javaSolution = () -> RidesAndFaresSolution.main(new String[]{});
-		return runApp(rides, fares, new TestSink<>(), javaExercise, javaSolution);
+		return runApp(rides, fares, new TestSink<>(), JAVA_EXERCISE, javaSolution);
 	}
 
 }

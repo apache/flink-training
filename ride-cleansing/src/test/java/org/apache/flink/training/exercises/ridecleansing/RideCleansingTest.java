@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 
 public class RideCleansingTest extends TaxiRideTestBase<TaxiRide> {
 
-	static Testable javaExercise = () -> RideCleansingExercise.main(new String[]{});
+	static final Testable JAVA_EXERCISE = () -> RideCleansingExercise.main(new String[]{});
 
 	@Test
 	public void testInNYC() throws Exception {
@@ -61,7 +61,7 @@ public class RideCleansingTest extends TaxiRideTestBase<TaxiRide> {
 
 	protected List<?> results(TestRideSource source) throws Exception {
 		Testable javaSolution = () -> RideCleansingSolution.main(new String[]{});
-		return runApp(source, new TestSink<>(), javaExercise, javaSolution);
+		return runApp(source, new TestSink<>(), JAVA_EXERCISE, javaSolution);
 	}
 
 }

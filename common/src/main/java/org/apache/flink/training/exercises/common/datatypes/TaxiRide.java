@@ -24,6 +24,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import javax.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.Locale;
 
@@ -45,7 +47,7 @@ import java.util.Locale;
  */
 public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
-	private static transient DateTimeFormatter timeFormatter =
+	private static final DateTimeFormatter TIME_FORMATTER =
 			DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US).withZoneUTC();
 
 	/**
@@ -89,20 +91,17 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(rideId).append(",");
-		sb.append(isStart ? "START" : "END").append(",");
-		sb.append(startTime.toString(timeFormatter)).append(",");
-		sb.append(endTime.toString(timeFormatter)).append(",");
-		sb.append(startLon).append(",");
-		sb.append(startLat).append(",");
-		sb.append(endLon).append(",");
-		sb.append(endLat).append(",");
-		sb.append(passengerCnt).append(",");
-		sb.append(taxiId).append(",");
-		sb.append(driverId);
-
-		return sb.toString();
+		return rideId + "," +
+				(isStart ? "START" : "END") + "," +
+				startTime.toString(TIME_FORMATTER) + "," +
+				endTime.toString(TIME_FORMATTER) + "," +
+				startLon + "," +
+				startLat + "," +
+				endLon + "," +
+				endLat + "," +
+				passengerCnt + "," +
+				taxiId + "," +
+				driverId;
 	}
 
 	/**
@@ -123,13 +122,13 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 			switch (tokens[1]) {
 				case "START":
 					ride.isStart = true;
-					ride.startTime = DateTime.parse(tokens[2], timeFormatter);
-					ride.endTime = DateTime.parse(tokens[3], timeFormatter);
+					ride.startTime = DateTime.parse(tokens[2], TIME_FORMATTER);
+					ride.endTime = DateTime.parse(tokens[3], TIME_FORMATTER);
 					break;
 				case "END":
 					ride.isStart = false;
-					ride.endTime = DateTime.parse(tokens[2], timeFormatter);
-					ride.startTime = DateTime.parse(tokens[3], timeFormatter);
+					ride.endTime = DateTime.parse(tokens[2], TIME_FORMATTER);
+					ride.startTime = DateTime.parse(tokens[3], TIME_FORMATTER);
 					break;
 				default:
 					throw new RuntimeException("Invalid record: " + line);
@@ -158,7 +157,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 	 *     <li>putting START events before END events if they have the same timestamp</li>
 	 * </ul>
 	 */
-	public int compareTo(TaxiRide other) {
+	public int compareTo(@Nullable TaxiRide other) {
 		if (other == null) {
 			return 1;
 		}

@@ -34,7 +34,7 @@ import java.util.Locale;
  */
 public class TaxiFare implements Serializable {
 
-	private static transient DateTimeFormatter timeFormatter =
+	private static final DateTimeFormatter TIME_FORMATTER =
 			DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US).withZoneUTC();
 
 	/**
@@ -69,17 +69,14 @@ public class TaxiFare implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(rideId).append(",");
-		sb.append(taxiId).append(",");
-		sb.append(driverId).append(",");
-		sb.append(startTime.toString(timeFormatter)).append(",");
-		sb.append(paymentType).append(",");
-		sb.append(tip).append(",");
-		sb.append(tolls).append(",");
-		sb.append(totalFare);
-
-		return sb.toString();
+		return rideId + "," +
+				taxiId + "," +
+				driverId + "," +
+				startTime.toString(TIME_FORMATTER) + "," +
+				paymentType + "," +
+				tip + "," +
+				tolls + "," +
+				totalFare;
 	}
 
 	/**
@@ -98,7 +95,7 @@ public class TaxiFare implements Serializable {
 			ride.rideId = Long.parseLong(tokens[0]);
 			ride.taxiId = Long.parseLong(tokens[1]);
 			ride.driverId = Long.parseLong(tokens[2]);
-			ride.startTime = DateTime.parse(tokens[3], timeFormatter);
+			ride.startTime = DateTime.parse(tokens[3], TIME_FORMATTER);
 			ride.paymentType = tokens[4];
 			ride.tip = tokens[5].length() > 0 ? Float.parseFloat(tokens[5]) : 0.0f;
 			ride.tolls = tokens[6].length() > 0 ? Float.parseFloat(tokens[6]) : 0.0f;

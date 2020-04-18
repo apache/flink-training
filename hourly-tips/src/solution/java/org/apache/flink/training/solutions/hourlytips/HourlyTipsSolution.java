@@ -96,12 +96,12 @@ public class HourlyTipsSolution extends ExerciseBase {
 	public static class AddTips extends ProcessWindowFunction<
 			TaxiFare, Tuple3<Long, Long, Float>, Long, TimeWindow> {
 		@Override
-		public void process(Long key, Context context, Iterable<TaxiFare> fares, Collector<Tuple3<Long, Long, Float>> out) throws Exception {
-			Float sumOfTips = 0F;
+		public void process(Long key, Context context, Iterable<TaxiFare> fares, Collector<Tuple3<Long, Long, Float>> out) {
+			float sumOfTips = 0F;
 			for (TaxiFare f : fares) {
 				sumOfTips += f.tip;
 			}
-			out.collect(new Tuple3<>(context.window().getEnd(), key, sumOfTips));
+			out.collect(Tuple3.of(context.window().getEnd(), key, sumOfTips));
 		}
 	}
 }

@@ -33,7 +33,7 @@ class RidesAndFaresTest extends ridesandfares.RidesAndFaresTest{
   override protected def results(rides: TaxiRideTestBase.TestRideSource, fares: TaxiRideTestBase.TestFareSource): util.List[tuple.Tuple2[TaxiRide, TaxiFare]] = {
     val scalaSolution: TaxiRideTestBase.Testable = () => RidesAndFaresSolution.main(Array.empty[String])
     val tuples: util.List[_] = runApp(rides, fares, new TaxiRideTestBase.TestSink[tuple.Tuple2[TaxiRide, TaxiFare]], scalaExercise, scalaSolution)
-    javaTuples(tuples.asInstanceOf[util.List[Tuple2[TaxiRide, TaxiFare]]])
+    javaTuples(tuples.asInstanceOf[util.List[(TaxiRide, TaxiFare)]])
   }
 
   private def javaTuples(a: util.List[(TaxiRide, TaxiFare)]): util.ArrayList[tuple.Tuple2[TaxiRide, TaxiFare]] = {
