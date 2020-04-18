@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 
 public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> {
 
-	static Testable javaExercise = () -> HourlyTipsExercise.main(new String[]{});
+	static final Testable JAVA_EXERCISE = () -> HourlyTipsExercise.main(new String[]{});
 
 	@Test
 	public void testOneDriverOneTip() throws Exception {
@@ -45,7 +45,7 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 				one
 		);
 
-		Tuple3<Long, Long, Float> max = new Tuple3<Long, Long, Float>(t(60), 1L, 1.0F);
+		Tuple3<Long, Long, Float> max = Tuple3.of(t(60), 1L, 1.0F);
 
 		List<Tuple3<Long, Long, Float>> expected = Collections.singletonList(max);
 
@@ -64,8 +64,8 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 				tenIn2
 		);
 
-		Tuple3<Long, Long, Float> hour1 = new Tuple3<Long, Long, Float>(t(60), 1L, 6.0F);
-		Tuple3<Long, Long, Float> hour2 = new Tuple3<Long, Long, Float>(t(120), 1L, 10.0F);
+		Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60), 1L, 6.0F);
+		Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120), 1L, 10.0F);
 
 		List<Tuple3<Long, Long, Float>> expected = Arrays.asList(hour1, hour2);
 
@@ -86,8 +86,8 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 				twentyFor2In2
 		);
 
-		Tuple3<Long, Long, Float> hour1 = new Tuple3<Long, Long, Float>(t(60), 1L, 6.0F);
-		Tuple3<Long, Long, Float> hour2 = new Tuple3<Long, Long, Float>(t(120), 2L, 20.0F);
+		Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60), 1L, 6.0F);
+		Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120), 2L, 20.0F);
 
 		List<Tuple3<Long, Long, Float>> expected = Arrays.asList(hour1, hour2);
 
@@ -104,7 +104,7 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 
 	protected List<Tuple3<Long, Long, Float>> results(TestFareSource source) throws Exception {
 		Testable javaSolution = () -> HourlyTipsSolution.main(new String[]{});
-		return runApp(source, new TestSink<>(), javaExercise, javaSolution);
+		return runApp(source, new TestSink<>(), JAVA_EXERCISE, javaSolution);
 	}
 
 }

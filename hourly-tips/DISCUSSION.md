@@ -41,7 +41,7 @@ public static class AddTips extends ProcessWindowFunction<
 		for (TaxiFare f : fares) {
 			sumOfTips += f.tip;
 		}
-		out.collect(new Tuple3<>(context.window().getEnd(), key, sumOfTips));
+		out.collect(Tuple3.of(context.window().getEnd(), key, sumOfTips));
 	}
 }
 ```

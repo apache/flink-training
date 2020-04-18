@@ -67,8 +67,8 @@ public class RideCountExample {
 		// map each ride to a tuple of (driverId, 1)
 		DataStream<Tuple2<Long, Long>> tuples = rides.map(new MapFunction<TaxiRide, Tuple2<Long, Long>>() {
 					@Override
-					public Tuple2<Long, Long> map(TaxiRide ride) throws Exception {
-						return new Tuple2<Long, Long>(ride.driverId, 1L);
+					public Tuple2<Long, Long> map(TaxiRide ride) {
+						return Tuple2.of(ride.driverId, 1L);
 					}
 		});
 

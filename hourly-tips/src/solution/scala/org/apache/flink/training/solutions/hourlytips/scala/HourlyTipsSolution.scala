@@ -82,7 +82,7 @@ object HourlyTipsSolution {
   class WrapWithWindowInfo() extends ProcessWindowFunction[(Long, Float), (Long, Long, Float), Long, TimeWindow] {
     override def process(key: Long, context: Context, elements: Iterable[(Long, Float)], out: Collector[(Long, Long, Float)]): Unit = {
       val sumOfTips = elements.iterator.next()._2
-      out.collect((context.window.getEnd(), key, sumOfTips))
+      out.collect((context.window.getEnd, key, sumOfTips))
     }
   }
 

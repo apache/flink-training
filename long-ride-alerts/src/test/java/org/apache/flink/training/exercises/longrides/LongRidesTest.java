@@ -32,14 +32,14 @@ import static org.junit.Assert.assertEquals;
 
 public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 
-	static Testable javaExercise = () -> LongRidesExercise.main(new String[]{});
+	static final Testable JAVA_EXERCISE = () -> LongRidesExercise.main(new String[]{});
 
-	private DateTime beginning = new DateTime(2000, 1, 1, 0, 0);
+	private static final DateTime BEGINNING = new DateTime(2000, 1, 1, 0, 0);
 
 	@Test
 	public void shortRide() throws Exception {
-		DateTime oneMinLater = beginning.plusMinutes(1);
-		TaxiRide rideStarted = startRide(1, beginning);
+		DateTime oneMinLater = BEGINNING.plusMinutes(1);
+		TaxiRide rideStarted = startRide(1, BEGINNING);
 		TaxiRide endedOneMinLater = endRide(rideStarted, oneMinLater);
 		Long markOneMinLater = oneMinLater.getMillis();
 
@@ -49,8 +49,8 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 
 	@Test
 	public void outOfOrder() throws Exception {
-		DateTime oneMinLater = beginning.plusMinutes(1);
-		TaxiRide rideStarted = startRide(1, beginning);
+		DateTime oneMinLater = BEGINNING.plusMinutes(1);
+		TaxiRide rideStarted = startRide(1, BEGINNING);
 		TaxiRide endedOneMinLater = endRide(rideStarted, oneMinLater);
 		Long markOneMinLater = oneMinLater.getMillis();
 
@@ -60,8 +60,8 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 
 	@Test
 	public void noStartShort() throws Exception {
-		DateTime oneMinLater = beginning.plusMinutes(1);
-		TaxiRide rideStarted = startRide(1, beginning);
+		DateTime oneMinLater = BEGINNING.plusMinutes(1);
+		TaxiRide rideStarted = startRide(1, BEGINNING);
 		TaxiRide endedOneMinLater = endRide(rideStarted, oneMinLater);
 		Long markOneMinLater = oneMinLater.getMillis();
 
@@ -71,8 +71,8 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 
 	@Test
 	public void noEnd() throws Exception {
-		TaxiRide rideStarted = startRide(1, beginning);
-		Long markThreeHoursLater = beginning.plusHours(3).getMillis();
+		TaxiRide rideStarted = startRide(1, BEGINNING);
+		Long markThreeHoursLater = BEGINNING.plusHours(3).getMillis();
 
 		TestRideSource source = new TestRideSource(rideStarted, markThreeHoursLater);
 		assertEquals(Collections.singletonList(rideStarted), results(source));
@@ -80,9 +80,9 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 
 	@Test
 	public void longRide() throws Exception {
-		TaxiRide rideStarted = startRide(1, beginning);
-		Long mark2HoursLater = beginning.plusMinutes(120).getMillis();
-		TaxiRide rideEnded3HoursLater = endRide(rideStarted, beginning.plusHours(3));
+		TaxiRide rideStarted = startRide(1, BEGINNING);
+		Long mark2HoursLater = BEGINNING.plusMinutes(120).getMillis();
+		TaxiRide rideEnded3HoursLater = endRide(rideStarted, BEGINNING.plusHours(3));
 
 		TestRideSource source = new TestRideSource(rideStarted, mark2HoursLater, rideEnded3HoursLater);
 		assertEquals(Collections.singletonList(rideStarted), results(source));
@@ -102,7 +102,7 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 
 	protected List<TaxiRide> results(TestRideSource source) throws Exception {
 		Testable javaSolution = () -> LongRidesSolution.main(new String[]{});
-		return runApp(source, new TestSink<>(), javaExercise, javaSolution);
+		return runApp(source, new TestSink<>(), JAVA_EXERCISE, javaSolution);
 	}
 
 }

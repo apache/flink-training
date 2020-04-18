@@ -32,7 +32,7 @@ class HourlyTipsTest extends hourlytips.HourlyTipsTest {
   override protected def results(source: TaxiRideTestBase.TestFareSource): util.List[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
     val scalaSolution: TaxiRideTestBase.Testable = () => HourlyTipsSolution.main(Array.empty[String])
     val tuples: util.List[_] = runApp(source, new TaxiRideTestBase.TestSink[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]], scalaExercise, scalaSolution)
-    javaTuples(tuples.asInstanceOf[util.List[Tuple3[Long, Long, Float]]])
+    javaTuples(tuples.asInstanceOf[util.List[(Long, Long, Float)]])
   }
 
   private def javaTuples(a: util.List[(Long, Long, Float)]): util.ArrayList[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {

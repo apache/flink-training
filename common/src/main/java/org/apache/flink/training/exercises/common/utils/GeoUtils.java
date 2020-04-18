@@ -245,9 +245,8 @@ public class GeoUtils {
 
 		double x = destLat - startLat;
 		double y = (destLon - startLon) * Math.cos(startLat);
-		int degrees = (int) Math.toDegrees(Math.atan2(x, y)) + 179;
 
-		return degrees;
+		return (int) Math.toDegrees(Math.atan2(x, y)) + 179;
 	}
 
 }
