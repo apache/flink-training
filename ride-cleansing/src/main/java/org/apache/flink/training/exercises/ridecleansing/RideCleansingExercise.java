@@ -30,18 +30,28 @@ import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 /**
  * The "Ride Cleansing" exercise from the Flink training in the docs.
  *
- * The task of the exercise is to filter a data stream of taxi ride records to keep only rides that
+ * <p>The task of the exercise is to filter a data stream of taxi ride records to keep only rides that
  * start and end within New York City. The resulting stream should be printed.
  *
- * Parameters:
+ * <p>Parameters:
  *   -input path-to-input-file
- *
  */
 public class RideCleansingExercise extends ExerciseBase {
+
+	/**
+	 * Main method.
+	 *
+	 * <p>Parameters:
+	 *   -input path-to-input-file
+	 *
+	 * @throws Exception which occurs during job execution.
+	 *
+	 * @throws Exception which occurs during job execution.
+	 */
 	public static void main(String[] args) throws Exception {
 
 		ParameterTool params = ParameterTool.fromArgs(args);
-		final String input = params.get("input", ExerciseBase.pathToRideData);
+		final String input = params.get("input", ExerciseBase.PATH_TO_RIDE_DATA);
 
 		final int maxEventDelay = 60;       // events are out of order by max 60 seconds
 		final int servingSpeedFactor = 600; // events of 10 minutes are served in 1 second

@@ -18,7 +18,6 @@
 
 package org.apache.flink.training.exercises.ridecleansing;
 
-import com.google.common.collect.Lists;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution;
@@ -26,6 +25,7 @@ import org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -40,7 +40,7 @@ public class RideCleansingTest extends TaxiRideTestBase<TaxiRide> {
 
 		TestRideSource source = new TestRideSource(atPennStation);
 
-		assertEquals(Lists.newArrayList(atPennStation), results(source));
+		assertEquals(Collections.singletonList(atPennStation), results(source));
 	}
 
 	@Test
@@ -51,12 +51,12 @@ public class RideCleansingTest extends TaxiRideTestBase<TaxiRide> {
 
 		TestRideSource source = new TestRideSource(toThePole, fromThePole, atNorthPole);
 
-		assertEquals(Lists.newArrayList(), results(source));
+		assertEquals(Collections.emptyList(), results(source));
 	}
 
 	private TaxiRide testRide(float startLon, float startLat, float endLon, float endLat) {
 		return new TaxiRide(1L, true, new DateTime(0), new DateTime(0),
-				startLon, startLat, endLon, endLat, (short)1, 0, 0);
+				startLon, startLat, endLon, endLat, (short) 1, 0, 0);
 	}
 
 	protected List<?> results(TestRideSource source) throws Exception {

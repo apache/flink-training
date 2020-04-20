@@ -34,18 +34,26 @@ import org.apache.flink.util.Collector;
 /**
  * The "Long Ride Alerts" exercise of the Flink training in the docs.
  *
- * The goal for this exercise is to emit START events for taxi rides that have not been matched
+ * <p>The goal for this exercise is to emit START events for taxi rides that have not been matched
  * by an END event during the first 2 hours of the ride.
  *
- * Parameters:
+ * <p>Parameters:
  * -input path-to-input-file
- *
  */
 public class LongRidesExercise extends ExerciseBase {
+
+	/**
+	 * Main method.
+	 *
+	 * <p>Parameters:
+	 * -input path-to-input-file
+	 *
+	 * @throws Exception which occurs during job execution.
+	 */
 	public static void main(String[] args) throws Exception {
 
 		ParameterTool params = ParameterTool.fromArgs(args);
-		final String input = params.get("input", ExerciseBase.pathToRideData);
+		final String input = params.get("input", ExerciseBase.PATH_TO_RIDE_DATA);
 
 		final int maxEventDelay = 60;       // events are out of order by max 60 seconds
 		final int servingSpeedFactor = 600; // events of 10 minutes are served in 1 second

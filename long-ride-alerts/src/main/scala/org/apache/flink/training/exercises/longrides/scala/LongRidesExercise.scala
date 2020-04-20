@@ -37,14 +37,14 @@ import org.apache.flink.util.Collector
   *
   * Parameters:
   * -input path-to-input-file
-  *
   */
 object LongRidesExercise {
+
   def main(args: Array[String]) {
 
     // parse parameters
     val params = ParameterTool.fromArgs(args)
-    val input = params.get("input", ExerciseBase.pathToRideData)
+    val input = params.get("input", ExerciseBase.PATH_TO_RIDE_DATA)
 
     val maxDelay = 60     // events are out of order by max 60 seconds
     val speed = 1800      // events of 30 minutes are served every second

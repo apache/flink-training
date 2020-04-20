@@ -231,9 +231,9 @@ The initial set of exercises are all based on data streams of events about taxi 
 After downloading the datasets, open the `org.apache.flink.training.exercises.common.utils.ExerciseBase` class in your IDE, and edit these two lines to point to the two taxi ride data files you have downloaded:
 
 ```java
-public final static String pathToRideData =   
+public final static String PATH_TO_RIDE_DATA =
     "/Users/david/stuff/flink-training/trainingData/nycTaxiRides.gz";
-public final static String pathToFareData =
+public final static String PATH_TO_FARE_DATA =
     "/Users/david/stuff/flink-training/trainingData/nycTaxiFares.gz";
 ```
 

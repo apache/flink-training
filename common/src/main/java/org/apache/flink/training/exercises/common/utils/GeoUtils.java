@@ -28,25 +28,25 @@ import java.util.Random;
 public class GeoUtils {
 
 	// geo boundaries of the area of NYC
-	public static double LON_EAST = -73.7;
-	public static double LON_WEST = -74.05;
-	public static double LAT_NORTH = 41.0;
-	public static double LAT_SOUTH = 40.5;
+	public static final double LON_EAST = -73.7;
+	public static final double LON_WEST = -74.05;
+	public static final double LAT_NORTH = 41.0;
+	public static final double LAT_SOUTH = 40.5;
 
 	// area width and height
-	public static double LON_WIDTH = 74.05 - 73.7;
-	public static double LAT_HEIGHT = 41.0 - 40.5;
+	public static final double LON_WIDTH = 74.05 - 73.7;
+	public static final double LAT_HEIGHT = 41.0 - 40.5;
 
 	// delta step to create artificial grid overlay of NYC
-	public static double DELTA_LON = 0.0014;
-	public static double DELTA_LAT = 0.00125;
+	public static final double DELTA_LON = 0.0014;
+	public static final double DELTA_LAT = 0.00125;
 
 	// ( |LON_WEST| - |LON_EAST| ) / DELTA_LAT
-	public static int NUMBER_OF_GRID_X = 250;
+	public static final int NUMBER_OF_GRID_X = 250;
 	// ( LAT_NORTH - LAT_SOUTH ) / DELTA_LON
-	public static int NUMBER_OF_GRID_Y = 400;
+	public static final int NUMBER_OF_GRID_Y = 400;
 
-	public static float DEG_LEN = 110.25f;
+	public static final float DEG_LEN = 110.25f;
 
 	/**
 	 * Checks if a location specified by longitude and latitude values is
@@ -103,7 +103,7 @@ public class GeoUtils {
 		int y2 = (int) Math.floor((LAT_NORTH - lat2) / DELTA_LAT);
 
 		int startX, startY, endX, endY;
-		if(x1 <= x2) {
+		if (x1 <= x2) {
 			startX = x1;
 			startY = y1;
 			endX = x2;
@@ -116,7 +116,7 @@ public class GeoUtils {
 			endY = y1;
 		}
 
-		double slope = (endY - startY) / ((endX - startX)+0.00000001);
+		double slope = (endY - startY) / ((endX - startX) + 0.00000001);
 
 		int curX = startX;
 		int curY = startY;
@@ -124,16 +124,16 @@ public class GeoUtils {
 		ArrayList<Integer> cellIds = new ArrayList<>(64);
 		cellIds.add(curX + (curY * NUMBER_OF_GRID_X));
 
-		while(curX < endX || curY != endY) {
+		while (curX < endX || curY != endY) {
 
-			if(slope > 0) {
+			if (slope > 0) {
 				double y = (curX - startX + 0.5) * slope + startY - 0.5;
 
-				if(y > curY - 0.05 && y < curY + 0.05) {
+				if (y > curY - 0.05 && y < curY + 0.05) {
 					curX++;
 					curY++;
 				}
-				else if(y < curY) {
+				else if (y < curY) {
 					curX++;
 				}
 				else {
@@ -143,11 +143,11 @@ public class GeoUtils {
 			else {
 				double y = (curX - startX + 0.5) * slope + startY + 0.5;
 
-				if(y > curY - 0.05 && y < curY + 0.05) {
+				if (y > curY - 0.05 && y < curY + 0.05) {
 					curX++;
 					curY--;
 				}
-				if(y > curY) {
+				if (y > curY) {
 					curX++;
 				}
 				else {
@@ -173,7 +173,7 @@ public class GeoUtils {
 
 		int xIndex = gridCellId % NUMBER_OF_GRID_X;
 
-		return (float)(Math.abs(LON_WEST) - (xIndex * DELTA_LON) - (DELTA_LON / 2)) * -1.0f;
+		return (float) (Math.abs(LON_WEST) - (xIndex * DELTA_LON) - (DELTA_LON / 2)) * -1.0f;
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class GeoUtils {
 		int xIndex = gridCellId % NUMBER_OF_GRID_X;
 		int yIndex = (gridCellId - xIndex) / NUMBER_OF_GRID_X;
 
-		return (float)(LAT_NORTH - (yIndex * DELTA_LAT) - (DELTA_LAT / 2));
+		return (float) (LAT_NORTH - (yIndex * DELTA_LAT) - (DELTA_LAT / 2));
 
 	}
 
@@ -199,7 +199,7 @@ public class GeoUtils {
 	 * @return A random longitude value within the NYC area.
 	 */
 	public static float getRandomNYCLon(Random rand) {
-		return (float)(LON_EAST - (LON_WIDTH * rand.nextFloat()));
+		return (float) (LON_EAST - (LON_WIDTH * rand.nextFloat()));
 	}
 
 	/**
@@ -209,7 +209,7 @@ public class GeoUtils {
 	 * @return A random latitude value within the NYC area.
 	 */
 	public static float getRandomNYCLat(Random rand) {
-		return (float)(LAT_SOUTH + (LAT_HEIGHT * rand.nextFloat()));
+		return (float) (LAT_SOUTH + (LAT_HEIGHT * rand.nextFloat()));
 	}
 
 	/**
@@ -224,14 +224,14 @@ public class GeoUtils {
 	public static double getEuclideanDistance(float lon1, float lat1, float lon2, float lat2) {
 		double x = lat1 - lat2;
 		double y = (lon1 - lon2) * Math.cos(lat2);
-		return (DEG_LEN * Math.sqrt(x*x + y*y));
+		return (DEG_LEN * Math.sqrt(x * x + y * y));
 	}
 
 	/**
 	 * Returns the angle in degrees between the vector from the start to the destination
 	 * and the x-axis on which the start is located.
 	 *
-	 * The angle describes in which direction the destination is located from the start, i.e.,
+	 * <p>The angle describes in which direction the destination is located from the start, i.e.,
 	 * 0° -> East, 90° -> South, 180° -> West, 270° -> North
 	 *
 	 * @param startLon longitude of start location

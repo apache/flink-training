@@ -18,18 +18,12 @@
 
 package org.apache.flink.training.exercises.common.utils;
 
+/**
+ * Exception denoting a missing solution (results in tests verifying the solution instead).
+ */
 public class MissingSolutionException extends Exception {
-	public MissingSolutionException() {};
-
-	public MissingSolutionException(String message) {
-		super(message);
-	};
-
-	public MissingSolutionException(Throwable cause) {
-		super(cause);
-	}
-
-	public MissingSolutionException(String message, Throwable cause) {
-		super(message, cause);
-	}
-};
+	/**
+	 * Create new exception.
+	 */
+	public MissingSolutionException() {}
+}

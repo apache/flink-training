@@ -23,12 +23,12 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.hourlytips.HourlyTipsSolution;
 
-import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 
 		Tuple3<Long, Long, Float> max = new Tuple3<Long, Long, Float>(t(60), 1L, 1.0F);
 
-		ArrayList<Tuple3<Long, Long, Float>> expected = Lists.newArrayList(max);
+		List<Tuple3<Long, Long, Float>> expected = Collections.singletonList(max);
 
 		assertEquals(expected, results(source));
 	}
@@ -67,7 +67,7 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 		Tuple3<Long, Long, Float> hour1 = new Tuple3<Long, Long, Float>(t(60), 1L, 6.0F);
 		Tuple3<Long, Long, Float> hour2 = new Tuple3<Long, Long, Float>(t(120), 1L, 10.0F);
 
-		ArrayList<Tuple3<Long, Long, Float>> expected = Lists.newArrayList(hour1, hour2);
+		List<Tuple3<Long, Long, Float>> expected = Arrays.asList(hour1, hour2);
 
 		assertEquals(expected, results(source));
 	}
@@ -89,7 +89,7 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 		Tuple3<Long, Long, Float> hour1 = new Tuple3<Long, Long, Float>(t(60), 1L, 6.0F);
 		Tuple3<Long, Long, Float> hour2 = new Tuple3<Long, Long, Float>(t(120), 2L, 20.0F);
 
-		ArrayList<Tuple3<Long, Long, Float>> expected = Lists.newArrayList(hour1, hour2);
+		List<Tuple3<Long, Long, Float>> expected = Arrays.asList(hour1, hour2);
 
 		assertEquals(expected, results(source));
 	}

@@ -22,10 +22,10 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.longrides.LongRidesSolution;
 
-import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -75,7 +75,7 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 		Long markThreeHoursLater = beginning.plusHours(3).getMillis();
 
 		TestRideSource source = new TestRideSource(rideStarted, markThreeHoursLater);
-		assertEquals(Lists.newArrayList(rideStarted), results(source));
+		assertEquals(Collections.singletonList(rideStarted), results(source));
 	}
 
 	@Test
@@ -85,11 +85,11 @@ public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
 		TaxiRide rideEnded3HoursLater = endRide(rideStarted, beginning.plusHours(3));
 
 		TestRideSource source = new TestRideSource(rideStarted, mark2HoursLater, rideEnded3HoursLater);
-		assertEquals(Lists.newArrayList(rideStarted), results(source));
+		assertEquals(Collections.singletonList(rideStarted), results(source));
 	}
 
 	private TaxiRide testRide(long rideId, Boolean isStart, DateTime startTime, DateTime endTime) {
-		return new TaxiRide(rideId, isStart, startTime, endTime, -73.9947F, 40.750626F, -73.9947F, 40.750626F, (short)1, 0, 0);
+		return new TaxiRide(rideId, isStart, startTime, endTime, -73.9947F, 40.750626F, -73.9947F, 40.750626F, (short) 1, 0, 0);
 	}
 
 	private TaxiRide startRide(long rideId, DateTime startTime) {
