@@ -29,23 +29,31 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiRideSource;
 import org.apache.flink.training.exercises.common.utils.ExerciseBase;
 
-
 /**
  * Example that counts the rides for each driver.
  *
- * Parameters:
+ * <p>Parameters:
  *   -input path-to-input-file
  *
- * 	Note that this is implicitly keeping state for each driver.
- * 	This sort of simple, non-windowed aggregation on an unbounded set of keys will use an unbounded amount of state.
- * 	When this is an issue, look at the SQL/Table API, or ProcessFunction, or state TTL, all of which provide
- * 	mechanisms for expiring state for stale keys.
+ * <p>Note that this is implicitly keeping state for each driver.
+ * This sort of simple, non-windowed aggregation on an unbounded set of keys will use an unbounded amount of state.
+ * When this is an issue, look at the SQL/Table API, or ProcessFunction, or state TTL, all of which provide
+ * mechanisms for expiring state for stale keys.
  */
 public class RideCountExample {
+
+	/**
+	 * Main method.
+	 *
+	 * <p>Parameters:
+	 *   -input path-to-input-file
+	 *
+	 * @throws Exception which occurs during job execution.
+	 */
 	public static void main(String[] args) throws Exception {
 
 		ParameterTool params = ParameterTool.fromArgs(args);
-		final String input = params.get("input", ExerciseBase.pathToRideData);
+		final String input = params.get("input", ExerciseBase.PATH_TO_RIDE_DATA);
 
 		final int maxEventDelay = 60;       // events are out of order by max 60 seconds
 		final int servingSpeedFactor = 600; // events of 10 minutes are served every second
@@ -60,7 +68,7 @@ public class RideCountExample {
 		DataStream<Tuple2<Long, Long>> tuples = rides.map(new MapFunction<TaxiRide, Tuple2<Long, Long>>() {
 					@Override
 					public Tuple2<Long, Long> map(TaxiRide ride) throws Exception {
-						return new Tuple2<Long, Long>(ride.driverId, 1L) ;
+						return new Tuple2<Long, Long>(ride.driverId, 1L);
 					}
 		});
 

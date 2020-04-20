@@ -26,6 +26,7 @@ subprojects {
         apply plugin: 'application'
     }
     apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'checkstyle'
 
     // artifact properties
     group = 'org.apache.flink'
@@ -85,7 +86,6 @@ subprojects {
         implementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
 
         flinkShadowJar "joda-time:joda-time:2.7"
-        flinkShadowJar "com.google.guava:guava:19.0"
 
         if (project != project(":common")) {
             implementation project(path: ':common')

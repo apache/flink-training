@@ -18,7 +18,6 @@
 
 package org.apache.flink.training.exercises.common.datatypes;
 
-
 import org.apache.flink.training.exercises.common.utils.GeoUtils;
 
 import org.joda.time.DateTime;
@@ -32,7 +31,7 @@ import java.util.Locale;
  * A TaxiRide is a taxi ride event. There are two types of events, a taxi ride start event and a
  * taxi ride end event. The isStart flag specifies the type of the event.
  *
- * A TaxiRide consists of
+ * <p>A TaxiRide consists of
  * - the rideId of the event which is identical for start and end record
  * - the type of the event (start or end)
  * - the time of the event
@@ -43,22 +42,26 @@ import java.util.Locale;
  * - the passengerCnt of the ride
  * - the taxiId
  * - the driverId
- *
  */
 public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
 	private static transient DateTimeFormatter timeFormatter =
 			DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US).withZoneUTC();
 
+	/**
+	 * Creates a new TaxiRide with now as start and end time.
+	 */
 	public TaxiRide() {
 		this.startTime = new DateTime();
 		this.endTime = new DateTime();
 	}
 
+	/**
+	 * Creates a TaxiRide with the given parameters.
+	 */
 	public TaxiRide(long rideId, boolean isStart, DateTime startTime, DateTime endTime,
 					float startLon, float startLat, float endLon, float endLat,
 					short passengerCnt, long taxiId, long driverId) {
-
 		this.rideId = rideId;
 		this.isStart = isStart;
 		this.startTime = startTime;
@@ -84,6 +87,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 	public long taxiId;
 	public long driverId;
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(rideId).append(",");
@@ -101,6 +105,9 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 		return sb.toString();
 	}
 
+	/**
+	 * Parse a TaxiRide from a CSV representation.
+	 */
 	public static TaxiRide fromString(String line) {
 
 		String[] tokens = line.split(",");
@@ -143,8 +150,14 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 		return ride;
 	}
 
-	// sort by timestamp,
-	// putting START events before END events if they have the same timestamp
+	/**
+	 * Compares this TaxiRide with the given one.
+	 *
+	 * <ul>
+	 *     <li>sort by timestamp,</li>
+	 *     <li>putting START events before END events if they have the same timestamp</li>
+	 * </ul>
+	 */
 	public int compareTo(TaxiRide other) {
 		if (other == null) {
 			return 1;
@@ -176,9 +189,12 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
 	@Override
 	public int hashCode() {
-		return (int)this.rideId;
+		return (int) this.rideId;
 	}
 
+	/**
+	 * Gets the ride's time stamp (start or end time depending on {@link #isStart}).
+	 */
 	public long getEventTime() {
 		if (isStart) {
 			return startTime.getMillis();
@@ -188,6 +204,9 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 		}
 	}
 
+	/**
+	 * Gets the distance from the ride location to the given one.
+	 */
 	public double getEuclideanDistance(double longitude, double latitude) {
 		if (this.isStart) {
 			return GeoUtils.getEuclideanDistance((float) longitude, (float) latitude, this.startLon, this.startLat);

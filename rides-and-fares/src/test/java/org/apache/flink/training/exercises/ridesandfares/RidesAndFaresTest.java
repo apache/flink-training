@@ -24,14 +24,14 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution;
 
-import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFare>> {
 
@@ -48,7 +48,7 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 		TestRideSource rides = new TestRideSource(ride1, ride2);
 		TestFareSource fares = new TestFareSource(fare1, fare2);
 
-		ArrayList<Tuple2<TaxiRide, TaxiFare>> expected = Lists.newArrayList(
+		List<Tuple2<TaxiRide, TaxiFare>> expected = Arrays.asList(
 				new Tuple2<>(ride1, fare1),
 				new Tuple2<>(ride2, fare2));
 
@@ -60,7 +60,7 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 		TestRideSource rides = new TestRideSource(ride1, ride2);
 		TestFareSource fares = new TestFareSource(fare2, fare1);
 
-		ArrayList<Tuple2<TaxiRide, TaxiFare>> expected = Lists.newArrayList(
+		List<Tuple2<TaxiRide, TaxiFare>> expected = Arrays.asList(
 				new Tuple2<>(ride1, fare1),
 				new Tuple2<>(ride2, fare2));
 
@@ -69,7 +69,7 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 
 	private TaxiRide testRide(long rideId) {
 		return new TaxiRide(rideId, true, new DateTime(0), new DateTime(0),
-				0F, 0F, 0F, 0F, (short)1, 0, rideId);
+				0F, 0F, 0F, 0F, (short) 1, 0, rideId);
 	}
 
 	private TaxiFare testFare(long rideId) {

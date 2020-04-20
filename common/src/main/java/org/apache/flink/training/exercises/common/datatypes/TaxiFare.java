@@ -28,22 +28,26 @@ import java.util.Locale;
 /**
  * A TaxiFare is a taxi fare event.
  *
- * A TaxiFare consists of
+ * <p>A TaxiFare consists of
  * - the rideId of the event
  * - the time of the event
- *
  */
 public class TaxiFare implements Serializable {
 
 	private static transient DateTimeFormatter timeFormatter =
 			DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US).withZoneUTC();
 
+	/**
+	 * Creates a TaxiFare with now as start time.
+	 */
 	public TaxiFare() {
 		this.startTime = new DateTime();
 	}
 
+	/**
+	 * Creates a TaxiFare with the given parameters.
+	 */
 	public TaxiFare(long rideId, long taxiId, long driverId, DateTime startTime, String paymentType, float tip, float tolls, float totalFare) {
-
 		this.rideId = rideId;
 		this.taxiId = taxiId;
 		this.driverId = driverId;
@@ -63,6 +67,7 @@ public class TaxiFare implements Serializable {
 	public float tolls;
 	public float totalFare;
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(rideId).append(",");
@@ -77,6 +82,9 @@ public class TaxiFare implements Serializable {
 		return sb.toString();
 	}
 
+	/**
+	 * Parse a TaxiFare from a CSV representation.
+	 */
 	public static TaxiFare fromString(String line) {
 
 		String[] tokens = line.split(",");
@@ -111,9 +119,12 @@ public class TaxiFare implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return (int)this.rideId;
+		return (int) this.rideId;
 	}
 
+	/**
+	 * Gets the fare's start time.
+	 */
 	public long getEventTime() {
 		return startTime.getMillis();
 	}

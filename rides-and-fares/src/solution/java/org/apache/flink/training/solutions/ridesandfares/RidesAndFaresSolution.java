@@ -37,18 +37,28 @@ import org.apache.flink.util.Collector;
 /**
  * Java reference implementation for the "Stateful Enrichment" exercise of the Flink training in the docs.
  *
- * The goal for this exercise is to enrich TaxiRides with fare information.
+ * <p>The goal for this exercise is to enrich TaxiRides with fare information.
  *
- * Parameters:
+ * <p>Parameters:
  * -rides path-to-input-file
  * -fares path-to-input-file
  */
 public class RidesAndFaresSolution extends ExerciseBase {
+
+	/**
+	 * Main method.
+	 *
+	 * <p>Parameters:
+	 * -rides path-to-input-file
+	 * -fares path-to-input-file
+	 *
+	 * @throws Exception which occurs during job execution.
+	 */
 	public static void main(String[] args) throws Exception {
 
 		ParameterTool params = ParameterTool.fromArgs(args);
-		final String ridesFile = params.get("rides", pathToRideData);
-		final String faresFile = params.get("fares", pathToFareData);
+		final String ridesFile = params.get("rides", PATH_TO_RIDE_DATA);
+		final String faresFile = params.get("fares", PATH_TO_FARE_DATA);
 
 		final int delay = 60;					// at most 60 seconds of delay
 		final int servingSpeedFactor = 1800; 	// 30 minutes worth of events are served every second

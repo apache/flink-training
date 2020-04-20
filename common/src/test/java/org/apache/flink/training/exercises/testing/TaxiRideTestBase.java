@@ -66,11 +66,11 @@ public abstract class TaxiRideTestBase<OUT> {
 	public static class TestSink<OUT> implements SinkFunction<OUT> {
 
 		// must be static
-		public static final List values = new ArrayList<>();
+		public static final List VALUES = new ArrayList<>();
 
 		@Override
 		public void invoke(OUT value, Context context) throws Exception {
-			values.add(value);
+			VALUES.add(value);
 		}
 	}
 
@@ -111,7 +111,7 @@ public abstract class TaxiRideTestBase<OUT> {
 	}
 
 	private List<OUT> execute(TestSink<OUT> sink, Testable exercise, Testable solution) throws Exception {
-		sink.values.clear();
+		sink.VALUES.clear();
 
 		ExerciseBase.out = sink;
 		ExerciseBase.parallelism = 1;
@@ -120,25 +120,25 @@ public abstract class TaxiRideTestBase<OUT> {
 			exercise.main();
 		} catch (Exception e) {
 			if (ultimateCauseIsMissingSolution(e)) {
-				sink.values.clear();
+				sink.VALUES.clear();
 				solution.main();
 			} else {
 				throw e;
 			}
 		}
 
-		return sink.values;
+		return sink.VALUES;
 	}
 
 	private List<OUT> execute(TestSink<OUT> sink, Testable solution) throws Exception {
-		sink.values.clear();
+		sink.VALUES.clear();
 
 		ExerciseBase.out = sink;
 		ExerciseBase.parallelism = 1;
 
 		solution.main();
 
-		return sink.values;
+		return sink.VALUES;
 	}
 
 	private boolean ultimateCauseIsMissingSolution(Throwable e) {

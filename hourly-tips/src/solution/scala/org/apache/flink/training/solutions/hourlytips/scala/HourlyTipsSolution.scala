@@ -38,7 +38,6 @@ import org.apache.flink.util.Collector
   *
   * Parameters:
   * -input path-to-input-file
-  *
   */
 object HourlyTipsSolution {
 
@@ -46,7 +45,7 @@ object HourlyTipsSolution {
 
     // read parameters
     val params = ParameterTool.fromArgs(args)
-    val input = params.get("input", ExerciseBase.pathToFareData)
+    val input = params.get("input", ExerciseBase.PATH_TO_FARE_DATA)
 
     val maxDelay = 60 // events are delayed by at most 60 seconds
     val speed = 600   // events of 10 minutes are served in 1 second
