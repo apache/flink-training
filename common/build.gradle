@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    registerFeature('test') {
+        usingSourceSet(sourceSets.test)
+    }
+}
+
+// common set of dependencies
+dependencies {
+    // --------------------------------------------------------------
+    // Compile-time dependencies that should NOT be part of the
+    // shadow jar and are provided in the lib folder of Flink
+    // --------------------------------------------------------------
+    api "org.apache.flink:flink-java:${flinkVersion}"
+    api "org.apache.flink:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+
+    testApi "junit:junit:${junitVersion}"
+    testApi "org.apache.flink:flink-test-utils-junit:${flinkVersion}"
+    testApi 'org.hamcrest:hamcrest-library:1.3'
+}

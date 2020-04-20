@@ -1,0 +1,133 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'scala' // optional; uncomment if needed
+    if (project != project(":common")) {
+        apply plugin: 'application'
+    }
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    // artifact properties
+    group = 'org.apache.flink'
+    version = '1.10-SNAPSHOT'
+    description = """Flink Training Exercises"""
+
+    ext {
+        javaVersion = '1.8'
+        flinkVersion = '1.10.0'
+        scalaBinaryVersion = '2.12'
+        slf4jVersion = '1.7.15'
+        log4jVersion = '1.2.17'
+        junitVersion = '4.12'
+    }
+
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    // declare where to find the dependencies of your project
+    repositories {
+        // for access from China, you may need to uncomment this line
+        // maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+        maven {
+            url "https://repository.apache.org/content/repositories/snapshots/"
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+    }
+
+    // NOTE: We cannot use "compileOnly" or "shadow" configurations since then we could not run code
+    // in the IDE or with "gradle run". We also cannot exclude transitive dependencies from the
+    // shadowJar yet (see https://github.com/johnrengelman/shadow/issues/159).
+    // -> Explicitly define the // libraries we want to be included in the "flinkShadowJar" configuration!
+    configurations {
+        flinkShadowJar // dependencies which go into the shadowJar
+
+        // provided by Flink
+        flinkShadowJar.exclude group: 'org.apache.flink', module: 'force-shading'
+        flinkShadowJar.exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        flinkShadowJar.exclude group: 'org.slf4j'
+        flinkShadowJar.exclude group: 'log4j'
+
+        // already provided dependencies from serializer frameworks
+        flinkShadowJar.exclude group: 'com.esotericsoftware.kryo', module: 'kryo'
+        flinkShadowJar.exclude group: 'javax.servlet', module: 'servlet-api'
+        flinkShadowJar.exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
+
+    // common set of dependencies
+    dependencies {
+        implementation "log4j:log4j:${log4jVersion}"
+        implementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+
+        flinkShadowJar "joda-time:joda-time:2.7"
+        flinkShadowJar "com.google.guava:guava:19.0"
+
+        if (project != project(":common")) {
+            implementation project(path: ':common')
+            // transitive dependencies for flinkShadowJar need to be defined above
+            // (the alternative of using configuration: 'shadow' does not work there because that adds a dependency on
+            // the jar file, not the sources)
+            flinkShadowJar project(path: ':common', transitive: false)
+
+            testImplementation(project(":common")) {
+                capabilities { requireCapability("$group:common-test") }
+            }
+        }
+    }
+
+    // make flinkShadowJar dependencies available:
+    sourceSets {
+        main.java.srcDirs += 'src/solution/java'
+        main.scala.srcDirs += 'src/solution/scala'
+        main.compileClasspath += configurations.flinkShadowJar
+        main.runtimeClasspath += configurations.flinkShadowJar
+
+        test.compileClasspath += configurations.flinkShadowJar
+        test.runtimeClasspath += configurations.flinkShadowJar
+
+        javadoc.classpath += configurations.flinkShadowJar
+    }
+
+    if (plugins.findPlugin('application')) {
+        applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
+        run.classpath = sourceSets.main.runtimeClasspath
+    }
+
+    jar {
+        manifest {
+            attributes 'Built-By': System.getProperty('user.name'),
+                    'Build-Jdk': System.getProperty('java.version')
+        }
+    }
+
+    shadowJar {
+        configurations = [project.configurations.flinkShadowJar]
+    }
+
+    assemble.dependsOn(shadowJar)
+}
