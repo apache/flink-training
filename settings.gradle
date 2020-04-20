@@ -1,0 +1,6 @@
+rootProject.name = 'flink-training'
+include 'common'
+include 'ride-cleansing'
+include 'rides-and-fares'
+include 'hourly-tips'
+include 'long-ride-alerts'
