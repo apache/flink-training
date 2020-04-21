@@ -91,6 +91,12 @@ If you are in China, we recommend configuring the maven repository to use a mirr
         // for access from China, you may need to uncomment this line
         maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         mavenCentral()
+        maven {
+            url "https://repository.apache.org/content/repositories/snapshots/"
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
     }
 ```
 </details>
