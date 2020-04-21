@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-# `ProcessFunction` and Timers (Long Ride Alerts)
+# Lab: `ProcessFunction` and Timers (Long Ride Alerts)
 
 The goal of the "Long Ride Alerts" exercise is to indicate whenever a taxi ride started two hours ago, and is still ongoing.
 
