@@ -72,7 +72,7 @@ This `flink-training` project contains exercises, tests, and reference solutions
 > If you want to work on a version other than the current Flink release, make sure to check out the appropriate branch.
 
 ```bash
-git clone https://github.com/apache/flink-training.git
+git clone --branch release-1.10 https://github.com/apache/flink-training.git
 cd flink-training
 ./gradlew test shadowJar
 ```
