@@ -24,6 +24,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
@@ -70,15 +71,15 @@ public class HourlyTipsSolution extends ExerciseBase {
 		// compute tips per hour for each driver
 		DataStream<Tuple3<Long, Long, Float>> hourlyTips = fares
 				.keyBy((TaxiFare fare) -> fare.driverId)
-				.timeWindow(Time.hours(1))
+				.window(TumblingEventTimeWindows.of(Time.hours(1)))
 				.process(new AddTips());
 
 		DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
-				.timeWindowAll(Time.hours(1))
+				.windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
 				.maxBy(2);
 
 //		You should explore how this alternative behaves. In what ways is the same as,
-//		and different from, the solution above (using a timeWindowAll)?
+//		and different from, the solution above (using a windowAll)?
 
 // 		DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
 // 			.keyBy(0)
