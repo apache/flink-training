@@ -26,7 +26,7 @@ The Java and Scala reference solutions illustrate two different approaches, thou
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyTips = fares
 	.keyBy((TaxiFare fare) -> fare.driverId)
-	.timeWindow(Time.hours(1))
+	.window(TumblingEventTimeWindows.of(Time.hours(1)))
 	.process(new AddTips());
 ```
 
@@ -54,7 +54,7 @@ The [Scala solution](src/solution/scala/org/apache/flink/training/solutions/hour
 val hourlyTips = fares
   .map((f: TaxiFare) => (f.driverId, f.tip))
   .keyBy(_._1)
-  .timeWindow(Time.hours(1))
+  .window(TumblingEventTimeWindows.of(Time.hours(1)))
   .reduce(
     (f1: (Long, Float), f2: (Long, Float)) => { (f1._1, f1._2 + f2._2) },
     new WrapWithWindowInfo())
@@ -100,7 +100,7 @@ Now, how to find the maximum within each hour? The reference solutions both do t
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
-	.timeWindowAll(Time.hours(1))
+	.windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
 	.maxBy(2);
 ```
 
