@@ -22,6 +22,7 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.scala.function.ProcessWindowFunction
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare
@@ -62,14 +63,14 @@ object HourlyTipsSolution {
     val hourlyTips = fares
       .map((f: TaxiFare) => (f.driverId, f.tip))
       .keyBy(_._1)
-      .timeWindow(Time.hours(1))
+      .window(TumblingEventTimeWindows.of(Time.hours(1)))
       .reduce(
         (f1: (Long, Float), f2: (Long, Float)) => { (f1._1, f1._2 + f2._2) },
         new WrapWithWindowInfo())
 
     // max tip total in each hour
     val hourlyMax = hourlyTips
-      .timeWindowAll(Time.hours(1))
+      .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
       .maxBy(2)
 
     // print result on stdout
