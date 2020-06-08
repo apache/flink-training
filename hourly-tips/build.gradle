@@ -1,1 +1,1 @@
-mainClassName = 'org.apache.flink.training.exercises.windows.hourlytips.HourlyTipsExercise'
+mainClassName = 'org.apache.flink.training.exercises.hourlytips.HourlyTipsExercise'

@@ -1,1 +1,1 @@
-mainClassName = 'org.apache.flink.training.exercises.basics.ridecleansing.RideCleansingExercise'
+mainClassName = 'org.apache.flink.training.exercises.ridecleansing.RideCleansingExercise'
