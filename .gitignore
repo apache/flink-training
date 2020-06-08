@@ -10,9 +10,15 @@
 # Debugger
 .attach_*
 
+# Eclipse
+.project
+.settings
+.classpath
+bin/
+
 # Gradle build process files
-**/.gradle/**/*
-**/build/**/*
+/.gradle/
+build/
 **/.gradletasknamecache
 
 # IntelliJ
