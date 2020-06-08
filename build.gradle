@@ -27,6 +27,7 @@ subprojects {
     }
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'checkstyle'
+    apply plugin: 'eclipse'
 
     // artifact properties
     group = 'org.apache.flink'
@@ -111,6 +112,12 @@ subprojects {
         test.runtimeClasspath += configurations.flinkShadowJar
 
         javadoc.classpath += configurations.flinkShadowJar
+    }
+
+    eclipse {
+        classpath {
+            plusConfigurations += [configurations.flinkShadowJar]
+        }
     }
 
     if (plugins.findPlugin('application')) {
