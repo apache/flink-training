@@ -33,9 +33,6 @@ public class ExerciseBase {
 	public static SinkFunction out = null;
 	public static int parallelism = 4;
 
-	public static final String PATH_TO_RIDE_DATA = "/Users/david/stuff/flink-training/trainingData/nycTaxiRides.gz";
-	public static final String PATH_TO_FARE_DATA = "/Users/david/stuff/flink-training/trainingData/nycTaxiFares.gz";
-
 	/**
 	 * Retrieves a test source during unit tests and the given one during normal execution.
 	 */

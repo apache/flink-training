@@ -19,31 +19,29 @@ under the License.
 
 # Lab: `ProcessFunction` and Timers (Long Ride Alerts)
 
-The goal of the "Long Ride Alerts" exercise is to indicate whenever a taxi ride started two hours ago, and is still ongoing.
+The goal of the "Long Ride Alerts" exercise is to provide a real-time warning whenever a taxi ride
+started two hours ago, and is still ongoing.
+
+This should be done using the event time timestamps and watermarks that are provided in the data stream. 
+
+The stream is out-of-order, and it is possible that the END event for a ride will be processed before
+its START event. But in such cases, we never care to create an alert, since we do know that the ride
+has ended.
 
 ### Input Data
 
-The input data of this exercise is a `DataStream` of taxi ride events. You will want to use a `TaxiRideSource`, as described in the page about the [Taxi Data Stream](../README.md#using-the-taxi-data-streams).
-
-You can filter the events to only include rides within New York City (as is done in the [Taxi Ride Cleansing exercise](../ride-cleansing)), but it is not essential for this lab.
+The input data of this exercise is a `DataStream` of taxi ride events.
 
 ### Expected Output
 
-The result of the exercise should be a `DataStream<TaxiRide>` that only contains START events of taxi rides which have no matching END event within the first two hours of the ride.
+The goal of this exercise is _not_ to find all rides that lasted for more than two hours, but rather
+to create an alert _in real time_ at the moment it becomes known that a ride has been going on for
+more than two hours.
+
+The result of the exercise should be a `DataStream<TaxiRide>` that only contains START events of
+taxi rides that started two hours earlier, and whose END event hasn't yet arrived.
 
 The resulting stream should be printed to standard out.
-
-Here are the `rideIds` and start times of the first few rides that go on for more than two hours, but you might want to print other info as well:
-
-~~~
-> 2758,2013-01-01 00:10:13
-> 7575,2013-01-01 00:20:23
-> 22131,2013-01-01 00:47:03
-> 25473,2013-01-01 00:53:10
-> 29907,2013-01-01 01:01:15
-> 30796,2013-01-01 01:03:00
-...
-~~~
 
 ## Getting Started
 

@@ -18,16 +18,13 @@
 
 package org.apache.flink.training.exercises.common.datatypes;
 
+import org.apache.flink.training.exercises.common.utils.DataGenerator;
 import org.apache.flink.training.exercises.common.utils.GeoUtils;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import javax.annotation.Nullable;
 
 import java.io.Serializable;
-import java.util.Locale;
+import java.time.Instant;
 
 /**
  * A TaxiRide is a taxi ride event. There are two types of events, a taxi ride start event and a
@@ -47,23 +44,39 @@ import java.util.Locale;
  */
 public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
-	private static final DateTimeFormatter TIME_FORMATTER =
-			DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US).withZoneUTC();
-
 	/**
 	 * Creates a new TaxiRide with now as start and end time.
 	 */
 	public TaxiRide() {
-		this.startTime = new DateTime();
-		this.endTime = new DateTime();
+		this.startTime = Instant.now();
+		this.endTime = Instant.now();
+	}
+
+	/**
+	 * Invents a TaxiRide.
+	 */
+	public TaxiRide(long rideId, boolean isStart) {
+		DataGenerator g = new DataGenerator(rideId);
+
+		this.rideId = rideId;
+		this.isStart = isStart;
+		this.startTime = g.startTime();
+		this.endTime = isStart ? Instant.ofEpochMilli(0) : g.endTime();
+		this.startLon = g.startLon();
+		this.startLat = g.startLat();
+		this.endLon = g.endLon();
+		this.endLat = g.endLat();
+		this.passengerCnt = g.passengerCnt();
+		this.taxiId = g.taxiId();
+		this.driverId = g.driverId();
 	}
 
 	/**
 	 * Creates a TaxiRide with the given parameters.
 	 */
-	public TaxiRide(long rideId, boolean isStart, DateTime startTime, DateTime endTime,
-					float startLon, float startLat, float endLon, float endLat,
-					short passengerCnt, long taxiId, long driverId) {
+	public TaxiRide(long rideId, boolean isStart, Instant startTime, Instant endTime,
+			float startLon, float startLat, float endLon, float endLat,
+			short passengerCnt, long taxiId, long driverId) {
 		this.rideId = rideId;
 		this.isStart = isStart;
 		this.startTime = startTime;
@@ -79,8 +92,8 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
 	public long rideId;
 	public boolean isStart;
-	public DateTime startTime;
-	public DateTime endTime;
+	public Instant startTime;
+	public Instant endTime;
 	public float startLon;
 	public float startLat;
 	public float endLon;
@@ -91,10 +104,11 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
 	@Override
 	public String toString() {
+
 		return rideId + "," +
 				(isStart ? "START" : "END") + "," +
-				startTime.toString(TIME_FORMATTER) + "," +
-				endTime.toString(TIME_FORMATTER) + "," +
+				startTime.toString() + "," +
+				endTime.toString() + "," +
 				startLon + "," +
 				startLat + "," +
 				endLon + "," +
@@ -102,51 +116,6 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 				passengerCnt + "," +
 				taxiId + "," +
 				driverId;
-	}
-
-	/**
-	 * Parse a TaxiRide from a CSV representation.
-	 */
-	public static TaxiRide fromString(String line) {
-
-		String[] tokens = line.split(",");
-		if (tokens.length != 11) {
-			throw new RuntimeException("Invalid record: " + line);
-		}
-
-		TaxiRide ride = new TaxiRide();
-
-		try {
-			ride.rideId = Long.parseLong(tokens[0]);
-
-			switch (tokens[1]) {
-				case "START":
-					ride.isStart = true;
-					ride.startTime = DateTime.parse(tokens[2], TIME_FORMATTER);
-					ride.endTime = DateTime.parse(tokens[3], TIME_FORMATTER);
-					break;
-				case "END":
-					ride.isStart = false;
-					ride.endTime = DateTime.parse(tokens[2], TIME_FORMATTER);
-					ride.startTime = DateTime.parse(tokens[3], TIME_FORMATTER);
-					break;
-				default:
-					throw new RuntimeException("Invalid record: " + line);
-			}
-
-			ride.startLon = tokens[4].length() > 0 ? Float.parseFloat(tokens[4]) : 0.0f;
-			ride.startLat = tokens[5].length() > 0 ? Float.parseFloat(tokens[5]) : 0.0f;
-			ride.endLon = tokens[6].length() > 0 ? Float.parseFloat(tokens[6]) : 0.0f;
-			ride.endLat = tokens[7].length() > 0 ? Float.parseFloat(tokens[7]) : 0.0f;
-			ride.passengerCnt = Short.parseShort(tokens[8]);
-			ride.taxiId = Long.parseLong(tokens[9]);
-			ride.driverId = Long.parseLong(tokens[10]);
-
-		} catch (NumberFormatException nfe) {
-			throw new RuntimeException("Invalid record: " + line, nfe);
-		}
-
-		return ride;
 	}
 
 	/**
@@ -196,10 +165,10 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 	 */
 	public long getEventTime() {
 		if (isStart) {
-			return startTime.getMillis();
+			return startTime.toEpochMilli();
 		}
 		else {
-			return endTime.getMillis();
+			return endTime.toEpochMilli();
 		}
 	}
 

@@ -24,9 +24,9 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution;
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,7 +36,6 @@ import static org.junit.Assert.assertThat;
 public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFare>> {
 
 	static final Testable JAVA_EXERCISE = () -> RidesAndFaresExercise.main(new String[]{});
-
 
 	final TaxiRide ride1 = testRide(1);
 	final TaxiRide ride2 = testRide(2);
@@ -68,12 +67,12 @@ public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFar
 	}
 
 	private TaxiRide testRide(long rideId) {
-		return new TaxiRide(rideId, true, new DateTime(0), new DateTime(0),
+		return new TaxiRide(rideId, true, Instant.EPOCH, Instant.EPOCH,
 				0F, 0F, 0F, 0F, (short) 1, 0, rideId);
 	}
 
 	private TaxiFare testFare(long rideId) {
-		return new TaxiFare(rideId, 0, rideId, new DateTime(0), "", 0F, 0F, 0F);
+		return new TaxiFare(rideId, 0, rideId, Instant.EPOCH, "", 0F, 0F, 0F);
 	}
 
 	protected List<?> results(TestRideSource rides, TestFareSource fares) throws Exception {

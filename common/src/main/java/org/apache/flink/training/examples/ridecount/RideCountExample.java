@@ -20,19 +20,14 @@ package org.apache.flink.training.examples.ridecount;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
-import org.apache.flink.training.exercises.common.sources.TaxiRideSource;
-import org.apache.flink.training.exercises.common.utils.ExerciseBase;
+import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
 
 /**
  * Example that counts the rides for each driver.
- *
- * <p>Parameters:
- *   -input path-to-input-file
  *
  * <p>Note that this is implicitly keeping state for each driver.
  * This sort of simple, non-windowed aggregation on an unbounded set of keys will use an unbounded amount of state.
@@ -44,24 +39,15 @@ public class RideCountExample {
 	/**
 	 * Main method.
 	 *
-	 * <p>Parameters:
-	 *   -input path-to-input-file
-	 *
 	 * @throws Exception which occurs during job execution.
 	 */
 	public static void main(String[] args) throws Exception {
-
-		ParameterTool params = ParameterTool.fromArgs(args);
-		final String input = params.get("input", ExerciseBase.PATH_TO_RIDE_DATA);
-
-		final int maxEventDelay = 60;       // events are out of order by max 60 seconds
-		final int servingSpeedFactor = 600; // events of 10 minutes are served every second
 
 		// set up streaming execution environment
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		// start the data generator
-		DataStream<TaxiRide> rides = env.addSource(new TaxiRideSource(input, maxEventDelay, servingSpeedFactor));
+		DataStream<TaxiRide> rides = env.addSource(new TaxiRideGenerator());
 
 		// map each ride to a tuple of (driverId, 1)
 		DataStream<Tuple2<Long, Long>> tuples = rides.map(new MapFunction<TaxiRide, Tuple2<Long, Long>>() {

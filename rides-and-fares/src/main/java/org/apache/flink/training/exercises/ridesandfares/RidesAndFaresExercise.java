@@ -19,15 +19,14 @@
 package org.apache.flink.training.exercises.ridesandfares;
 
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
-import org.apache.flink.training.exercises.common.sources.TaxiFareSource;
-import org.apache.flink.training.exercises.common.sources.TaxiRideSource;
+import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
+import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
 import org.apache.flink.training.exercises.common.utils.ExerciseBase;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
@@ -37,41 +36,27 @@ import org.apache.flink.util.Collector;
  *
  * <p>The goal for this exercise is to enrich TaxiRides with fare information.
  *
- * <p>Parameters:
- * -rides path-to-input-file
- * -fares path-to-input-file
  */
 public class RidesAndFaresExercise extends ExerciseBase {
 
 	/**
 	 * Main method.
 	 *
-	 * <p>Parameters:
-	 * -rides path-to-input-file
-	 * -fares path-to-input-file
-	 *
 	 * @throws Exception which occurs during job execution.
 	 */
 	public static void main(String[] args) throws Exception {
-
-		ParameterTool params = ParameterTool.fromArgs(args);
-		final String ridesFile = params.get("rides", PATH_TO_RIDE_DATA);
-		final String faresFile = params.get("fares", PATH_TO_FARE_DATA);
-
-		final int delay = 60;					// at most 60 seconds of delay
-		final int servingSpeedFactor = 1800; 	// 30 minutes worth of events are served every second
 
 		// set up streaming execution environment
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env.setParallelism(ExerciseBase.parallelism);
 
 		DataStream<TaxiRide> rides = env
-				.addSource(rideSourceOrTest(new TaxiRideSource(ridesFile, delay, servingSpeedFactor)))
+				.addSource(rideSourceOrTest(new TaxiRideGenerator()))
 				.filter((TaxiRide ride) -> ride.isStart)
 				.keyBy((TaxiRide ride) -> ride.rideId);
 
 		DataStream<TaxiFare> fares = env
-				.addSource(fareSourceOrTest(new TaxiFareSource(faresFile, delay, servingSpeedFactor)))
+				.addSource(fareSourceOrTest(new TaxiFareGenerator()))
 				.keyBy((TaxiFare fare) -> fare.rideId);
 
 		DataStream<Tuple2<TaxiRide, TaxiFare>> enrichedRides = rides

@@ -19,12 +19,11 @@
 package org.apache.flink.training.solutions.longrides.scala
 
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
-import org.apache.flink.training.exercises.common.sources.TaxiRideSource
+import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
 import org.apache.flink.training.exercises.common.utils.ExerciseBase
 import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.util.Collector
@@ -35,19 +34,10 @@ import org.apache.flink.util.Collector
   * The goal for this exercise is to emit START events for taxi rides that have not been matched
   * by an END event during the first 2 hours of the ride.
   *
-  * Parameters:
-  * -input path-to-input-file
   */
 object LongRidesSolution {
 
   def main(args: Array[String]) {
-
-    // parse parameters
-    val params = ParameterTool.fromArgs(args)
-    val input = params.get("input", PATH_TO_RIDE_DATA)
-
-    val maxDelay = 60     // events are out of order by max 60 seconds
-    val speed = 1800      // events of 30 minutes are served every second
 
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -55,7 +45,7 @@ object LongRidesSolution {
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     env.setParallelism(ExerciseBase.parallelism)
 
-    val rides = env.addSource(rideSourceOrTest(new TaxiRideSource(input, maxDelay, speed)))
+    val rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()))
 
     val longRides = rides
       .keyBy(_.rideId)
