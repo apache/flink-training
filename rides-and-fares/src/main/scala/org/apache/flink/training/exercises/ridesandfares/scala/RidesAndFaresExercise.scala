@@ -18,11 +18,10 @@
 
 package org.apache.flink.training.exercises.ridesandfares.scala
 
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.flink.training.exercises.common.datatypes.{TaxiFare, TaxiRide}
-import org.apache.flink.training.exercises.common.sources.{TaxiFareSource, TaxiRideSource}
+import org.apache.flink.training.exercises.common.sources.{TaxiFareGenerator, TaxiRideGenerator}
 import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.training.exercises.common.utils.{ExerciseBase, MissingSolutionException}
 import org.apache.flink.util.Collector
@@ -32,33 +31,22 @@ import org.apache.flink.util.Collector
   *
   * The goal for this exercise is to enrich TaxiRides with fare information.
   *
-  * Parameters:
-  * -rides path-to-input-file
-  * -fares path-to-input-file
   */
 object RidesAndFaresExercise {
 
   def main(args: Array[String]) {
-
-    // parse parameters
-    val params = ParameterTool.fromArgs(args)
-    val ridesFile = params.get("rides", ExerciseBase.PATH_TO_RIDE_DATA)
-    val faresFile = params.get("fares", ExerciseBase.PATH_TO_FARE_DATA)
-
-    val delay = 60;               // at most 60 seconds of delay
-    val servingSpeedFactor = 1800 // 30 minutes worth of events are served every second
 
     // set up streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(ExerciseBase.parallelism)
 
     val rides = env
-      .addSource(rideSourceOrTest(new TaxiRideSource(ridesFile, delay, servingSpeedFactor)))
+      .addSource(rideSourceOrTest(new TaxiRideGenerator()))
       .filter { ride => ride.isStart }
       .keyBy { ride => ride.rideId }
 
     val fares = env
-      .addSource(fareSourceOrTest(new TaxiFareSource(faresFile, delay, servingSpeedFactor)))
+      .addSource(fareSourceOrTest(new TaxiFareGenerator()))
       .keyBy { fare => fare.rideId }
 
     val processed = rides

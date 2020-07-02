@@ -73,7 +73,7 @@ class WrapWithWindowInfo() extends ProcessWindowFunction[(Long, Float), (Long, L
 
 to compute `hourlyTips`.
 
-Having computed `hourlyTips`, it is a good idea to take a look at what this stream looks like. `hourlyTips.print()` yields this,
+Having computed `hourlyTips`, it is a good idea to take a look at what this stream looks like. `hourlyTips.print()` yields something like this,
 
 ```
 1> (1357002000000,2013000019,1.0)

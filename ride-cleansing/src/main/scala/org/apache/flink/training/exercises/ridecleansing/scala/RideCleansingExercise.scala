@@ -18,10 +18,9 @@
 
 package org.apache.flink.training.exercises.ridecleansing.scala
 
-import org.apache.flink.training.exercises.common.sources.TaxiRideSource
+import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
 import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.training.exercises.common.utils.{ExerciseBase, GeoUtils, MissingSolutionException}
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 
 /**
@@ -31,25 +30,17 @@ import org.apache.flink.streaming.api.scala._
  * start and end within New York City. The resulting stream should be printed to the
  * standard out.
  *
- * Parameters:
- * -input path-to-input-file
  */
 object RideCleansingExercise extends ExerciseBase {
 
   def main(args: Array[String]) {
-    // parse parameters
-    val params = ParameterTool.fromArgs(args)
-    val input = params.get("input", ExerciseBase.PATH_TO_RIDE_DATA)
-
-    val maxDelay = 60 // events are out of order by max 60 seconds
-    val speed = 600   // events of 10 minutes are served in 1 second
 
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(parallelism)
 
     // get the taxi ride data stream
-    val rides = env.addSource(rideSourceOrTest(new TaxiRideSource(input, maxDelay, speed)))
+    val rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()))
 
     val filteredRides = rides
       // filter out rides that do not start and end in NYC

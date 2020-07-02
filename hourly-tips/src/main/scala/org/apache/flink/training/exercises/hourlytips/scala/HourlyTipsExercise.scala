@@ -18,10 +18,9 @@
 
 package org.apache.flink.training.exercises.hourlytips.scala
 
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.training.exercises.common.sources.TaxiFareSource
+import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator
 import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.training.exercises.common.utils.{ExerciseBase, MissingSolutionException}
 
@@ -31,19 +30,10 @@ import org.apache.flink.training.exercises.common.utils.{ExerciseBase, MissingSo
   * The task of the exercise is to first calculate the total tips collected by each driver, hour by hour, and
   * then from that stream, find the highest tip total in each hour.
   *
-  * Parameters:
-  * -input path-to-input-file
   */
 object HourlyTipsExercise {
 
   def main(args: Array[String]) {
-
-    // read parameters
-    val params = ParameterTool.fromArgs(args)
-    val input = params.get("input", ExerciseBase.PATH_TO_FARE_DATA)
-
-    val maxDelay = 60 // events are delayed by at most 60 seconds
-    val speed = 600   // events of 10 minutes are served in 1 second
 
     // set up streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -51,7 +41,7 @@ object HourlyTipsExercise {
     env.setParallelism(ExerciseBase.parallelism)
 
     // start the data generator
-    val fares = env.addSource(fareSourceOrTest(new TaxiFareSource(input, maxDelay, speed)))
+    val fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()))
 
     throw new MissingSolutionException()
 

@@ -23,10 +23,9 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.hourlytips.HourlyTipsSolution;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +44,7 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 				one
 		);
 
-		Tuple3<Long, Long, Float> max = Tuple3.of(t(60), 1L, 1.0F);
+		Tuple3<Long, Long, Float> max = Tuple3.of(t(60).toEpochMilli(), 1L, 1.0F);
 
 		List<Tuple3<Long, Long, Float>> expected = Collections.singletonList(max);
 
@@ -64,8 +63,8 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 				tenIn2
 		);
 
-		Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60), 1L, 6.0F);
-		Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120), 1L, 10.0F);
+		Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60).toEpochMilli(), 1L, 6.0F);
+		Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120).toEpochMilli(), 1L, 10.0F);
 
 		List<Tuple3<Long, Long, Float>> expected = Arrays.asList(hour1, hour2);
 
@@ -86,20 +85,20 @@ public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> 
 				twentyFor2In2
 		);
 
-		Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60), 1L, 6.0F);
-		Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120), 2L, 20.0F);
+		Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60).toEpochMilli(), 1L, 6.0F);
+		Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120).toEpochMilli(), 2L, 20.0F);
 
 		List<Tuple3<Long, Long, Float>> expected = Arrays.asList(hour1, hour2);
 
 		assertEquals(expected, results(source));
 	}
 
-	private long t(int n) {
-		return new DateTime(2000, 1, 1, 0, 0, DateTimeZone.UTC).plusMinutes(n).getMillis();
+	private Instant t(int minutes) {
+		return Instant.parse("2020-01-01T12:00:00.00Z").plusSeconds(60 * minutes);
 	}
 
-	private TaxiFare testFare(long driverId, long startTime, float tip) {
-		return new TaxiFare(0, 0, driverId, new DateTime(startTime), "", tip, 0F, 0F);
+	private TaxiFare testFare(long driverId, Instant startTime, float tip) {
+		return new TaxiFare(0, 0, driverId, startTime, "", tip, 0F, 0F);
 	}
 
 	protected List<Tuple3<Long, Long, Float>> results(TestFareSource source) throws Exception {

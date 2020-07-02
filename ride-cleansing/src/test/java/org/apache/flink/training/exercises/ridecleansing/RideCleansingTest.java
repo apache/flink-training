@@ -22,9 +22,9 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
 import org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution;
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class RideCleansingTest extends TaxiRideTestBase<TaxiRide> {
 	}
 
 	private TaxiRide testRide(float startLon, float startLat, float endLon, float endLat) {
-		return new TaxiRide(1L, true, new DateTime(0), new DateTime(0),
+		return new TaxiRide(1L, true, Instant.EPOCH, Instant.EPOCH,
 				startLon, startLat, endLon, endLat, (short) 1, 0, 0);
 	}
 
