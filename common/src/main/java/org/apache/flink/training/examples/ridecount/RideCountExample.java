@@ -19,7 +19,6 @@
 package org.apache.flink.training.examples.ridecount;
 
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -73,7 +72,7 @@ public class RideCountExample {
 		});
 
 		// partition the stream by the driverId
-		KeyedStream<Tuple2<Long, Long>, Tuple> keyedByDriverId = tuples.keyBy(0);
+		KeyedStream<Tuple2<Long, Long>, Long> keyedByDriverId = tuples.keyBy(t -> t.f0);
 
 		// count the rides for each driver
 		DataStream<Tuple2<Long, Long>> rideCounts = keyedByDriverId.sum(1);
