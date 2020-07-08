@@ -82,7 +82,7 @@ public class HourlyTipsSolution extends ExerciseBase {
 //		and different from, the solution above (using a windowAll)?
 
 // 		DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
-// 			.keyBy(0)
+// 			.keyBy(t -> t.f0)
 // 			.maxBy(2);
 
 		printOrTest(hourlyMax);

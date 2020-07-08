@@ -67,7 +67,7 @@ public class LongRidesExercise extends ExerciseBase {
 		DataStream<TaxiRide> rides = env.addSource(rideSourceOrTest(new TaxiRideSource(input, maxEventDelay, servingSpeedFactor)));
 
 		DataStream<TaxiRide> longRides = rides
-				.keyBy(ride -> ride.rideId)
+				.keyBy((TaxiRide ride) -> ride.rideId)
 				.process(new MatchFunction());
 
 		printOrTest(longRides);

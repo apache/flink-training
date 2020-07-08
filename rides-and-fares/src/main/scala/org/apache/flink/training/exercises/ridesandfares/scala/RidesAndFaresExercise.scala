@@ -55,11 +55,11 @@ object RidesAndFaresExercise {
     val rides = env
       .addSource(rideSourceOrTest(new TaxiRideSource(ridesFile, delay, servingSpeedFactor)))
       .filter { ride => ride.isStart }
-      .keyBy("rideId")
+      .keyBy { ride => ride.rideId }
 
     val fares = env
       .addSource(fareSourceOrTest(new TaxiFareSource(faresFile, delay, servingSpeedFactor)))
-      .keyBy("rideId")
+      .keyBy { fare => fare.rideId }
 
     val processed = rides
       .connect(fares)

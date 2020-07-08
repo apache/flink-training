@@ -118,7 +118,7 @@ But, what if we were to do this, instead?
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
-	.keyBy(0)
+	.keyBy(t -> t.f0)
 	.maxBy(2);
 ```
 

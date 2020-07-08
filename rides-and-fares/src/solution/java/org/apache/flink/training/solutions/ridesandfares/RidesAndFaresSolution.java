@@ -81,11 +81,11 @@ public class RidesAndFaresSolution extends ExerciseBase {
 		DataStream<TaxiRide> rides = env
 				.addSource(rideSourceOrTest(new TaxiRideSource(ridesFile, delay, servingSpeedFactor)))
 				.filter((TaxiRide ride) -> ride.isStart)
-				.keyBy(ride -> ride.rideId);
+				.keyBy((TaxiRide ride) -> ride.rideId);
 
 		DataStream<TaxiFare> fares = env
 				.addSource(fareSourceOrTest(new TaxiFareSource(faresFile, delay, servingSpeedFactor)))
-				.keyBy(fare -> fare.rideId);
+				.keyBy((TaxiFare fare) -> fare.rideId);
 
 		// Set a UID on the stateful flatmap operator so we can read its state using the State Processor API.
 		DataStream<Tuple2<TaxiRide, TaxiFare>> enrichedRides = rides

@@ -68,11 +68,11 @@ public class RidesAndFaresExercise extends ExerciseBase {
 		DataStream<TaxiRide> rides = env
 				.addSource(rideSourceOrTest(new TaxiRideSource(ridesFile, delay, servingSpeedFactor)))
 				.filter((TaxiRide ride) -> ride.isStart)
-				.keyBy("rideId");
+				.keyBy((TaxiRide ride) -> ride.rideId);
 
 		DataStream<TaxiFare> fares = env
 				.addSource(fareSourceOrTest(new TaxiFareSource(faresFile, delay, servingSpeedFactor)))
-				.keyBy("rideId");
+				.keyBy((TaxiFare fare) -> fare.rideId);
 
 		DataStream<Tuple2<TaxiRide, TaxiFare>> enrichedRides = rides
 				.connect(fares)
