@@ -71,8 +71,8 @@ This `flink-training` project contains exercises, tests, and reference solutions
 > If you want to work on a version other than the current Flink release, make sure to check out the appropriate branch.
 
 ```bash
-git clone https://github.com/apache/flink-training.git
-cd flink-training
+git clone https://github.com/ververica/flink-training.git ververica-flink-training
+cd ververica-flink-training
 ./gradlew test shadowJar
 ```
 
