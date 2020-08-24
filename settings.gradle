@@ -9,6 +9,16 @@ include 'rides-and-fares'
 include 'hourly-tips'
 include 'long-ride-alerts'
 include 'state-processor'
+include 'troubleshooting:checkpointing'
+include 'troubleshooting:common'
+include 'troubleshooting:external-enrichment'
+include 'troubleshooting:introduction'
+include 'troubleshooting:object-reuse'
+include 'troubleshooting:state-migration:common'
+include 'troubleshooting:state-migration:exercise'
+include 'troubleshooting:state-migration:solution'
+include 'troubleshooting:state-migration:solution-custom-to-avro'
+include 'troubleshooting:throughput'
 
 // CI=true, TRAVIS=true, CONTINUOUS_INTEGRATION=true set automatically during Travis execution
 // see https://docs.travis-ci.com/user/environment-variables#default-environment-variables

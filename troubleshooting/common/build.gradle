@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'com.ververica'
+
+// common set of dependencies
+dependencies {
+    // --------------------------------------------------------------
+    // Compile-time dependencies that should NOT be part of the
+    // shadow jar and are provided in the lib folder of Flink
+    // --------------------------------------------------------------
+    api "org.apache.flink:flink-java:${flinkVersion}"
+    api "org.apache.flink:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-statebackend-rocksdb_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+    api "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+
+    flinkShadowJar "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    flinkShadowJar "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+}

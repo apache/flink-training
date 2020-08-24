@@ -27,3 +27,4 @@ under the License.
 1. [`ProcessFunction` and Timers (Long Ride Alerts)](long-ride-alerts)
    - [Exercise](long-ride-alerts/README.md)
    - [Discussion](long-ride-alerts/DISCUSSION.md)
+1. [Tuning & Troubleshooting Labs](troubleshooting)

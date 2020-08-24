@@ -20,9 +20,14 @@ plugins {
 }
 
 subprojects {
+    if (project == project(":troubleshooting") || project == project(":troubleshooting:state-migration")) {
+        // this is just an additional grouping layer, not a project!
+        return
+    }
+
     apply plugin: 'java'
     // apply plugin: 'scala' // optional; uncomment if needed
-    if (project != project(":common")) {
+    if (project != project(":common") && project != project(":troubleshooting:common") && project != project(":troubleshooting:state-migration:common")) {
         apply plugin: 'application'
     }
     apply plugin: 'com.github.johnrengelman.shadow'
@@ -87,7 +92,7 @@ subprojects {
         implementation "log4j:log4j:${log4jVersion}"
         implementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
 
-        if (project != project(":common")) {
+        if (project != project(":common") && !project.path.startsWith(":troubleshooting")) {
             implementation project(path: ':common')
             // transitive dependencies for flinkShadowJar need to be defined above
             // (the alternative of using configuration: 'shadow' does not work there because that adds a dependency on

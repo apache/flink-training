@@ -23,6 +23,53 @@ under the License.
 		"https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
+	<!-- troubleshooting/common -->
+	<suppress
+		files="(.*)troubleshooting[/\\]common[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]common[/\\](Measurement|WindowedMeasurements|FakeKafkaRecord)\.java"
+		checks="MissingJavadocMethod"/>
+
+	<!-- troubleshooting/introduction -->
+	<suppress
+		files="(.*)troubleshooting[/\\]introduction[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]solutions[/\\](SimpleMeasurement)\.java"
+		checks="MissingJavadocMethod"/>
+
+	<!-- troubleshooting/external-enrichment -->
+	<suppress
+		files="(.*)troubleshooting[/\\]external-enrichment[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]provided[/\\](SimpleMeasurement)\.java"
+		checks="MissingJavadocMethod"/>
+	<suppress
+		files="(.*)troubleshooting[/\\]external-enrichment[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]provided[/\\](EnrichedMeasurement)\.java"
+		checks="MissingJavadocMethod"/>
+
+	<!-- troubleshooting/object-reuse -->
+	<suppress
+		files="(.*)troubleshooting[/\\]object-reuse[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]provided[/\\](ExtendedMeasurement)\.java"
+		checks="MissingJavadocMethod"/>
+	<suppress
+		files="(.*)troubleshooting[/\\]object-reuse[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]solutions[/\\]immutable[/\\](ExtendedMeasurement|Location|MeasurementValue|Sensor)\.java"
+		checks="MissingJavadocMethod"/>
+
+	<!-- troubleshooting/state-migration -->
+	<suppress
+		files="(.*)troubleshooting[/\\]state-migration[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]exercises[/\\](MeasurementAggregationReport)\.java"
+		checks="MissingJavadocMethod"/>
+	<suppress
+		files="(.*)troubleshooting[/\\]state-migration[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]exercises[/\\]custom[/\\](AggregatedSensorStatistics)\.java"
+		checks="MissingJavadocMethod"/>
+
+	<!-- troubleshooting/throughput -->
+	<suppress
+			files="(.*)troubleshooting[/\\]throughput[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]exercises[/\\](WindowedMeasurementsForArea)\.java"
+			checks="MissingJavadocMethod"/>
+	<suppress
+			files="(.*)troubleshooting[/\\]throughput[/\\](.*)com[/\\]ververica[/\\]flink[/\\]training[/\\]solutions[/\\](WindowedMeasurementsForArea2)\.java"
+			checks="MissingJavadocMethod"/>
+
+	<!-- Avro-generated files -->
+	<suppress
+		files="(.*)generated-(.*)-avro-java(.*)\.java"
+		checks=".*"/>
+
 	<suppress
 			files="(.*)test[/\\](.*)"
 			checks="MissingJavadocMethod"/>

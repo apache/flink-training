@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.16.0"
+    }
+}
+apply plugin: "com.commercehub.gradle.plugin.avro"
+
+mainClassName = 'com.ververica.flink.training.exercises.TroubledStreamingJob'
+
+dependencies {
+    flinkShadowJar "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    flinkShadowJar "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+
+    flinkShadowJar "org.apache.flink:flink-avro:${flinkVersion}"
+
+    implementation project(path: ':troubleshooting:state-migration:common')
+    // transitive dependencies for flinkShadowJar need to be defined above
+    // (the alternative of using configuration: 'shadow' does not work there because that adds a dependency on
+    // the jar file, not the sources)
+    flinkShadowJar project(path: ':troubleshooting:common', transitive: false)
+    flinkShadowJar project(path: ':troubleshooting:state-migration:common', transitive: false)
+}

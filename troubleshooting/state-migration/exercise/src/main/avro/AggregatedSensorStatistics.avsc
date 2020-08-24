@@ -1,0 +1,20 @@
+{"namespace": "com.ververica.training.statemigration.avro",
+ "type": "record",
+ "name": "AggregatedSensorStatistics",
+ "fields": [
+     {
+     "name": "sensorId",
+     "type": "int"
+     },
+     {
+     "name": "count",
+     "type": "long",
+     "default": 0
+     },
+     {
+     "name": "lastUpdate",
+     "type": "long",
+     "default": 0
+     }
+ ]
+}
