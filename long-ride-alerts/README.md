@@ -75,10 +75,10 @@ collect START events to the output only if a matching END event hasn't yet arriv
 There are many possible solutions for this exercise, but in general it is enough to keep one
 `TaxiRide` in state (one `TaxiRide` for each key, or `rideId`). The approach used in the reference solution is to
 store whichever event arrives first (the START or the END), and if it's a START event,
-create a timer for two hours later. If and when the other event (for the same rideId) arrives,
+create a timer for two hours later. If and when the other event (for the same `rideId`) arrives,
 carefully clean things up.
 
-It's possible to arrange this so that if `onTimer()` is called, you are guaranteed that
+It is possible to arrange this so that if `onTimer()` is called, you are guaranteed that
 an alert (i.e., the ride kept in state) should be emitted. Writing the code this way conveniently
 puts all of the complex business logic together in one place (in the `processElement()` method).
 </details>
