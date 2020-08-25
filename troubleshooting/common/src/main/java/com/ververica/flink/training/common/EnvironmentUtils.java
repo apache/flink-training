@@ -18,6 +18,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.flink.configuration.RestOptions.BIND_PORT;
+
 /**
  * Common functionality to set up execution environments for the troubleshooting training.
  */
@@ -32,12 +34,20 @@ public class EnvironmentUtils {
 	public static StreamExecutionEnvironment createConfiguredEnvironment(
 			final ParameterTool parameters) throws
 			IOException, URISyntaxException {
-		final boolean local = isLocal(parameters);
+		final String localMode = parameters.get("local",
+				System.getenv("FLINK_TRAINING_LOCAL") != null ? BIND_PORT.defaultValue() : "-1");
 
-		StreamExecutionEnvironment env;
-		if (local) {
-			env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
+		final StreamExecutionEnvironment env;
+		if (localMode.equals("-1")) {
+			// cluster mode or disabled web UI
+			env = StreamExecutionEnvironment.getExecutionEnvironment();
+		} else {
+			// configure Web UI
+			Configuration flinkConfig = new Configuration();
+			flinkConfig.set(BIND_PORT, localMode);
+			env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(flinkConfig);
 
+			// configure filesystem state backend
 			String statePath = parameters.get("fsStatePath");
 			Path checkpointPath;
 			if (statePath != null) {
@@ -55,8 +65,12 @@ public class EnvironmentUtils {
 				stateBackend = new FsStateBackend(checkpointPath);
 			}
 			env.setStateBackend(stateBackend);
-		} else {
-			env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+			// set a restart strategy for better IDE debugging
+			env.setRestartStrategy(RestartStrategies.fixedDelayRestart(
+					Integer.MAX_VALUE,
+					Time.of(15, TimeUnit.SECONDS) // delay
+			));
 		}
 
 		final int parallelism = parameters.getInt("parallelism", -1);
@@ -65,10 +79,6 @@ public class EnvironmentUtils {
 		}
 
 		env.getConfig().setGlobalJobParameters(parameters);
-		env.setRestartStrategy(RestartStrategies.fixedDelayRestart(
-				Integer.MAX_VALUE,
-				Time.of(15, TimeUnit.SECONDS) // delay
-		));
 		return env;
 	}
 
@@ -76,6 +86,11 @@ public class EnvironmentUtils {
 	 * Checks whether the environment should be set up in local mode (with Web UI,...).
 	 */
 	public static boolean isLocal(ParameterTool parameters) {
-		return parameters.getBoolean("local", false);
+		final String localMode = parameters.get("local");
+		if (localMode == null) {
+			return System.getenv("FLINK_TRAINING_LOCAL") != null;
+		} else {
+			return !localMode.equals("-1");
+		}
 	}
 }

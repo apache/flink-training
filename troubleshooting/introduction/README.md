@@ -13,10 +13,19 @@ Ververica Platform.
 
 ### Running Locally
 
-Executing `com.ververica.flink.training.exercises.TroubledStreamingJob#main()` with `--local true` will create a local
-Flink cluster running the troubled streaming job.
+Executing `com.ververica.flink.training.exercises.TroubledStreamingJob#main()` should create a local Flink cluster
+running the troubled streaming job and serving Flink's Web UI at http://localhost:8081.
+If port 8081 is blocked and Flink won't start, or if the Web UI is not showing up, you can also configure and force
+the local mode via the `--local` program argument and set the port the Web UI is listening on:
 
-Once running, you can access Flink's Web UI via http://localhost:8081.
+* `--local -1`: defaults via `StreamExecutionEnvironment.getExecutionEnvironment()` (no Web UI, no extra settings)
+* `--local <port|port-range>`: uses `StreamExecutionEnvironment.createLocalEnvironmentWithWebUI()` and
+  - sets a `fixedDelayRestart` failure strategy with 15s delay and infinite restarts
+  - configures the Web UI to listen on a port in the given range
+    If more than one port is given, please find the port in the logs from this line:
+```
+12:11:04.062 [main] INFO o.a.f.r.d.DispatcherRestEndpoint - Web frontend listening at http://localhost:8081.
+```
 
 You can also specify the parallelism via `--parallelism <number>` if needed (may be valuable in local setups).
 
