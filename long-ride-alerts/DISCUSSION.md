@@ -21,7 +21,23 @@ under the License.
 
 (Discussion of [Lab: `ProcessFunction` and Timers (Long Ride Alerts)](./))
 
+It would be interesting to test that the solution does not leak state.
 
+A good way to write unit tests for a `KeyedProcessFunction` to check for state retention, etc., is to
+use the test harnesses described in the
+[documentation on testing](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/testing.html#unit-testing-stateful-or-timely-udfs--custom-operators). 
+
+In fact, the reference solutions will leak state in the case where a START event is missing. They also
+leak in the case where the alert is generated, but then the END event does eventually arrive (after `onTimer()`
+has cleared the matching START event).
+
+This could be addressed either by using [state TTL](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/state/state.html#state-time-to-live-ttl),
+or by using another timer that eventually
+clears any remaining state. There is a tradeoff here, however: once that state has been removed,
+then if the matching events are not actually missing, but are instead very, very late, they will cause erroneous alerts.
+
+This tradeoff between keeping state indefinitely versus occasionally getting things wrong when events are
+exceptionally late is a challenge that is inherent to stateful stream processing.
 
 -----
 

@@ -18,6 +18,7 @@
 
 package org.apache.flink.training.solutions.longrides.scala
 
+import scala.concurrent.duration._
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
@@ -57,39 +58,42 @@ object LongRidesSolution {
   }
 
   class MatchFunction extends KeyedProcessFunction[Long, TaxiRide, TaxiRide] {
-    // keyed, managed state
-    // holds an END event if the ride has ended, otherwise a START event
     lazy val rideState: ValueState[TaxiRide] = getRuntimeContext.getState(
-      new ValueStateDescriptor[TaxiRide]("saved ride", classOf[TaxiRide]))
+      new ValueStateDescriptor[TaxiRide]("ride event", classOf[TaxiRide]))
 
     override def processElement(ride: TaxiRide,
                                 context: KeyedProcessFunction[Long, TaxiRide, TaxiRide]#Context,
                                 out: Collector[TaxiRide]): Unit = {
-      val timerService = context.timerService
 
-      if (ride.isStart) {
-        // the matching END might have arrived first; don't overwrite it
-        if (rideState.value() == null) {
-          rideState.update(ride)
-        }
-      }
-      else {
+      val previousRideEvent = rideState.value()
+
+      if (previousRideEvent == null) {
         rideState.update(ride)
+        if (ride.isStart) {
+          context.timerService().registerEventTimeTimer(getTimerTime(ride))
+        }
+      } else {
+        if (!ride.isStart) {
+          // it's an END event, so event saved was the START event and has a timer
+          // the timer hasn't fired yet, and we can safely kill the timer
+          context.timerService().deleteEventTimeTimer(getTimerTime(previousRideEvent))
+        }
+        // both events have now been seen, we can clear the state
+        rideState.clear()
       }
-
-      timerService.registerEventTimeTimer(ride.getEventTime + 120 * 60 * 1000)
     }
 
     override def onTimer(timestamp: Long,
                          ctx: KeyedProcessFunction[Long, TaxiRide, TaxiRide]#OnTimerContext,
                          out: Collector[TaxiRide]): Unit = {
-      val savedRide = rideState.value
 
-      if (savedRide != null && savedRide.isStart) {
-        out.collect(savedRide)
-      }
-
+      // if we get here, we know that the ride started two hours ago, and the END hasn't been processed
+      out.collect(rideState.value())
       rideState.clear()
+    }
+
+    private def getTimerTime(ride: TaxiRide) = {
+      ride.startTime.toEpochMilli + 2.hours.toMillis
     }
   }
 

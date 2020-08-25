@@ -22,7 +22,6 @@ import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.TimerService;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -65,40 +64,46 @@ public class LongRidesSolution extends ExerciseBase {
 	}
 
 	private static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, TaxiRide> {
-		// keyed, managed state
-		// holds an END event if the ride has ended, otherwise a START event
+
 		private ValueState<TaxiRide> rideState;
 
 		@Override
 		public void open(Configuration config) {
-			ValueStateDescriptor<TaxiRide> startDescriptor =
-					new ValueStateDescriptor<>("saved ride", TaxiRide.class);
-			rideState = getRuntimeContext().getState(startDescriptor);
+			ValueStateDescriptor<TaxiRide> stateDescriptor =
+					new ValueStateDescriptor<>("ride event", TaxiRide.class);
+			rideState = getRuntimeContext().getState(stateDescriptor);
 		}
 
 		@Override
 		public void processElement(TaxiRide ride, Context context, Collector<TaxiRide> out) throws Exception {
-			TimerService timerService = context.timerService();
+			TaxiRide previousRideEvent = rideState.value();
 
-			if (ride.isStart) {
-				// the matching END might have arrived first; don't overwrite it
-				if (rideState.value() == null) {
-					rideState.update(ride);
+			if (previousRideEvent == null) {
+				rideState.update(ride);
+				if (ride.isStart) {
+					context.timerService().registerEventTimeTimer(getTimerTime(ride));
 				}
 			} else {
-				rideState.update(ride);
+				if (!ride.isStart) {
+					// it's an END event, so event saved was the START event and has a timer
+					// the timer hasn't fired yet, and we can safely kill the timer
+					context.timerService().deleteEventTimeTimer(getTimerTime(previousRideEvent));
+				}
+				// both events have now been seen, we can clear the state
+				rideState.clear();
 			}
-
-			timerService.registerEventTimeTimer(ride.getEventTime() + 120 * 60 * 1000);
 		}
 
 		@Override
 		public void onTimer(long timestamp, OnTimerContext context, Collector<TaxiRide> out) throws Exception {
-			TaxiRide savedRide = rideState.value();
-			if (savedRide != null && savedRide.isStart) {
-				out.collect(savedRide);
-			}
+
+			// if we get here, we know that the ride started two hours ago, and the END hasn't been processed
+			out.collect(rideState.value());
 			rideState.clear();
+		}
+
+		private long getTimerTime(TaxiRide ride) {
+			return ride.startTime.plusSeconds(120 * 60).toEpochMilli();
 		}
 	}
 
