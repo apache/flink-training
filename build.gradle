@@ -140,6 +140,9 @@ subprojects {
 
     shadowJar {
         configurations = [project.configurations.flinkShadowJar]
+        if (project.parent != rootProject) {
+            archiveBaseName.set("${project.parent.name}-${project.name}")
+        }
     }
 
     assemble.dependsOn(shadowJar)
