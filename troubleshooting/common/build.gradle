@@ -2,8 +2,6 @@ plugins {
     id 'java-library'
 }
 
-group = 'com.ververica'
-
 // common set of dependencies
 dependencies {
     // --------------------------------------------------------------

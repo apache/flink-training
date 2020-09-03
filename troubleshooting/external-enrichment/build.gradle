@@ -1,4 +1,3 @@
-group = 'com.ververica'
 mainClassName = 'com.ververica.flink.training.exercises.TroubledStreamingJob'
 
 dependencies {
