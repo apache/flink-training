@@ -76,21 +76,16 @@ to compute `hourlyTips`.
 Having computed `hourlyTips`, it is a good idea to take a look at what this stream looks like. `hourlyTips.print()` yields something like this,
 
 ```
-1> (1357002000000,2013000019,1.0)
-1> (1357002000000,2013000036,6.4)
-1> (1357002000000,2013000027,15.4)
-1> (1357002000000,2013000071,1.0)
-1> (1357002000000,2013000105,3.65)
-1> (1357002000000,2013000110,1.8)
-1> (1357002000000,2013000237,0.0)
-1> (1357002000000,2013000580,0.0)
-1> (1357002000000,2013000968,0.0)
-1> (1357002000000,2013002242,2.0)
-1> (1357002000000,2013004131,0.0)
-1> (1357002000000,2013008339,0.0)
-3> (1357002000000,2013000026,5.45)
-3> (1357002000000,2013000009,2.0)
-1> (1357002000000,2013008305,0.0)
+2> (1577883600000,2013000185,33.0)
+4> (1577883600000,2013000108,14.0)
+3> (1577883600000,2013000087,14.0)
+1> (1577883600000,2013000036,23.0)
+4> (1577883600000,2013000072,13.0)
+2> (1577883600000,2013000041,28.0)
+3> (1577883600000,2013000123,33.0)
+4> (1577883600000,2013000188,18.0)
+1> (1577883600000,2013000098,23.0)
+2> (1577883600000,2013000047,13.0)
 ...
 ```
 
@@ -107,11 +102,12 @@ DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
 which works just fine, producing this stream of results:
 
 ```
-1> (1357002000000,2013000493,54.45)
-2> (1357005600000,2013010467,64.53)
-3> (1357009200000,2013010589,104.75)
-4> (1357012800000,2013010182,150.0)
-1> (1357016400000,2013010182,90.0)
+3> (1577883600000,2013000089,76.0)
+4> (1577887200000,2013000197,71.0)
+1> (1577890800000,2013000118,83.0)
+2> (1577894400000,2013000119,81.0)
+3> (1577898000000,2013000195,73.0)
+4> (1577901600000,2013000072,123.0)
 ```
 
 But, what if we were to do this, instead?
@@ -122,28 +118,34 @@ DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
 	.maxBy(2);
 ```
 
-This says to group the stream of `hourlyTips` by timestamp, and within each timestamp, find the maximum of the sum of the tips. That sounds like it is exactly what we want. And while this alternative does find the same results, there are a couple of reasons why it is not a very good solution.
+This says to group the stream of `hourlyTips` by timestamp, and within each timestamp, find the maximum of the sum of the tips.
+That sounds like it is exactly what we want. And while this alternative does find the same results,
+there are a couple of reasons why it is not a very good solution.
 
-First, instead of producing a single result at the end of each window, with this approach we get a stream that is continuously reporting the maximum achieved so far, for each key (i.e., each hour), which is an awkward way to consume the result if all you wanted was a single value for each hour.
+First, instead of producing a single result at the end of each window, with this approach we get a stream that is
+continuously reporting the maximum achieved so far, for each key (i.e., each hour), which is an awkward way to consume
+the result if all you wanted was a single value for each hour.
 
 ```
-3> (1357002000000,2013000019,1.0)
-3> (1357002000000,2013000036,6.4)
-3> (1357002000000,2013000027,15.4)
+1> (1577883600000,2013000108,14.0)
+1> (1577883600000,2013000108,14.0)
+1> (1577883600000,2013000188,18.0)
+1> (1577883600000,2013000188,18.0)
+1> (1577883600000,2013000188,18.0)
+1> (1577883600000,2013000034,36.0)
+1> (1577883600000,2013000183,70.0)
+1> (1577883600000,2013000183,70.0)
 ...
-3> (1357002000000,2013009336,25.0)
+1> (1577883600000,2013000152,73.0)
+1> (1577883600000,2013000152,73.0)
 ...
-3> (1357002000000,2013006686,38.26)
-...
-3> (1357002000000,2013005943,40.08)
-...
-3> (1357002000000,2013005747,51.8)
-...
-3> (1357002000000,2013000493,54.45)
+1> (1577883600000,2013000089,76.0)
 ...
 ```
 
-Second, Flink will be keeping in state the maximum seen so far for each key (each hour), forever. Flink has no idea that these keys are event-time timestamps, and that the watermarks could be used as an indicator of when this state can be cleared -- to get those semantics, we need to use windows.
+Second, Flink will be keeping in state the maximum seen so far for each key (each hour), forever.
+Flink has no idea that these keys are event-time timestamps, and that the watermarks could be used as
+an indicator of when this state can be cleared -- to get those semantics, we need to use windows.
 
 -----
 
