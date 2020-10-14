@@ -36,7 +36,7 @@ subprojects {
 
     ext {
         javaVersion = '1.8'
-        flinkVersion = '1.11.0'
+        flinkVersion = '1.11.2'
         scalaBinaryVersion = '2.12'
         slf4jVersion = '1.7.15'
         log4jVersion = '1.2.17'
