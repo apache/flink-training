@@ -21,7 +21,7 @@ plugins {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'scala' // optional; uncomment if needed
+    // apply plugin: 'scala' // optional; uncomment if needed
     if (project != project(":common")) {
         apply plugin: 'application'
     }
@@ -102,7 +102,9 @@ subprojects {
     // make flinkShadowJar dependencies available:
     sourceSets {
         main.java.srcDirs += 'src/solution/java'
-        main.scala.srcDirs += 'src/solution/scala'
+        tasks.withType(ScalaCompile) {
+            main.scala.srcDirs += 'src/solution/scala'
+        }
         main.compileClasspath += configurations.flinkShadowJar
         main.runtimeClasspath += configurations.flinkShadowJar
 
