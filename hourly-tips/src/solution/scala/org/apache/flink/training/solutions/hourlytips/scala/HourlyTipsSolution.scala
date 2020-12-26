@@ -18,7 +18,6 @@
 
 package org.apache.flink.training.solutions.hourlytips.scala
 
-import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.scala.function.ProcessWindowFunction
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
@@ -43,7 +42,6 @@ object HourlyTipsSolution {
 
     // set up streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     env.setParallelism(ExerciseBase.parallelism)
 
     // start the data generator

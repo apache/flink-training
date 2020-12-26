@@ -19,7 +19,6 @@
 package org.apache.flink.training.exercises.longrides.scala
 
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
@@ -41,7 +40,6 @@ object LongRidesExercise {
 
     // set up the execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     env.setParallelism(ExerciseBase.parallelism)
 
     val rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()))
