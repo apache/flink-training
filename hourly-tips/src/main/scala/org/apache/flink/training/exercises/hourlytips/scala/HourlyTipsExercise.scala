@@ -18,7 +18,6 @@
 
 package org.apache.flink.training.exercises.hourlytips.scala
 
-import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator
 import org.apache.flink.training.exercises.common.utils.ExerciseBase._
@@ -37,7 +36,6 @@ object HourlyTipsExercise {
 
     // set up streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     env.setParallelism(ExerciseBase.parallelism)
 
     // start the data generator
