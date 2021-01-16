@@ -19,7 +19,6 @@
 package org.apache.flink.training.exercises.longrides;
 
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.TimerService;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -48,7 +47,6 @@ public class LongRidesExercise extends ExerciseBase {
 
 		// set up streaming execution environment
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 		env.setParallelism(ExerciseBase.parallelism);
 
 		// start the data generator
