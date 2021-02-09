@@ -111,8 +111,8 @@ Once that’s done you should be able to open [`RideCleansingTest`](ride-cleansi
 
 ## Using the Taxi Data Streams
 
-These exercises use data generators that produce simulated event streams inspired by those shared by the
-[New York City Taxi & Limousine Commission](http://www.nyc.gov/html/tlc/html/home/home.shtml)
+These exercises use data [generators](common/src/main/java/org/apache/flink/training/exercises/common/sources) that produce simulated event streams 
+inspired by those shared by the [New York City Taxi & Limousine Commission](http://www.nyc.gov/html/tlc/html/home/home.shtml)
 in their public [data set](https://uofi.app.box.com/NYCtaxidata) about taxi rides in New York City.
 
 ### Schemas of Taxi Ride and Taxi Fare Events

@@ -27,7 +27,7 @@ The `GeoUtils` utility class provides a static method `isInNYC(float lon, float 
 
 ### Input Data
 
-This series of exercises is based a stream of `TaxiRide` events, as described in [Using the Taxi Data Streams](../README.md#using-the-taxi-data-streams).
+This exercise is based on a stream of `TaxiRide` events, as described in [Using the Taxi Data Streams](../README.md#using-the-taxi-data-streams).
 
 ### Expected Output
 
