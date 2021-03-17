@@ -6,7 +6,6 @@ import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
@@ -44,8 +43,7 @@ public class ExternalEnrichmentJob {
 
 		StreamExecutionEnvironment env = createConfiguredEnvironment(parameters);
 
-		//Time Characteristics
-		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+		//Timing Configuration
 		env.getConfig().setAutoWatermarkInterval(100);
 		env.setBufferTimeout(10);
 

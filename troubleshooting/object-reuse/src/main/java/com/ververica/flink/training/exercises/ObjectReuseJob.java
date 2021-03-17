@@ -12,6 +12,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
@@ -25,7 +26,6 @@ import com.ververica.flink.training.provided.WeatherUtils;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static com.ververica.flink.training.common.EnvironmentUtils.createConfiguredEnvironment;
 
@@ -104,7 +104,7 @@ public class ObjectReuseJob {
 		// (3) stream with an windowed-average of the temperature (to smoothens sensor
 		//     measurements, variant B); then converted into local temperature units (°F in the US)
 		keyedTemperatureStream
-				.timeWindow(Time.of(10, TimeUnit.SECONDS), Time.of(1, TimeUnit.SECONDS))
+				.window(SlidingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(1)))
 				.aggregate(new WindowAverageSensor())
 				.name("WindowAverageTemperature")
 				.uid("WindowAverageTemperature")

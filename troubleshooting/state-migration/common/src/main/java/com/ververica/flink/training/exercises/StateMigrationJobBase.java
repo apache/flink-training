@@ -4,7 +4,6 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -35,9 +34,6 @@ public class StateMigrationJobBase {
 		ParameterTool parameters = ParameterTool.fromArgs(args);
 
 		StreamExecutionEnvironment env = EnvironmentUtils.createConfiguredEnvironment(parameters);
-
-		//Time Characteristics
-		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 		//Checkpointing Configuration
 		env.enableCheckpointing(5000);

@@ -4,13 +4,13 @@ import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.metrics.DescriptiveStatisticsHistogram;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
@@ -44,8 +44,7 @@ public class TroubledStreamingJob {
 
 		StreamExecutionEnvironment env = createConfiguredEnvironment(parameters);
 
-		//Time Characteristics
-		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+		//Timing Configuration
 		env.getConfig().setAutoWatermarkInterval(2000);
 
 		//Checkpointing Configuration
@@ -69,7 +68,7 @@ public class TroubledStreamingJob {
 
 		SingleOutputStreamOperator<WindowedMeasurements> aggregatedPerLocation = sourceStream
 				.keyBy(jsonNode -> jsonNode.get("location").asText())
-				.timeWindow(Time.of(1, TimeUnit.SECONDS))
+				.window(TumblingEventTimeWindows.of(Time.seconds(1)))
 				.sideOutputLateData(lateDataTag)
 				.process(new MeasurementWindowAggregatingFunction())
 				.name("WindowedAggregationPerLocation")

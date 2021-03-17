@@ -7,11 +7,11 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
 import org.apache.flink.runtime.metrics.DescriptiveStatisticsHistogram;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
@@ -25,7 +25,6 @@ import com.ververica.flink.training.common.WindowedMeasurements;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 import static com.ververica.flink.training.common.EnvironmentUtils.createConfiguredEnvironment;
 import static com.ververica.flink.training.common.EnvironmentUtils.isLocal;
@@ -45,8 +44,7 @@ public class ThroughputJob {
 
 		StreamExecutionEnvironment env = createConfiguredEnvironment(parameters);
 
-		//Time Characteristics
-		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+		//Timing Configuration
 		env.getConfig().setAutoWatermarkInterval(100);
 		env.setBufferTimeout(10);
 
@@ -72,7 +70,7 @@ public class ThroughputJob {
 
 		DataStream<WindowedMeasurements> aggregatedPerLocation = sourceStream
 				.keyBy(jsonNode -> jsonNode.get("location").asText())
-				.timeWindow(Time.of(1, TimeUnit.SECONDS))
+				.window(TumblingEventTimeWindows.of(Time.seconds(1)))
 				.aggregate(new MeasurementWindowAggregatingPerLocation(),
 						new MeasurementWindowProcessFunction())
 				.name("WindowedAggregationPerLocation")
@@ -80,7 +78,7 @@ public class ThroughputJob {
 
 		DataStream<WindowedMeasurementsForArea> aggregatedPerArea = aggregatedPerLocation
 				.keyBy(m -> WindowedMeasurementsForArea.getArea(m.getLocation()))
-				.timeWindow(Time.of(1, TimeUnit.SECONDS))
+				.window(TumblingEventTimeWindows.of(Time.seconds(1)))
 				.aggregate(new MeasurementWindowAggregatingPerArea());
 
 		if (isLocal(parameters)) {
