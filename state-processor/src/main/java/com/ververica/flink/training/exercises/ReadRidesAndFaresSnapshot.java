@@ -7,7 +7,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.runtime.state.memory.MemoryStateBackend;
+import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.state.api.ExistingSavepoint;
 import org.apache.flink.state.api.Savepoint;
 import org.apache.flink.state.api.functions.KeyedStateReaderFunction;
@@ -34,7 +34,7 @@ public class ReadRidesAndFaresSnapshot {
 	 */
 	public static void main(String[] args) throws Exception {
 		ExecutionEnvironment bEnv = ExecutionEnvironment.getExecutionEnvironment();
-		MemoryStateBackend backend = new MemoryStateBackend();
+		HashMapStateBackend backend = new HashMapStateBackend();
 
 		ParameterTool params = ParameterTool.fromArgs(args);
 		String input = params.getRequired("input");
