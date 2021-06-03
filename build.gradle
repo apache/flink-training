@@ -31,12 +31,12 @@ subprojects {
 
     // artifact properties
     group = 'org.apache.flink'
-    version = '1.12-SNAPSHOT'
+    version = '1.13-SNAPSHOT'
     description = """Flink Training Exercises"""
 
     ext {
         javaVersion = '1.8'
-        flinkVersion = '1.12.0'
+        flinkVersion = '1.13.1'
         scalaBinaryVersion = '2.12'
         slf4jVersion = '1.7.15'
         log4jVersion = '1.2.17'
