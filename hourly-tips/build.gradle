@@ -1,3 +1,8 @@
+ext.javaExerciseClassName = 'org.apache.flink.training.exercises.hourlytips.HourlyTipsExercise'
+ext.scalaExerciseClassName = 'org.apache.flink.training.exercises.hourlytips.scala.HourlyTipsExercise'
+ext.javaSolutionClassName = 'org.apache.flink.training.solutions.hourlytips.HourlyTipsSolution'
+ext.scalaSolutionClassName = 'org.apache.flink.training.solutions.hourlytips.scala.HourlyTipsSolution'
+
 apply plugin: 'application'
 
-mainClassName = 'org.apache.flink.training.exercises.hourlytips.HourlyTipsExercise'
+mainClassName = ext.javaExerciseClassName

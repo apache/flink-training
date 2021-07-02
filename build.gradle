@@ -94,6 +94,18 @@ subprojects {
         test.runtimeClasspath += configurations.shadow
     }
 
+    project.plugins.withId('application') {
+        ['javaExerciseClassName', 'scalaExerciseClassName',
+         'javaSolutionClassName', 'scalaSolutionClassName'].each { property ->
+            if (project.ext.has(property)) {
+                project.tasks.create(name: classNamePropertyToTaskName(property), type: JavaExec) {
+                    classpath = project.sourceSets.main.runtimeClasspath
+                    mainClass = project.ext.get(property)
+                    group = 'flink-training'
+                }
+            }
+        }
+    }
 
     jar {
         manifest {
@@ -118,4 +130,31 @@ subprojects {
     }
 
     assemble.dependsOn(shadowJar)
+}
+
+tasks.register('printRunTasks') {
+    println '------------------------------------------------------------'
+    println 'Flink Training Tasks runnable from root project \'' + project.name + '\''
+    println '------------------------------------------------------------'
+
+    subprojects.findAll { project ->
+        boolean first = true;
+        project.tasks.withType(JavaExec) { task ->
+            if (task.group == 'flink-training') {
+                if (first) {
+                    println ''
+                    println '> Subproject \'' + project.name + '\''
+                    first = false;
+                }
+                println './gradlew :' + project.name + ':' + task.name
+            }
+        }
+    }
+}
+
+static def classNamePropertyToTaskName(String property) {
+    return 'run' +
+            property.charAt(0).toString().toUpperCase() +
+            property.substring(1, property.lastIndexOf('ClassName'))
+
 }

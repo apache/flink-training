@@ -1,3 +1,8 @@
+ext.javaExerciseClassName = 'org.apache.flink.training.exercises.ridecleansing.RideCleansingExercise'
+ext.scalaExerciseClassName = 'org.apache.flink.training.exercises.ridecleansing.scala.RideCleansingExercise'
+ext.javaSolutionClassName = 'org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution'
+ext.scalaSolutionClassName = 'org.apache.flink.training.solutions.ridecleansing.scala.RideCleansingSolution'
+
 apply plugin: 'application'
 
-mainClassName = 'org.apache.flink.training.exercises.ridecleansing.RideCleansingExercise'
+mainClassName = ext.javaExerciseClassName

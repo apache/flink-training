@@ -1,3 +1,8 @@
+ext.javaExerciseClassName = 'org.apache.flink.training.exercises.longrides.LongRidesExercise'
+ext.scalaExerciseClassName = 'org.apache.flink.training.exercises.longrides.scala.LongRidesExercise'
+ext.javaSolutionClassName = 'org.apache.flink.training.solutions.longrides.LongRidesSolution'
+ext.scalaSolutionClassName = 'org.apache.flink.training.solutions.longrides.scala.LongRidesSolution'
+
 apply plugin: 'application'
 
-mainClassName = 'org.apache.flink.training.exercises.longrides.LongRidesExercise'
+mainClassName = ext.javaExerciseClassName
