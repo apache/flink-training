@@ -176,7 +176,24 @@ Each of these exercises includes an `...Exercise` class with most of the necessa
 
 > **:information_source: Note:** As long as your `...Exercise` class is throwing a `MissingSolutionException`, the provided JUnit test classes will ignore that failure and verify the correctness of the solution implementation instead.
 
-There are Java and Scala versions of all the exercise, test, and solution classes.
+There are Java and Scala versions of all the exercise, test, and solution classes, each of which can be run from IntelliJ as usual.
+
+#### Running Exercises, Tests, and Solutions on the Command Line
+
+You can execute exercises, solutions, and tests via `gradlew` from a CLI.
+
+- Tests can be executed as usual:
+
+    ```bash
+    ./gradlew test
+    ./gradlew :<subproject>:test
+    ```
+
+- For Java/Scala exercises and solutions, we provide special tasks that are listed via
+
+    ```bash
+    ./gradlew printRunTasks
+    ```
 
 -----
 
