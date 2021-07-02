@@ -17,6 +17,7 @@
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
+    id "com.diffplug.spotless" version "5.14.0" apply false
 }
 
 description = "Flink Training Exercises"
@@ -24,6 +25,20 @@ description = "Flink Training Exercises"
 allprojects {
     group = 'org.apache.flink'
     version = '1.13-SNAPSHOT'
+
+    apply plugin: 'com.diffplug.spotless'
+
+    spotless {
+        format 'misc', {
+            // define the files to apply `misc` to
+            target '*.gradle', '*.md', '.gitignore'
+
+            // define the steps to apply to those files
+            trimTrailingWhitespace()
+            indentWithSpaces(4)
+            endWithNewline()
+        }
+    }
 }
 
 subprojects {
@@ -104,6 +119,18 @@ subprojects {
                     group = 'flink-training'
                 }
             }
+        }
+    }
+
+    spotless {
+        java {
+            googleJavaFormat('1.7').aosp()
+
+            // \# refers to static imports
+            importOrder('org.apache.flink', 'org.apache.flink.shaded', '', 'javax', 'java', 'scala', '\\#')
+            removeUnusedImports()
+
+            targetExclude("**/generated*/*.java")
         }
     }
 
