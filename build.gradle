@@ -60,62 +60,38 @@ subprojects {
         }
     }
 
-    // NOTE: We cannot use "compileOnly" or "shadow" configurations since then we could not run code
-    // in the IDE or with "gradle run". We also cannot exclude transitive dependencies from the
-    // shadowJar yet (see https://github.com/johnrengelman/shadow/issues/159).
-    // -> Explicitly define the // libraries we want to be included in the "flinkShadowJar" configuration!
-    configurations {
-        flinkShadowJar // dependencies which go into the shadowJar
-
-        // provided by Flink
-        flinkShadowJar.exclude group: 'org.apache.flink', module: 'force-shading'
-        flinkShadowJar.exclude group: 'com.google.code.findbugs', module: 'jsr305'
-        flinkShadowJar.exclude group: 'org.slf4j'
-        flinkShadowJar.exclude group: 'log4j'
-        flinkShadowJar.exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-
-        // already provided dependencies from serializer frameworks
-        flinkShadowJar.exclude group: 'com.esotericsoftware.kryo', module: 'kryo'
-        flinkShadowJar.exclude group: 'javax.servlet', module: 'servlet-api'
-        flinkShadowJar.exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-    }
-
     // common set of dependencies
     dependencies {
-        implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
-        implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
-        implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+        shadow "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+        shadow "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+        shadow "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+
+        shadow "org.apache.flink:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "org.apache.flink:flink-java:${flinkVersion}"
+        shadow "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
 
         if (project != project(":common")) {
             implementation project(path: ':common')
-            // transitive dependencies for flinkShadowJar need to be defined above
-            // (the alternative of using configuration: 'shadow' does not work there because that adds a dependency on
-            // the jar file, not the sources)
-            flinkShadowJar project(path: ':common', transitive: false)
-
             testImplementation(project(":common")) {
                 capabilities { requireCapability("$group:common-test") }
             }
         }
     }
 
-    // make flinkShadowJar dependencies available:
+    // add solution source dirs:
     sourceSets {
         main.java.srcDirs += 'src/solution/java'
         main.scala.srcDirs += 'src/solution/scala'
-        main.compileClasspath += configurations.flinkShadowJar
-        main.runtimeClasspath += configurations.flinkShadowJar
 
-        test.compileClasspath += configurations.flinkShadowJar
-        test.runtimeClasspath += configurations.flinkShadowJar
+        // Add shadow configuration to runtime class path so that the
+        // dynamically-generated tasks by IntelliJ are able to run and have
+        // all dependencies they need. (Luckily, this does not influence what
+        // ends up in the final shadowJar.)
+        main.runtimeClasspath += configurations.shadow
 
-        javadoc.classpath += configurations.flinkShadowJar
-    }
-
-    eclipse {
-        classpath {
-            plusConfigurations += [configurations.flinkShadowJar]
-        }
+        test.compileClasspath += configurations.shadow
+        test.runtimeClasspath += configurations.shadow
     }
 
 
@@ -127,7 +103,18 @@ subprojects {
     }
 
     shadowJar {
-        configurations = [project.configurations.flinkShadowJar]
+        mergeServiceFiles()
+        dependencies {
+            exclude(dependency("org.apache.flink:force-shading"))
+            exclude(dependency('com.google.code.findbugs:jsr305'))
+            exclude(dependency('org.slf4j:.*'))
+            exclude(dependency('log4j:.*'))
+            exclude(dependency('org.apache.logging.log4j:log4j-to-slf4j'))
+            // already provided dependencies from serializer frameworks
+            exclude(dependency('com.esotericsoftware.kryo:kryo'))
+            exclude(dependency('javax.servlet:servlet-api')) // TODO: check if needed
+            exclude(dependency('org.apache.httpcomponents:httpclient')) // TODO: check if needed
+        }
     }
 
     assemble.dependsOn(shadowJar)
