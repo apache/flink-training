@@ -29,9 +29,6 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'scala' // optional; uncomment if needed
-    if (project != project(":common")) {
-        apply plugin: 'application'
-    }
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
@@ -120,10 +117,6 @@ subprojects {
         }
     }
 
-    if (plugins.findPlugin('application')) {
-        applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
-        run.classpath = sourceSets.main.runtimeClasspath
-    }
 
     jar {
         manifest {
