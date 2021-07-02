@@ -19,6 +19,13 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
 }
 
+description = "Flink Training Exercises"
+
+allprojects {
+    group = 'org.apache.flink'
+    version = '1.13-SNAPSHOT'
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'scala' // optional; uncomment if needed
@@ -28,11 +35,6 @@ subprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
-
-    // artifact properties
-    group = 'org.apache.flink'
-    version = '1.13-SNAPSHOT'
-    description = """Flink Training Exercises"""
 
     ext {
         javaVersion = '1.8'
