@@ -1,3 +1,5 @@
+ext.solutionClassName = 'org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution'
+
 apply plugin: 'application'
 
 mainClassName = 'org.apache.flink.training.exercises.ridesandfares.RidesAndFaresExercise'

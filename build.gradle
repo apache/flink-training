@@ -117,6 +117,14 @@ subprojects {
         }
     }
 
+    project.plugins.withId('application') {
+        if (project.ext.has('solutionClassName')) {
+            project.tasks.create(name: "runSolution", type: JavaExec) {
+                classpath = project.sourceSets.main.runtimeClasspath
+                mainClass = project.ext.solutionClassName
+            }
+        }
+    }
 
     jar {
         manifest {

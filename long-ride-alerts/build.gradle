@@ -1,3 +1,5 @@
+ext.solutionClassName = 'org.apache.flink.training.solutions.longrides.LongRidesSolution'
+
 apply plugin: 'application'
 
 mainClassName = 'org.apache.flink.training.exercises.longrides.LongRidesExercise'

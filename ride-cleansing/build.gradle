@@ -1,3 +1,5 @@
+ext.solutionClassName = 'org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution'
+
 apply plugin: 'application'
 
 mainClassName = 'org.apache.flink.training.exercises.ridecleansing.RideCleansingExercise'
