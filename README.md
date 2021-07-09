@@ -23,7 +23,7 @@ Exercises that go along with the training content in the documentation.
 
 ## Table of Contents
 
-[**Setup your Development Environment**](#setup-your-development-environment)
+[**Set up your Development Environment**](#set-up-your-development-environment)
 
 1. [Software requirements](#software-requirements)
 1. [Clone and build the flink-training project](#clone-and-build-the-flink-training-project)
@@ -45,7 +45,7 @@ Exercises that go along with the training content in the documentation.
 
 [**License**](#license)
 
-## Setup your Development Environment
+## Set up your Development Environment
 
 The following instructions guide you through the process of setting up a development environment for the purpose of developing, debugging, and executing solutions to the Flink developer training exercises and examples.
 
@@ -53,7 +53,7 @@ The following instructions guide you through the process of setting up a develop
 
 Flink supports Linux, OS X, and Windows as development environments for Flink programs and local execution. The following software is required for a Flink development setup and should be installed on your system:
 
-- a JDK for Java 8 or Java 11 (a JRE is not sufficient; other versions of Java are not supported)
+- a JDK for Java 8 or Java 11 (a JRE is not sufficient; other versions of Java are currently not supported)
 - Git
 - an IDE for Java (and/or Scala) development with Gradle support.
   We recommend IntelliJ, but Eclipse or Visual Studio Code can also be used so long as you stick to Java. For Scala you will need to use IntelliJ (and its Scala plugin).
@@ -169,7 +169,7 @@ In the hands-on sessions you will implement Flink programs using various Flink A
 
 The following steps guide you through the process of using the provided data streams, implementing your first Flink streaming program, and executing your program in your IDE.
 
-We assume you have setup your development environment according to our [setup guide above](#setup-your-development-environment).
+We assume you have set up your development environment according to our [setup guide above](#set-up-your-development-environment).
 
 ### Learn about the data
 
@@ -219,4 +219,4 @@ Now you are ready to begin with the first exercise in our [**Labs**](LABS-OVERVI
 
 ## License
 
-The code in this repository is licensed under the Apache Software License 2.
+The code in this repository is licensed under the [Apache Software License 2](LICENSE).
