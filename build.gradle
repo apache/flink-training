@@ -16,30 +16,28 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
+    id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
+}
+
+description = "Flink Training Exercises"
+
+allprojects {
+    group = 'org.apache.flink'
+    version = '1.13-SNAPSHOT'
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'scala' // optional; uncomment if needed
-    if (project != project(":common")) {
-        apply plugin: 'application'
-    }
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
-
-    // artifact properties
-    group = 'org.apache.flink'
-    version = '1.13-SNAPSHOT'
-    description = """Flink Training Exercises"""
 
     ext {
         javaVersion = '1.8'
         flinkVersion = '1.13.1'
         scalaBinaryVersion = '2.12'
-        slf4jVersion = '1.7.15'
-        log4jVersion = '1.2.17'
+        log4jVersion = '2.12.1'
         junitVersion = '4.12'
     }
 
@@ -74,6 +72,7 @@ subprojects {
         flinkShadowJar.exclude group: 'com.google.code.findbugs', module: 'jsr305'
         flinkShadowJar.exclude group: 'org.slf4j'
         flinkShadowJar.exclude group: 'log4j'
+        flinkShadowJar.exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
 
         // already provided dependencies from serializer frameworks
         flinkShadowJar.exclude group: 'com.esotericsoftware.kryo', module: 'kryo'
@@ -83,8 +82,9 @@ subprojects {
 
     // common set of dependencies
     dependencies {
-        implementation "log4j:log4j:${log4jVersion}"
-        implementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+        implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+        implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+        implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
         if (project != project(":common")) {
             implementation project(path: ':common')
@@ -118,9 +118,13 @@ subprojects {
         }
     }
 
-    if (plugins.findPlugin('application')) {
-        applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
-        run.classpath = sourceSets.main.runtimeClasspath
+    project.plugins.withId('application') {
+        if (project.ext.has('solutionClassName')) {
+            project.tasks.create(name: "runSolution", type: JavaExec) {
+                classpath = project.sourceSets.main.runtimeClasspath
+                mainClass = project.ext.solutionClassName
+            }
+        }
     }
 
     jar {
