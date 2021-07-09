@@ -56,7 +56,7 @@ Flink supports Linux, OS X, and Windows as development environments for Flink pr
 - a JDK for Java 8 or Java 11 (a JRE is not sufficient; other versions of Java are currently not supported)
 - Git
 - an IDE for Java (and/or Scala) development with Gradle support.
-  We recommend IntelliJ, but Eclipse or Visual Studio Code can also be used so long as you stick to Java. For Scala you will need to use IntelliJ (and its Scala plugin).
+  We recommend [IntelliJ](https://www.jetbrains.com/idea/), but [Eclipse](https://www.eclipse.org/downloads/) or [Visual Studio Code](https://code.visualstudio.com/) (with the [Java extension pack](https://code.visualstudio.com/docs/java/java-tutorial)) can also be used so long as you stick to Java. For Scala, you will need to use IntelliJ (and its [Scala plugin](https://plugins.jetbrains.com/plugin/1347-scala/)).
 
 > **:information_source: Note for Windows users:** The examples of shell commands provided in the training instructions are for UNIX systems. To make things easier, you may find it worthwhile to setup cygwin or WSL. For developing Flink jobs, Windows works reasonably well: you can run a Flink cluster on a single machine, submit jobs, run the webUI, and execute jobs in the IDE.
 
@@ -214,6 +214,116 @@ You can execute exercises, solutions, and tests via `gradlew` from a CLI.
 -----
 
 Now you are ready to begin with the first exercise in our [**Labs**](LABS-OVERVIEW.md).
+
+-----
+
+## How to work on this project
+
+> **:heavy_exclamation_mark: Important:** This section contains tips for developers who are
+> maintaining the `flink-training` project (not so much people doing the
+> training).
+
+The following sections apply on top of the [Setup Instructions](#set-up-your-development-environment) above.
+
+### Code Formatting
+
+Just like [Apache Flink](https://github.com/apache/flink), we use the [Spotless
+plugin](https://github.com/diffplug/spotless/tree/main/plugin-maven) together
+with [google-java-format](https://github.com/google/google-java-format) to
+format our Java code. You can configure your IDE to automatically apply
+formatting on saving with these steps:
+
+1. Install the [google-java-format
+   plugin](https://plugins.jetbrains.com/plugin/8527-google-java-format) and
+   enable it for the project
+2. In the plugin settings, change the code style to "AOSP" (4-space indents)
+3. Install the [Save Actions
+   plugin](https://plugins.jetbrains.com/plugin/7642-save-actions)
+4. Enable the plugin, along with "Optimize imports" and "Reformat file" but
+   ignoring `.*README\.md`.
+
+### Ignoring Refactoring Commits
+
+We keep a list of big refactoring commits in `.git-blame-ignore-revs`. When looking at change annotations using `git blame` it's helpful to ignore these. You can configure git and your IDE to do so using:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+### Adding new exercises
+
+If you want to add a new exercise, we recommend copying an existing one and
+adapting it accordingly. Make sure the new subproject's `build.gradle` file
+contains appropriate class name properties so that we can create the right
+tasks for [Running Tests and Solutions on the Command Line](#running-exercises-tests-and-solutions-on-the-command-line), e.g.:
+
+```groovy
+ext.javaExerciseClassName = 'org.apache.flink.training.exercises.ridesandfares.RidesAndFaresExercise'
+ext.scalaExerciseClassName = 'org.apache.flink.training.exercises.ridesandfares.scala.RidesAndFaresExercise'
+ext.javaSolutionClassName = 'org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution'
+ext.scalaSolutionClassName = 'org.apache.flink.training.solutions.ridesandfares.scala.RidesAndFaresSolution'
+
+apply plugin: 'application'
+
+mainClassName = ext.javaExerciseClassName
+```
+
+### Useful Gradle Commands and Tricks
+
+#### Clean Build with all Checks  
+
+```bash
+./gradlew clean check shadowJar
+./gradlew clean check shadowJar --no-build-cache
+```
+
+#### Force a Re-run of all Tests Only
+
+```bash
+./gradlew cleanTest test  --no-build-cache
+```
+
+> **:information_source: Note:** Ignoring the build-cache is required if you really want to run the test again (without any changes in code).
+> Otherwise the test tasks will just pull the latest test results from the cache.
+
+#### Fix Formatting
+
+```bash
+./gradlew spotlessApply
+./gradlew :rides-and-fares:spotlessApply
+```
+
+> **:information_source: Note:** You actually do not have to remember this since
+> `./gradlew check` will not only verify the formatting and print any errors but
+> also mention the command to fix these.
+
+#### Tune the Java Compiler
+
+Add the following code to the `subprojects { /*...*/ }` section of the
+[`build.gradle`](build.gradle) file and adapt accordingly, for example:
+
+```groovy
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << '-Xlint:unchecked'
+        options.deprecation = true
+    }
+```
+
+> **:information_source: Note:** We don't add this by default for now to keep
+> the training requirements low for participants and keep focus on the
+> exercises at hand.
+
+#### Deprecated Gradle Features
+
+You may see this warning being reported from Gradle:
+> Deprecated Gradle features were used in this build, making it incompatible with Gradle 8.0.
+>
+> You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+>
+> See https://docs.gradle.org/7.1/userguide/command_line_interface.html#sec:command_line_warnings
+
+This is currently caused by https://github.com/johnrengelman/shadow/issues/680
+and has to be fixed by the shadow plugin developers.
 
 -----
 
