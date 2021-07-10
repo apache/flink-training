@@ -18,6 +18,10 @@
 
 package org.apache.flink.training.exercises.ridesandfares;
 
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.typeinfo.TypeHint;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -69,18 +73,52 @@ public class RidesAndFaresExercise extends ExerciseBase {
 	}
 
 	public static class EnrichmentFunction extends RichCoFlatMapFunction<TaxiRide, TaxiFare, Tuple2<TaxiRide, TaxiFare>> {
+//		public TaxiRide taxiRide;
+//		public TaxiFare taxiFare;
+		ValueState<Tuple2<TaxiRide, TaxiFare>> rideCombState;
 
 		@Override
 		public void open(Configuration config) throws Exception {
-			throw new MissingSolutionException();
+			TypeInformation<Tuple2<TaxiRide, TaxiFare>> rideCombType = TypeInformation.of(new TypeHint<Tuple2<TaxiRide, TaxiFare>>(){});
+			ValueStateDescriptor<Tuple2<TaxiRide, TaxiFare>> desc = new ValueStateDescriptor<>("rideCombState", rideCombType);
+			rideCombState = getRuntimeContext().getState(desc);
+//			throw new MissingSolutionException();
 		}
 
 		@Override
 		public void flatMap1(TaxiRide ride, Collector<Tuple2<TaxiRide, TaxiFare>> out) throws Exception {
+
+			Tuple2<TaxiRide, TaxiFare> curr;
+			if (rideCombState.value() == null) {
+				curr =  new Tuple2<>(ride, null);
+				rideCombState.update(curr);
+			} else {
+				curr = new Tuple2<>(ride, rideCombState.value().f1);
+				if (curr.f1 != null) {
+					rideCombState.clear();
+					out.collect(curr);
+				} else {
+					rideCombState.update(curr);
+				}
+			}
 		}
 
 		@Override
 		public void flatMap2(TaxiFare fare, Collector<Tuple2<TaxiRide, TaxiFare>> out) throws Exception {
+			Tuple2<TaxiRide, TaxiFare> curr;
+			if (rideCombState.value() == null) {
+				curr = new Tuple2<>(null, fare);
+				rideCombState.update(curr);
+			} else {
+				curr = new Tuple2<>(rideCombState.value().f0, fare);
+				if (curr.f0 != null) {
+					rideCombState.clear();
+					out.collect(curr);
+				} else {
+					rideCombState.update(curr);
+				}
+
+			}
 		}
 	}
 }

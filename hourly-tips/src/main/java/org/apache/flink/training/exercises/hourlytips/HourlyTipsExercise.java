@@ -18,42 +18,72 @@
 
 package org.apache.flink.training.exercises.hourlytips;
 
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.api.java.tuple.Tuple;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
+import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
 import org.apache.flink.training.exercises.common.utils.ExerciseBase;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
+import org.apache.flink.util.Collector;
 
 /**
  * The "Hourly Tips" exercise of the Flink training in the docs.
  *
  * <p>The task of the exercise is to first calculate the total tips collected by each driver, hour by hour, and
  * then from that stream, find the highest tip total in each hour.
- *
  */
 public class HourlyTipsExercise extends ExerciseBase {
 
-	/**
-	 * Main method.
-	 *
-	 * @throws Exception which occurs during job execution.
-	 */
-	public static void main(String[] args) throws Exception {
+    /**
+     * Main method.
+     *
+     * @throws Exception which occurs during job execution.
+     */
+    public static void main(String[] args) throws Exception {
 
-		// set up streaming execution environment
-		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-		env.setParallelism(ExerciseBase.parallelism);
+        // set up streaming execution environment
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(ExerciseBase.parallelism);
 
-		// start the data generator
-		DataStream<TaxiFare> fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()));
+        // start the data generator
+        DataStream<TaxiFare> fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()));
 
-		throw new MissingSolutionException();
+        DataStream<Tuple3<Long, Long, Float>> tipStream = fares
+                .keyBy(x -> x.driverId)
+                .window(TumblingEventTimeWindows.of(Time.hours(1)))
+                .process(new AddTip());
 
-//		printOrTest(hourlyMax);
+        DataStream<Tuple3<Long, Long, Float>> hourlyMax = tipStream
+                .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
+                .max(2);
+        printOrTest(hourlyMax);
 
-		// execute the transformation pipeline
-//		env.execute("Hourly Tips (java)");
-	}
+        // execute the transformation pipeline
+        env.execute("Hourly Tips (java)");
+    }
 
+    public static class AddTip extends ProcessWindowFunction<
+            TaxiFare,                  // input type
+            Tuple3<Long, Long, Float>,  // output type
+            Long,                         // key type
+            TimeWindow> {                   // window type
+
+        @Override
+        public void process(Long key, Context context, Iterable<TaxiFare> fares, Collector<Tuple3<Long, Long, Float>> out) throws Exception {
+            float tips = 0;
+            for (TaxiFare fare : fares) {
+                tips += fare.tip;
+            }
+            out.collect(Tuple3.of(context.window().getEnd(), key, tips));
+        }
+    }
 }
+
