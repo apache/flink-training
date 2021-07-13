@@ -35,49 +35,52 @@ import static org.junit.Assert.assertThat;
 
 public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFare>> {
 
-	static final Testable JAVA_EXERCISE = () -> RidesAndFaresExercise.main(new String[]{});
+    static final Testable JAVA_EXERCISE = () -> RidesAndFaresExercise.main(new String[] {});
 
-	final TaxiRide ride1 = testRide(1);
-	final TaxiRide ride2 = testRide(2);
-	final TaxiFare fare1 = testFare(1);
-	final TaxiFare fare2 = testFare(2);
+    final TaxiRide ride1 = testRide(1);
+    final TaxiRide ride2 = testRide(2);
+    final TaxiFare fare1 = testFare(1);
+    final TaxiFare fare2 = testFare(2);
 
-	@Test
-	public void testInOrder() throws Exception {
-		TestRideSource rides = new TestRideSource(ride1, ride2);
-		TestFareSource fares = new TestFareSource(fare1, fare2);
+    @Test
+    public void testInOrder() throws Exception {
+        TestRideSource rides = new TestRideSource(ride1, ride2);
+        TestFareSource fares = new TestFareSource(fare1, fare2);
 
-		List<Tuple2<TaxiRide, TaxiFare>> expected = Arrays.asList(
-				Tuple2.of(ride1, fare1),
-				Tuple2.of(ride2, fare2));
+        List<Tuple2<TaxiRide, TaxiFare>> expected =
+                Arrays.asList(Tuple2.of(ride1, fare1), Tuple2.of(ride2, fare2));
 
-		assertThat("Join results don't match", results(rides, fares), containsInAnyOrder(expected.toArray()));
-	}
+        assertThat(
+                "Join results don't match",
+                results(rides, fares),
+                containsInAnyOrder(expected.toArray()));
+    }
 
-	@Test
-	public void testOutOfOrder() throws Exception {
-		TestRideSource rides = new TestRideSource(ride1, ride2);
-		TestFareSource fares = new TestFareSource(fare2, fare1);
+    @Test
+    public void testOutOfOrder() throws Exception {
+        TestRideSource rides = new TestRideSource(ride1, ride2);
+        TestFareSource fares = new TestFareSource(fare2, fare1);
 
-		List<Tuple2<TaxiRide, TaxiFare>> expected = Arrays.asList(
-				Tuple2.of(ride1, fare1),
-				Tuple2.of(ride2, fare2));
+        List<Tuple2<TaxiRide, TaxiFare>> expected =
+                Arrays.asList(Tuple2.of(ride1, fare1), Tuple2.of(ride2, fare2));
 
-		assertThat("Join results don't match", results(rides, fares), containsInAnyOrder(expected.toArray()));
-	}
+        assertThat(
+                "Join results don't match",
+                results(rides, fares),
+                containsInAnyOrder(expected.toArray()));
+    }
 
-	private TaxiRide testRide(long rideId) {
-		return new TaxiRide(rideId, true, Instant.EPOCH, Instant.EPOCH,
-				0F, 0F, 0F, 0F, (short) 1, 0, rideId);
-	}
+    private TaxiRide testRide(long rideId) {
+        return new TaxiRide(
+                rideId, true, Instant.EPOCH, Instant.EPOCH, 0F, 0F, 0F, 0F, (short) 1, 0, rideId);
+    }
 
-	private TaxiFare testFare(long rideId) {
-		return new TaxiFare(rideId, 0, rideId, Instant.EPOCH, "", 0F, 0F, 0F);
-	}
+    private TaxiFare testFare(long rideId) {
+        return new TaxiFare(rideId, 0, rideId, Instant.EPOCH, "", 0F, 0F, 0F);
+    }
 
-	protected List<?> results(TestRideSource rides, TestFareSource fares) throws Exception {
-		Testable javaSolution = () -> RidesAndFaresSolution.main(new String[]{});
-		return runApp(rides, fares, new TestSink<>(), JAVA_EXERCISE, javaSolution);
-	}
-
+    protected List<?> results(TestRideSource rides, TestFareSource fares) throws Exception {
+        Testable javaSolution = () -> RidesAndFaresSolution.main(new String[] {});
+        return runApp(rides, fares, new TestSink<>(), JAVA_EXERCISE, javaSolution);
+    }
 }

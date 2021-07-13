@@ -34,47 +34,46 @@ import org.apache.flink.util.Collector;
  *
  * <p>The goal for this exercise is to emit START events for taxi rides that have not been matched
  * by an END event during the first 2 hours of the ride.
- *
  */
 public class LongRidesExercise extends ExerciseBase {
 
-	/**
-	 * Main method.
-	 *
-	 * @throws Exception which occurs during job execution.
-	 */
-	public static void main(String[] args) throws Exception {
+    /**
+     * Main method.
+     *
+     * @throws Exception which occurs during job execution.
+     */
+    public static void main(String[] args) throws Exception {
 
-		// set up streaming execution environment
-		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-		env.setParallelism(ExerciseBase.parallelism);
+        // set up streaming execution environment
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(ExerciseBase.parallelism);
 
-		// start the data generator
-		DataStream<TaxiRide> rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()));
+        // start the data generator
+        DataStream<TaxiRide> rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()));
 
-		DataStream<TaxiRide> longRides = rides
-				.keyBy((TaxiRide ride) -> ride.rideId)
-				.process(new MatchFunction());
+        DataStream<TaxiRide> longRides =
+                rides.keyBy((TaxiRide ride) -> ride.rideId).process(new MatchFunction());
 
-		printOrTest(longRides);
+        printOrTest(longRides);
 
-		env.execute("Long Taxi Rides");
-	}
+        env.execute("Long Taxi Rides");
+    }
 
-	public static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, TaxiRide> {
+    public static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, TaxiRide> {
 
-		@Override
-		public void open(Configuration config) throws Exception {
-			throw new MissingSolutionException();
-		}
+        @Override
+        public void open(Configuration config) throws Exception {
+            throw new MissingSolutionException();
+        }
 
-		@Override
-		public void processElement(TaxiRide ride, Context context, Collector<TaxiRide> out) throws Exception {
-			TimerService timerService = context.timerService();
-		}
+        @Override
+        public void processElement(TaxiRide ride, Context context, Collector<TaxiRide> out)
+                throws Exception {
+            TimerService timerService = context.timerService();
+        }
 
-		@Override
-		public void onTimer(long timestamp, OnTimerContext context, Collector<TaxiRide> out) throws Exception {
-		}
-	}
+        @Override
+        public void onTimer(long timestamp, OnTimerContext context, Collector<TaxiRide> out)
+                throws Exception {}
+    }
 }

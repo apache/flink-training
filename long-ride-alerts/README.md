@@ -22,7 +22,7 @@ under the License.
 The goal of the "Long Ride Alerts" exercise is to provide a real-time warning whenever a taxi ride
 started two hours ago, and is still ongoing.
 
-This should be done using the event time timestamps and watermarks that are provided in the data stream. 
+This should be done using the event time timestamps and watermarks that are provided in the data stream.
 
 The stream is out-of-order, and it is possible that the END event for a ride will be processed before
 its START event. But in such cases, we never care to create an alert, since we do know that the ride
@@ -62,10 +62,10 @@ The resulting stream should be printed to standard out.
 <details>
 <summary><strong>Overall approach</strong></summary>
 
-This exercise revolves around using a `ProcessFunction` to manage some keyed state and event time timers, 
-and doing so in a way that works even when the END event for a given `rideId` arrives before the START (which can happen). 
+This exercise revolves around using a `ProcessFunction` to manage some keyed state and event time timers,
+and doing so in a way that works even when the END event for a given `rideId` arrives before the START (which can happen).
 The challenge is figuring out what state to keep, and when to set and clear that state.
-You will want to use event time timers that fire two hours after an incoming START event, and in the `onTimer()` method, 
+You will want to use event time timers that fire two hours after an incoming START event, and in the `onTimer()` method,
 collect START events to the output only if a matching END event hasn't yet arrived.
 </details>
 
