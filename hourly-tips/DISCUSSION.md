@@ -25,28 +25,28 @@ The Java and Scala reference solutions illustrate two different approaches, thou
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyTips = fares
-	.keyBy((TaxiFare fare) -> fare.driverId)
-	.window(TumblingEventTimeWindows.of(Time.hours(1)))
-	.process(new AddTips());
+    .keyBy((TaxiFare fare) -> fare.driverId)
+    .window(TumblingEventTimeWindows.of(Time.hours(1)))
+    .process(new AddTips());
 ```
 
 where a `ProcessWindowFunction` does all the heavy lifting:
 
 ```java
 public static class AddTips extends ProcessWindowFunction<
-		TaxiFare, Tuple3<Long, Long, Float>, Long, TimeWindow> {
-	@Override
-	public void process(Long key, Context context, Iterable<TaxiFare> fares, Collector<Tuple3<Long, Long, Float>> out) throws Exception {
-		Float sumOfTips = 0F;
-		for (TaxiFare f : fares) {
-			sumOfTips += f.tip;
-		}
-		out.collect(Tuple3.of(context.window().getEnd(), key, sumOfTips));
-	}
+        TaxiFare, Tuple3<Long, Long, Float>, Long, TimeWindow> {
+    @Override
+    public void process(Long key, Context context, Iterable<TaxiFare> fares, Collector<Tuple3<Long, Long, Float>> out) throws Exception {
+        Float sumOfTips = 0F;
+        for (TaxiFare f : fares) {
+            sumOfTips += f.tip;
+        }
+        out.collect(Tuple3.of(context.window().getEnd(), key, sumOfTips));
+    }
 }
 ```
 
-This is straightforward, but has the drawback that it is buffering all of the `TaxiFare` objects in the windows until the windows are triggered, which is less efficient than computing the sum of the tips incrementally, using a `reduce` or `agggregate` function. 
+This is straightforward, but has the drawback that it is buffering all of the `TaxiFare` objects in the windows until the windows are triggered, which is less efficient than computing the sum of the tips incrementally, using a `reduce` or `agggregate` function.
 
 The [Scala solution](src/solution/scala/org/apache/flink/training/solutions/hourlytips/scala/HourlyTipsSolution.scala) uses a `reduce` function
 
@@ -95,8 +95,8 @@ Now, how to find the maximum within each hour? The reference solutions both do t
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
-	.windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
-	.maxBy(2);
+    .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
+    .maxBy(2);
 ```
 
 which works just fine, producing this stream of results:
@@ -114,8 +114,8 @@ But, what if we were to do this, instead?
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
-	.keyBy(t -> t.f0)
-	.maxBy(2);
+    .keyBy(t -> t.f0)
+    .maxBy(2);
 ```
 
 This says to group the stream of `hourlyTips` by timestamp, and within each timestamp, find the maximum of the sum of the tips.

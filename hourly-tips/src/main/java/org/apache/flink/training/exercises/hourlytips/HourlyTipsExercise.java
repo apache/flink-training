@@ -28,32 +28,30 @@ import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 /**
  * The "Hourly Tips" exercise of the Flink training in the docs.
  *
- * <p>The task of the exercise is to first calculate the total tips collected by each driver, hour by hour, and
- * then from that stream, find the highest tip total in each hour.
- *
+ * <p>The task of the exercise is to first calculate the total tips collected by each driver, hour
+ * by hour, and then from that stream, find the highest tip total in each hour.
  */
 public class HourlyTipsExercise extends ExerciseBase {
 
-	/**
-	 * Main method.
-	 *
-	 * @throws Exception which occurs during job execution.
-	 */
-	public static void main(String[] args) throws Exception {
+    /**
+     * Main method.
+     *
+     * @throws Exception which occurs during job execution.
+     */
+    public static void main(String[] args) throws Exception {
 
-		// set up streaming execution environment
-		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-		env.setParallelism(ExerciseBase.parallelism);
+        // set up streaming execution environment
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(ExerciseBase.parallelism);
 
-		// start the data generator
-		DataStream<TaxiFare> fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()));
+        // start the data generator
+        DataStream<TaxiFare> fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()));
 
-		throw new MissingSolutionException();
+        throw new MissingSolutionException();
 
-//		printOrTest(hourlyMax);
+        //		printOrTest(hourlyMax);
 
-		// execute the transformation pipeline
-//		env.execute("Hourly Tips (java)");
-	}
-
+        // execute the transformation pipeline
+        //		env.execute("Hourly Tips (java)");
+    }
 }

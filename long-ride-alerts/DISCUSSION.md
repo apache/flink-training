@@ -25,7 +25,7 @@ It would be interesting to test that the solution does not leak state.
 
 A good way to write unit tests for a `KeyedProcessFunction` to check for state retention, etc., is to
 use the test harnesses described in the
-[documentation on testing](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/testing.html#unit-testing-stateful-or-timely-udfs--custom-operators). 
+[documentation on testing](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/testing.html#unit-testing-stateful-or-timely-udfs--custom-operators).
 
 In fact, the reference solutions will leak state in the case where a START event is missing. They also
 leak in the case where the alert is generated, but then the END event does eventually arrive (after `onTimer()`

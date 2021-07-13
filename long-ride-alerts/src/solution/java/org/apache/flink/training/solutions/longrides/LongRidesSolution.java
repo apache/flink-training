@@ -34,75 +34,75 @@ import org.apache.flink.util.Collector;
  *
  * <p>The goal for this exercise is to emit START events for taxi rides that have not been matched
  * by an END event during the first 2 hours of the ride.
- *
  */
 public class LongRidesSolution extends ExerciseBase {
 
-	/**
-	 * Main method.
-	 *
-	 * @throws Exception which occurs during job execution.
-	 */
-	public static void main(String[] args) throws Exception {
+    /**
+     * Main method.
+     *
+     * @throws Exception which occurs during job execution.
+     */
+    public static void main(String[] args) throws Exception {
 
-		// set up streaming execution environment
-		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-		env.setParallelism(ExerciseBase.parallelism);
+        // set up streaming execution environment
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(ExerciseBase.parallelism);
 
-		// start the data generator
-		DataStream<TaxiRide> rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()));
+        // start the data generator
+        DataStream<TaxiRide> rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()));
 
-		DataStream<TaxiRide> longRides = rides
-				.keyBy((TaxiRide ride) -> ride.rideId)
-				.process(new MatchFunction());
+        DataStream<TaxiRide> longRides =
+                rides.keyBy((TaxiRide ride) -> ride.rideId).process(new MatchFunction());
 
-		printOrTest(longRides);
+        printOrTest(longRides);
 
-		env.execute("Long Taxi Rides");
-	}
+        env.execute("Long Taxi Rides");
+    }
 
-	private static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, TaxiRide> {
+    private static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, TaxiRide> {
 
-		private ValueState<TaxiRide> rideState;
+        private ValueState<TaxiRide> rideState;
 
-		@Override
-		public void open(Configuration config) {
-			ValueStateDescriptor<TaxiRide> stateDescriptor =
-					new ValueStateDescriptor<>("ride event", TaxiRide.class);
-			rideState = getRuntimeContext().getState(stateDescriptor);
-		}
+        @Override
+        public void open(Configuration config) {
+            ValueStateDescriptor<TaxiRide> stateDescriptor =
+                    new ValueStateDescriptor<>("ride event", TaxiRide.class);
+            rideState = getRuntimeContext().getState(stateDescriptor);
+        }
 
-		@Override
-		public void processElement(TaxiRide ride, Context context, Collector<TaxiRide> out) throws Exception {
-			TaxiRide previousRideEvent = rideState.value();
+        @Override
+        public void processElement(TaxiRide ride, Context context, Collector<TaxiRide> out)
+                throws Exception {
+            TaxiRide previousRideEvent = rideState.value();
 
-			if (previousRideEvent == null) {
-				rideState.update(ride);
-				if (ride.isStart) {
-					context.timerService().registerEventTimeTimer(getTimerTime(ride));
-				}
-			} else {
-				if (!ride.isStart) {
-					// it's an END event, so event saved was the START event and has a timer
-					// the timer hasn't fired yet, and we can safely kill the timer
-					context.timerService().deleteEventTimeTimer(getTimerTime(previousRideEvent));
-				}
-				// both events have now been seen, we can clear the state
-				rideState.clear();
-			}
-		}
+            if (previousRideEvent == null) {
+                rideState.update(ride);
+                if (ride.isStart) {
+                    context.timerService().registerEventTimeTimer(getTimerTime(ride));
+                }
+            } else {
+                if (!ride.isStart) {
+                    // it's an END event, so event saved was the START event and has a timer
+                    // the timer hasn't fired yet, and we can safely kill the timer
+                    context.timerService().deleteEventTimeTimer(getTimerTime(previousRideEvent));
+                }
+                // both events have now been seen, we can clear the state
+                rideState.clear();
+            }
+        }
 
-		@Override
-		public void onTimer(long timestamp, OnTimerContext context, Collector<TaxiRide> out) throws Exception {
+        @Override
+        public void onTimer(long timestamp, OnTimerContext context, Collector<TaxiRide> out)
+                throws Exception {
 
-			// if we get here, we know that the ride started two hours ago, and the END hasn't been processed
-			out.collect(rideState.value());
-			rideState.clear();
-		}
+            // if we get here, we know that the ride started two hours ago, and the END hasn't been
+            // processed
+            out.collect(rideState.value());
+            rideState.clear();
+        }
 
-		private long getTimerTime(TaxiRide ride) {
-			return ride.startTime.plusSeconds(120 * 60).toEpochMilli();
-		}
-	}
-
+        private long getTimerTime(TaxiRide ride) {
+            return ride.startTime.plusSeconds(120 * 60).toEpochMilli();
+        }
+    }
 }
