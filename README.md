@@ -101,6 +101,22 @@ If you are in China, we recommend configuring the maven repository to use a mirr
 </details>
 
 
+### Enable Scala (optional)
+
+The exercises in this project are also available in Scala but due to a couple
+of reported problems from non-Scala users, we decided to disable these by
+default. You can re-enable all Scala exercises and solutions by uncommenting
+the Scala plugin in our [`build.gradle`](build.gradle) file:
+
+```groovy
+subprojects {
+    //...
+    apply plugin: 'scala' // optional; uncomment if needed
+}
+```
+
+You can also selectively apply this plugin in a single subproject if desired.
+
 ### Import the flink-training project into your IDE
 
 The project needs to be imported as a gradle project into your IDE.
