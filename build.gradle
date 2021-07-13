@@ -43,7 +43,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'scala' // optional; uncomment if needed
+    // apply plugin: 'scala' // optional; uncomment if needed
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
@@ -97,7 +97,9 @@ subprojects {
     // add solution source dirs:
     sourceSets {
         main.java.srcDirs += 'src/solution/java'
-        main.scala.srcDirs += 'src/solution/scala'
+        tasks.withType(ScalaCompile) {
+            main.scala.srcDirs += 'src/solution/scala'
+        }
 
         // Add shadow configuration to runtime class path so that the
         // dynamically-generated tasks by IntelliJ are able to run and have
@@ -110,14 +112,14 @@ subprojects {
     }
 
     project.plugins.withId('application') {
-        ['javaExerciseClassName', 'scalaExerciseClassName',
-         'javaSolutionClassName', 'scalaSolutionClassName'].each { property ->
-            if (project.ext.has(property)) {
-                project.tasks.create(name: classNamePropertyToTaskName(property), type: JavaExec) {
-                    classpath = project.sourceSets.main.runtimeClasspath
-                    mainClass = project.ext.get(property)
-                    group = 'flink-training'
-                }
+        ['javaExerciseClassName', 'javaSolutionClassName'].each { property ->
+            createTrainingRunTask(project, property)
+        }
+    }
+    pluginManager.withPlugin('scala') {
+        project.plugins.withId('application') {
+            ['scalaExerciseClassName', 'scalaSolutionClassName'].each { property ->
+                createTrainingRunTask(project, property)
             }
         }
     }
@@ -179,7 +181,17 @@ tasks.register('printRunTasks') {
     }
 }
 
-static def classNamePropertyToTaskName(String property) {
+static def void createTrainingRunTask(Project project, String property) {
+    if (project.ext.has(property)) {
+        project.tasks.create(name: classNamePropertyToTaskName(property), type: JavaExec) {
+            classpath = project.sourceSets.main.runtimeClasspath
+            mainClass = project.ext.get(property)
+            group = 'flink-training'
+        }
+    }
+}
+
+static def String classNamePropertyToTaskName(String property) {
     return 'run' +
             property.charAt(0).toString().toUpperCase() +
             property.substring(1, property.lastIndexOf('ClassName'))
