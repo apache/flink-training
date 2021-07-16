@@ -270,7 +270,7 @@ mainClassName = ext.javaExerciseClassName
 
 ### Useful Gradle Commands and Tricks
 
-#### Clean Build with all Checks  
+#### Clean Build with all Checks
 
 ```bash
 ./gradlew clean check shadowJar
