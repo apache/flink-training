@@ -90,4 +90,4 @@ Reference solutions are available in this project:
 
 -----
 
-[**Back to Labs Overview**](../LABS-OVERVIEW.md)
+[**Back to Labs Overview**](../README.md#lab-exercises)

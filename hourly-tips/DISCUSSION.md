@@ -149,4 +149,4 @@ an indicator of when this state can be cleared -- to get those semantics, we nee
 
 -----
 
-[**Back to Labs Overview**](../LABS-OVERVIEW.md)
+[**Back to Labs Overview**](../README.md#lab-exercises)
