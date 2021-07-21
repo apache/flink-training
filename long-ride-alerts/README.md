@@ -99,4 +99,4 @@ Reference solutions are available at GitHub:
 
 [**Lab Discussion: `ProcessFunction` and Timers (Long Ride Alerts)**](DISCUSSION.md)
 
-[**Back to Labs Overview**](../LABS-OVERVIEW.md)
+[**Back to Labs Overview**](../README.md#lab-exercises)

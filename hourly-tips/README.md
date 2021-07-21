@@ -73,4 +73,4 @@ Reference solutions are available at GitHub:
 
 [**Lab Discussion: Windowed Analytics (Hourly Tips)**](DISCUSSION.md)
 
-[**Back to Labs Overview**](../LABS-OVERVIEW.md)
+[**Back to Labs Overview**](../README.md#lab-exercises)

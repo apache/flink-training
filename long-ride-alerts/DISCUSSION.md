@@ -41,4 +41,4 @@ exceptionally late is a challenge that is inherent to stateful stream processing
 
 -----
 
-[**Back to Labs Overview**](../LABS-OVERVIEW.md)
+[**Back to Labs Overview**](../README.md#lab-exercises)
