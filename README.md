@@ -47,7 +47,7 @@ Exercises that accompany the training content in the documentation.
 
 [**License**](#license)
 
-## Set up your development environment 
+## Set up your development environment
 
 You will need to set up your environment in order to develop, debug, and execute solutions to the training exercises and examples.
 
@@ -61,12 +61,12 @@ Flink supports Linux, OS X, and Windows as development environments for Flink pr
   - We recommend [IntelliJ](https://www.jetbrains.com/idea/), but [Eclipse](https://www.eclipse.org/downloads/) or [Visual Studio Code](https://code.visualstudio.com/) (with the [Java extension pack](https://code.visualstudio.com/docs/java/java-tutorial)) can also be used so long as you stick to Java
   - For Scala, you will need to use IntelliJ (and its [Scala plugin](https://plugins.jetbrains.com/plugin/1347-scala/))
 
-> **:information_source: Note for Windows users:** The shell command examples provided in the training instructions are for UNIX systems. 
+> **:information_source: Note for Windows users:** The shell command examples provided in the training instructions are for UNIX systems.
 > You may find it worthwhile to setup cygwin or WSL. For developing Flink jobs, Windows works reasonably well: you can run a Flink cluster on a single machine, submit jobs, run the webUI, and execute jobs in the IDE.
 
 ### Clone and build the flink-training project
 
-This `flink-training` repository contains exercises, tests, and reference solutions for the programming exercises. 
+This `flink-training` repository contains exercises, tests, and reference solutions for the programming exercises.
 
 > **:information_source: Repository Layout:** This repository has several branches set up pointing to different Apache Flink versions, similarly to the [apache/flink](https://github.com/apache/flink) repository with:
 > - a release branch for each minor version of Apache Flink, e.g. `release-1.10`, and
@@ -131,20 +131,20 @@ The project needs to be imported as a gradle project into your IDE.
 
 Then you should be able to open [`RideCleansingTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingTest.java) and run this test.
 
-> **:information_source: Note for Scala users:** You will need to use IntelliJ with the JetBrains Scala plugin, and you will need to add a Scala 2.12 SDK to the Global Libraries section of the Project Structure. 
+> **:information_source: Note for Scala users:** You will need to use IntelliJ with the JetBrains Scala plugin, and you will need to add a Scala 2.12 SDK to the Global Libraries section of the Project Structure.
 > IntelliJ will ask you for the latter when you open a Scala file.
 
 ## Use the taxi data streams
 
-These exercises use data [generators](common/src/main/java/org/apache/flink/training/exercises/common/sources) that produce simulated event streams. 
-The data is inspired by the [New York City Taxi & Limousine Commission's](http://www.nyc.gov/html/tlc/html/home/home.shtml) public 
+These exercises use data [generators](common/src/main/java/org/apache/flink/training/exercises/common/sources) that produce simulated event streams.
+The data is inspired by the [New York City Taxi & Limousine Commission's](http://www.nyc.gov/html/tlc/html/home/home.shtml) public
 [data set](https://uofi.app.box.com/NYCtaxidata) about taxi rides in New York City.
 
 ### Schema of taxi ride events
 
-Our taxi data set contains information about individual taxi rides in New York City. 
+Our taxi data set contains information about individual taxi rides in New York City.
 
-Each ride is represented by two events: a trip start, and a trip end. 
+Each ride is represented by two events: a trip start, and a trip end.
 
 Each event consists of eleven fields:
 
@@ -188,7 +188,7 @@ We assume you have set up your development environment according to our [setup g
 
 ### Learn about the data
 
-The initial set of exercises are all based on data streams of events about taxi rides and taxi fares. These streams are produced by source functions which reads data from input files. 
+The initial set of exercises are all based on data streams of events about taxi rides and taxi fares. These streams are produced by source functions which reads data from input files.
 Read the [instructions](#using-the-taxi-data-streams) to learn how to use them.
 
 ### Run and debug Flink programs in your IDE
@@ -230,7 +230,7 @@ For Java/Scala exercises and solutions, we provide special tasks that can be lis
 
 :point_down: Now you are ready to begin the lab exercises. :point_down:
 
-## Lab exercises 
+## Lab exercises
 
 1. [Filtering a Stream (Ride Cleansing)](ride-cleansing)
 1. [Stateful Enrichment (Rides and Fares)](rides-and-fares)
@@ -243,7 +243,7 @@ For Java/Scala exercises and solutions, we provide special tasks that can be lis
 
 ## Contribute
 
-If you would like to contribute to this repository or add new exercises, please read the [contributing](CONTRIBUTING.md) guide. 
+If you would like to contribute to this repository or add new exercises, please read the [contributing](CONTRIBUTING.md) guide.
 
 ## License
 

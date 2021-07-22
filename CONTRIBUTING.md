@@ -24,8 +24,8 @@ formatting upon saving with these steps:
 
 ## Ignore refactoring commits
 
-There is a list of refactoring commits in `.git-blame-ignore-revs`. 
-When looking at change annotations using `git blame`, it is helpful to ignore these. 
+There is a list of refactoring commits in `.git-blame-ignore-revs`.
+When looking at change annotations using `git blame`, it is helpful to ignore these.
 You can configure git and your IDE to do so with:
 
 ```bash
@@ -35,8 +35,8 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 ## :heavy_plus_sign: Add new exercises :heavy_plus_sign:
 
 To add a new exercise, we recommend copying an existing one and adapting it. Make sure the new subproject's `build.gradle` file
-contains appropriate class name properties so that we can create the right tasks for 
-[running tests and solutions on the command line](README.md#running-exercises-tests-and-solutions-on-the-command-line). 
+contains appropriate class name properties so that we can create the right tasks for
+[running tests and solutions on the command line](README.md#running-exercises-tests-and-solutions-on-the-command-line).
 
 For example:
 
