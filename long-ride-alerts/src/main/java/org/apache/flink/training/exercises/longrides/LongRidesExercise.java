@@ -18,24 +18,68 @@
 
 package org.apache.flink.training.exercises.longrides;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.TimerService;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
+import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.ExerciseBase;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
 
+import java.time.Duration;
+
 /**
- * The "Long Ride Alerts" exercise of the Flink training in the docs.
+ * The "Long Ride Alerts" exercise.
  *
- * <p>The goal for this exercise is to emit START events for taxi rides that have not been matched
- * by an END event during the first 2 hours of the ride.
+ * <p>The goal for this exercise is to emit the rideIds for taxi rides with a duration of more than
+ * two hours. You should assume that TaxiRide events can be lost, but there are no duplicates.
+ *
+ * <p>You should eventually clear any state you create.
  */
-public class LongRidesExercise extends ExerciseBase {
+public class LongRidesExercise {
+    private SourceFunction<TaxiRide> source;
+    private SinkFunction<Long> sink;
+
+    /** Creates a job using the source and sink provided. */
+    public LongRidesExercise(SourceFunction<TaxiRide> source, SinkFunction<Long> sink) {
+        this.source = source;
+        this.sink = sink;
+    }
+
+    /**
+     * Creates and executes the long rides pipeline.
+     *
+     * <p>@throws Exception which occurs during job execution.
+     */
+    public void execute() throws Exception {
+
+        // set up streaming execution environment
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        // start the data generator
+        DataStream<TaxiRide> rides = env.addSource(source, TypeInformation.of(TaxiRide.class));
+
+        // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
+        WatermarkStrategy<TaxiRide> watermarkStrategy =
+                WatermarkStrategy.<TaxiRide>forBoundedOutOfOrderness(Duration.ofSeconds(60))
+                        .withTimestampAssigner((ride, timestamp) -> ride.getEventTime());
+
+        // create the pipeline
+        rides.assignTimestampsAndWatermarks(watermarkStrategy)
+                .keyBy((TaxiRide ride) -> ride.rideId)
+                .process(new MatchFunction())
+                .addSink(sink);
+
+        // execute the pipeline
+        env.execute("Long Taxi Rides");
+    }
 
     /**
      * Main method.
@@ -43,23 +87,13 @@ public class LongRidesExercise extends ExerciseBase {
      * @throws Exception which occurs during job execution.
      */
     public static void main(String[] args) throws Exception {
+        LongRidesExercise job =
+                new LongRidesExercise(new TaxiRideGenerator(), new PrintSinkFunction<>());
 
-        // set up streaming execution environment
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(ExerciseBase.parallelism);
-
-        // start the data generator
-        DataStream<TaxiRide> rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()));
-
-        DataStream<TaxiRide> longRides =
-                rides.keyBy((TaxiRide ride) -> ride.rideId).process(new MatchFunction());
-
-        printOrTest(longRides);
-
-        env.execute("Long Taxi Rides");
+        job.execute();
     }
 
-    public static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, TaxiRide> {
+    private static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
         @Override
         public void open(Configuration config) throws Exception {
@@ -67,13 +101,13 @@ public class LongRidesExercise extends ExerciseBase {
         }
 
         @Override
-        public void processElement(TaxiRide ride, Context context, Collector<TaxiRide> out)
+        public void processElement(TaxiRide ride, Context context, Collector<Long> out)
                 throws Exception {
             TimerService timerService = context.timerService();
         }
 
         @Override
-        public void onTimer(long timestamp, OnTimerContext context, Collector<TaxiRide> out)
+        public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out)
                 throws Exception {}
     }
 }
