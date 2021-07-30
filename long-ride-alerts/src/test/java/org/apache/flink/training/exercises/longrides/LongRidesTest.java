@@ -19,7 +19,7 @@
 package org.apache.flink.training.exercises.longrides;
 
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase;
 import org.apache.flink.training.solutions.longrides.LongRidesSolution;
 
 import org.junit.Test;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class LongRidesTest extends TaxiRideTestBase<TaxiRide> {
+public class LongRidesTest extends LegacyTaxiRideTestBase<TaxiRide> {
 
     static final Testable JAVA_EXERCISE = () -> LongRidesExercise.main(new String[] {});
 

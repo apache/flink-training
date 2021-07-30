@@ -19,20 +19,19 @@
 package org.apache.flink.training.exercises.ridesandfares.scala
 
 import java.util
-
 import org.apache.flink.api.java.tuple
 import org.apache.flink.training.exercises.common.datatypes.{TaxiFare, TaxiRide}
 import org.apache.flink.training.exercises.ridesandfares
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase
 import org.apache.flink.training.solutions.ridesandfares.scala.RidesAndFaresSolution
 
 class RidesAndFaresTest extends ridesandfares.RidesAndFaresTest{
-  private val scalaExercise: TaxiRideTestBase.Testable = () => RidesAndFaresExercise.main(Array.empty[String])
+  private val scalaExercise: LegacyTaxiRideTestBase.Testable = () => RidesAndFaresExercise.main(Array.empty[String])
 
   @throws[Exception]
-  override protected def results(rides: TaxiRideTestBase.TestRideSource, fares: TaxiRideTestBase.TestFareSource): util.List[tuple.Tuple2[TaxiRide, TaxiFare]] = {
-    val scalaSolution: TaxiRideTestBase.Testable = () => RidesAndFaresSolution.main(Array.empty[String])
-    val tuples: util.List[_] = runApp(rides, fares, new TaxiRideTestBase.TestSink[tuple.Tuple2[TaxiRide, TaxiFare]], scalaExercise, scalaSolution)
+  override protected def results(rides: LegacyTaxiRideTestBase.TestRideSource, fares: LegacyTaxiRideTestBase.TestFareSource): util.List[tuple.Tuple2[TaxiRide, TaxiFare]] = {
+    val scalaSolution: LegacyTaxiRideTestBase.Testable = () => RidesAndFaresSolution.main(Array.empty[String])
+    val tuples: util.List[_] = runApp(rides, fares, new LegacyTaxiRideTestBase.TestSink[tuple.Tuple2[TaxiRide, TaxiFare]], scalaExercise, scalaSolution)
     javaTuples(tuples.asInstanceOf[util.List[(TaxiRide, TaxiFare)]])
   }
 

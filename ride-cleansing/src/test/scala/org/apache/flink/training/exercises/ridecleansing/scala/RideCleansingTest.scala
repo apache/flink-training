@@ -19,19 +19,18 @@
 package org.apache.flink.training.exercises.ridecleansing.scala
 
 import java.util
-
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.ridecleansing
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase
 import org.apache.flink.training.solutions.ridecleansing.scala.RideCleansingSolution
 
 class RideCleansingTest extends ridecleansing.RideCleansingTest{
-  private val scalaExercise: TaxiRideTestBase.Testable = () => RideCleansingExercise.main(Array.empty[String])
+  private val scalaExercise: LegacyTaxiRideTestBase.Testable = () => RideCleansingExercise.main(Array.empty[String])
 
   @throws[Exception]
-  override protected def results(source: TaxiRideTestBase.TestRideSource): util.List[TaxiRide] = {
-    val scalaSolution: TaxiRideTestBase.Testable = () => RideCleansingSolution.main(Array.empty[String])
-    runApp(source, new TaxiRideTestBase.TestSink[TaxiRide], scalaExercise, scalaSolution)
+  override protected def results(source: LegacyTaxiRideTestBase.TestRideSource): util.List[TaxiRide] = {
+    val scalaSolution: LegacyTaxiRideTestBase.Testable = () => RideCleansingSolution.main(Array.empty[String])
+    runApp(source, new LegacyTaxiRideTestBase.TestSink[TaxiRide], scalaExercise, scalaSolution)
   }
 
 }

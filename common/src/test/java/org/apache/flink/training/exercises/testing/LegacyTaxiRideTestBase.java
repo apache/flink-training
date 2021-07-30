@@ -29,7 +29,7 @@ import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TaxiRideTestBase<OUT> {
+public abstract class LegacyTaxiRideTestBase<OUT> {
     public static class TestRideSource extends TestSource<TaxiRide>
             implements ResultTypeQueryable<TaxiRide> {
         public TestRideSource(Object... eventsOrWatermarks) {

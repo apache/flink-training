@@ -19,7 +19,7 @@
 package org.apache.flink.training.exercises.ridecleansing;
 
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase;
 import org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution;
 
 import org.junit.Test;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class RideCleansingTest extends TaxiRideTestBase<TaxiRide> {
+public class RideCleansingTest extends LegacyTaxiRideTestBase<TaxiRide> {
 
     static final Testable JAVA_EXERCISE = () -> RideCleansingExercise.main(new String[] {});
 

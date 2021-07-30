@@ -19,19 +19,18 @@
 package org.apache.flink.training.exercises.hourlytips.scala
 
 import java.util
-
 import org.apache.flink.api.java.tuple
 import org.apache.flink.training.exercises.hourlytips
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase
 import org.apache.flink.training.solutions.hourlytips.scala.HourlyTipsSolution
 
 class HourlyTipsTest extends hourlytips.HourlyTipsTest {
-  private val scalaExercise: TaxiRideTestBase.Testable = () => HourlyTipsExercise.main(Array.empty[String])
+  private val scalaExercise: LegacyTaxiRideTestBase.Testable = () => HourlyTipsExercise.main(Array.empty[String])
 
   @throws[Exception]
-  override protected def results(source: TaxiRideTestBase.TestFareSource): util.List[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
-    val scalaSolution: TaxiRideTestBase.Testable = () => HourlyTipsSolution.main(Array.empty[String])
-    val tuples: util.List[_] = runApp(source, new TaxiRideTestBase.TestSink[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]], scalaExercise, scalaSolution)
+  override protected def results(source: LegacyTaxiRideTestBase.TestFareSource): util.List[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
+    val scalaSolution: LegacyTaxiRideTestBase.Testable = () => HourlyTipsSolution.main(Array.empty[String])
+    val tuples: util.List[_] = runApp(source, new LegacyTaxiRideTestBase.TestSink[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]], scalaExercise, scalaSolution)
     javaTuples(tuples.asInstanceOf[util.List[(Long, Long, Float)]])
   }
 

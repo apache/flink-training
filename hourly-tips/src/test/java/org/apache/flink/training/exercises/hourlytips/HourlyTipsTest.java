@@ -20,7 +20,7 @@ package org.apache.flink.training.exercises.hourlytips;
 
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase;
 import org.apache.flink.training.solutions.hourlytips.HourlyTipsSolution;
 
 import org.junit.Test;
@@ -32,7 +32,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class HourlyTipsTest extends TaxiRideTestBase<Tuple3<Long, Long, Float>> {
+public class HourlyTipsTest extends LegacyTaxiRideTestBase<Tuple3<Long, Long, Float>> {
 
     static final Testable JAVA_EXERCISE = () -> HourlyTipsExercise.main(new String[] {});
 

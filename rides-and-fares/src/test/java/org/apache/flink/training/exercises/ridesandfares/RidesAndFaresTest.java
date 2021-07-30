@@ -21,7 +21,7 @@ package org.apache.flink.training.exercises.ridesandfares;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase;
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase;
 import org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution;
 
 import org.junit.Test;
@@ -33,7 +33,7 @@ import java.util.List;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
-public class RidesAndFaresTest extends TaxiRideTestBase<Tuple2<TaxiRide, TaxiFare>> {
+public class RidesAndFaresTest extends LegacyTaxiRideTestBase<Tuple2<TaxiRide, TaxiFare>> {
 
     static final Testable JAVA_EXERCISE = () -> RidesAndFaresExercise.main(new String[] {});
 

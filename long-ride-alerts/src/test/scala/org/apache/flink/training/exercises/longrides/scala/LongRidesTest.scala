@@ -19,18 +19,17 @@
 package org.apache.flink.training.exercises.longrides.scala
 
 import java.util
-
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.longrides
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase
+import org.apache.flink.training.exercises.testing.LegacyTaxiRideTestBase
 import org.apache.flink.training.solutions.longrides.scala.LongRidesSolution
 
 class LongRidesTest extends longrides.LongRidesTest {
-  private val scalaExercise: TaxiRideTestBase.Testable = () => LongRidesExercise.main(Array.empty[String])
+  private val scalaExercise: LegacyTaxiRideTestBase.Testable = () => LongRidesExercise.main(Array.empty[String])
 
   @throws[Exception]
-  override protected def results(source: TaxiRideTestBase.TestRideSource): util.List[TaxiRide] = {
-    val scalaSolution: TaxiRideTestBase.Testable = () => LongRidesSolution.main(Array.empty[String])
-    runApp(source, new TaxiRideTestBase.TestSink[TaxiRide], scalaExercise, scalaSolution)
+  override protected def results(source: LegacyTaxiRideTestBase.TestRideSource): util.List[TaxiRide] = {
+    val scalaSolution: LegacyTaxiRideTestBase.Testable = () => LongRidesSolution.main(Array.empty[String])
+    runApp(source, new LegacyTaxiRideTestBase.TestSink[TaxiRide], scalaExercise, scalaSolution)
   }
 }
