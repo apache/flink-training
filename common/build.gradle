@@ -18,5 +18,7 @@ dependencies {
 
     testApi "junit:junit:${junitVersion}"
     testApi "org.apache.flink:flink-test-utils-junit:${flinkVersion}"
+    testApi "org.apache.flink:flink-test-utils_${scalaBinaryVersion}:${flinkVersion}"
     testApi 'org.hamcrest:hamcrest-library:1.3'
+    testApi 'org.assertj:assertj-core:3.20.2'
 }
