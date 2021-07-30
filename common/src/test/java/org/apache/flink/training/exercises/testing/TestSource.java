@@ -38,7 +38,7 @@ public abstract class TestSource<T> implements SourceFunction<T> {
                 ctx.collectWithTimestamp(element, getTimestamp(element));
             }
         }
-        // test sources are finite, so they have a Long.MAX_VALUE watermark when they finishes
+        // test sources are finite, so they emit a Long.MAX_VALUE watermark when they finish
     }
 
     abstract long getTimestamp(T element);
