@@ -16,11 +16,12 @@ formatting upon saving with these steps:
 1. Install the [google-java-format
    plugin](https://plugins.jetbrains.com/plugin/8527-google-java-format) and
    enable it for the project
-2. In the plugin settings, change the code style to "AOSP" (4-space indents)
+2. In the plugin settings, enable the plugin and change the code style to "AOSP" (4-space indents).
 3. Install the [Save Actions
    plugin](https://plugins.jetbrains.com/plugin/7642-save-actions)
-4. Enable the plugin, along with "Optimize imports" and "Reformat file" but
-   ignoring `.*README\.md`.
+4. Enable the plugin, along with "Optimize imports" and "Reformat file".
+5. In the "Save Actions" settings page, set up a "File Path Inclusion" for `.*\.java`. Otherwise, you will get
+   unintended reformatting in other files you edit.
 
 ## Ignore refactoring commits
 
