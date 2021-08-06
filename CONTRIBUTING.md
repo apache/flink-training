@@ -7,6 +7,8 @@ The following sections apply on top of the [Setup Instructions](README.md#set-up
 
 ## Format code
 
+### Java
+
 Just like [Apache Flink](https://github.com/apache/flink), we use the [Spotless
 plugin](https://github.com/diffplug/spotless/tree/main/plugin-maven) together
 with [google-java-format](https://github.com/google/google-java-format) to
@@ -22,6 +24,16 @@ formatting upon saving with these steps:
 4. Enable the plugin, along with "Optimize imports" and "Reformat file".
 5. In the "Save Actions" settings page, set up a "File Path Inclusion" for `.*\.java`. Otherwise, you will get
    unintended reformatting in other files you edit.
+
+### Scala
+
+We use the [Spotless
+plugin](https://github.com/diffplug/spotless/tree/main/plugin-maven) for
+formatting Scala code as well and apply a formatting style similar to the
+Scalastyle configuration from [Apache Flink](https://github.com/apache/flink).
+The code style is verified during `./gradlew check` which will also print
+instructions how to fix the style if it does not comply with the defined
+format.
 
 ## Ignore refactoring commits
 
