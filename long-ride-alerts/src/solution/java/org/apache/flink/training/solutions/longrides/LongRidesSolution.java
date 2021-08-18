@@ -18,6 +18,7 @@
 
 package org.apache.flink.training.solutions.longrides;
 
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -95,7 +96,8 @@ public class LongRidesSolution {
         job.execute();
     }
 
-    private static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
+    @VisibleForTesting
+    public static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
         private ValueState<TaxiRide> rideState;
 

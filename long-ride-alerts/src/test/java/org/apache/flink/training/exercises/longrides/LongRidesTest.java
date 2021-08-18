@@ -48,9 +48,9 @@ public class LongRidesTest {
                             .setNumberTaskManagers(1)
                             .build());
 
-    private static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
-    private static final Instant ONE_MINUTE_LATER = BEGINNING.plusSeconds(60);
-    private static final Instant THREE_HOURS_LATER = BEGINNING.plusSeconds(180 * 60);
+    public static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
+    public static final Instant ONE_MINUTE_LATER = BEGINNING.plusSeconds(60);
+    public static final Instant THREE_HOURS_LATER = BEGINNING.plusSeconds(180 * 60);
 
     @Test
     public void shortRide() throws Exception {
@@ -160,7 +160,8 @@ public class LongRidesTest {
         }
     }
 
-    private TaxiRide testRide(long rideId, Boolean isStart, Instant startTime, Instant endTime) {
+    private static TaxiRide testRide(
+            long rideId, Boolean isStart, Instant startTime, Instant endTime) {
         return new TaxiRide(
                 rideId,
                 isStart,
@@ -175,11 +176,11 @@ public class LongRidesTest {
                 0);
     }
 
-    private TaxiRide startRide(long rideId, Instant startTime) {
+    public static TaxiRide startRide(long rideId, Instant startTime) {
         return testRide(rideId, true, startTime, Instant.EPOCH);
     }
 
-    private TaxiRide endRide(TaxiRide started, Instant endTime) {
+    public static TaxiRide endRide(TaxiRide started, Instant endTime) {
         return testRide(started.rideId, false, started.startTime, endTime);
     }
 
