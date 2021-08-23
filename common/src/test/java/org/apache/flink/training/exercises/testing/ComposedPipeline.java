@@ -36,12 +36,13 @@ public class ComposedPipeline<IN, OUT> implements ExecutablePipeline<IN, OUT> {
     }
 
     private boolean ultimateCauseIsMissingSolution(Throwable e) {
-        if (e instanceof MissingSolutionException) {
-            return true;
-        } else if (e.getCause() != null) {
-            return ultimateCauseIsMissingSolution(e.getCause());
-        } else {
-            return false;
+        while (e != null) {
+            if (e instanceof MissingSolutionException) {
+                return true;
+            } else {
+                e = e.getCause();
+            }
         }
+        return false;
     }
 }
