@@ -46,8 +46,7 @@ public class ParallelTestSource<T> extends RichParallelSourceFunction<T> {
         int numberOfParallelSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
         substream = new ArrayList<>();
 
-        for (int i = 0; i < testStream.length; i++) {
-            T element = testStream[i];
+        for (T element : testStream) {
             long subtaskToUse = partitioner.partition(element) % numberOfParallelSubtasks;
 
             if (subtaskToUse == indexOfThisSubtask) {
