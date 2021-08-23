@@ -64,7 +64,7 @@ public class LongRidesExercise {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // start the data generator
-        DataStream<TaxiRide> rides = env.addSource(source, TypeInformation.of(TaxiRide.class));
+        DataStream<TaxiRide> rides = env.addSource(source);
 
         // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
         WatermarkStrategy<TaxiRide> watermarkStrategy =
