@@ -24,6 +24,7 @@ import org.apache.flink.training.exercises.common.utils.DataGenerator;
 import org.apache.flink.training.exercises.common.utils.GeoUtils;
 
 import javax.annotation.Nullable;
+
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -183,11 +184,13 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
         }
     }
 
+    /** Creates a StreamRecord, using the ride and its timestamp. Used in tests. */
     @VisibleForTesting
     public StreamRecord asStreamRecord() {
         return new StreamRecord(this, this.getEventTime());
     }
 
+    /** Creates a StreamRecord from this taxi ride, using its id and timestamp. Used in tests. */
     @VisibleForTesting
     public StreamRecord idAsStreamRecord() {
         return new StreamRecord(this.rideId, this.getEventTime());

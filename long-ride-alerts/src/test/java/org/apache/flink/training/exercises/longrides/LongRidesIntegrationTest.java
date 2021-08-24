@@ -26,6 +26,7 @@ import org.apache.flink.training.exercises.testing.ExecutablePipeline;
 import org.apache.flink.training.exercises.testing.ParallelTestSource;
 import org.apache.flink.training.exercises.testing.TestSink;
 import org.apache.flink.training.solutions.longrides.LongRidesSolution;
+
 import org.junit.ClassRule;
 import org.junit.Test;
 

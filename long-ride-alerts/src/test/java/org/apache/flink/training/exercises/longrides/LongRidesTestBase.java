@@ -5,11 +5,11 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import java.time.Instant;
 
 public class LongRidesTestBase {
-    public final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
-    public final Instant ONE_MINUTE_LATER = BEGINNING.plusSeconds(60);
-    public final Instant ONE_HOUR_LATER = BEGINNING.plusSeconds(60 * 60);
-    public final Instant TWO_HOURS_LATER = BEGINNING.plusSeconds(120 * 60);
-    public final Instant THREE_HOURS_LATER = BEGINNING.plusSeconds(180 * 60);
+    public static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
+    public static final Instant ONE_MINUTE_LATER = BEGINNING.plusSeconds(60);
+    public static final Instant ONE_HOUR_LATER = BEGINNING.plusSeconds(60 * 60);
+    public static final Instant TWO_HOURS_LATER = BEGINNING.plusSeconds(120 * 60);
+    public static final Instant THREE_HOURS_LATER = BEGINNING.plusSeconds(180 * 60);
 
     public TaxiRide startRide(long rideId, Instant startTime) {
         return testRide(rideId, true, startTime, Instant.EPOCH);

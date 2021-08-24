@@ -9,6 +9,7 @@ import org.apache.flink.streaming.util.KeyedOneInputStreamOperatorTestHarness;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.ComposedKeyedProcessFunction;
 import org.apache.flink.training.solutions.longrides.LongRidesSolution;
+
 import org.junit.Before;
 import org.junit.Test;
 
