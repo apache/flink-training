@@ -44,8 +44,8 @@ object LongRidesExercise {
   class LongRidesJob(source: SourceFunction[TaxiRide], sink: SinkFunction[Long]) {
 
     /**
-     * Creates and executes the ride cleansing pipeline.
-     */
+      * Creates and executes the ride cleansing pipeline.
+      */
     @throws[Exception]
     def execute(): Unit = {
       val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -57,15 +57,15 @@ object LongRidesExercise {
       val watermarkStrategy = WatermarkStrategy
         .forBoundedOutOfOrderness[TaxiRide](Duration.ofSeconds(60))
         .withTimestampAssigner(new SerializableTimestampAssigner[TaxiRide] {
-          override def extractTimestamp(element: TaxiRide, recordTimestamp: Long): Long =
-            element.getEventTime
+          override def extractTimestamp(ride: TaxiRide, streamRecordTimestamp: Long): Long =
+            ride.getEventTime
         })
 
       // create the pipeline
       rides
         .assignTimestampsAndWatermarks(watermarkStrategy)
         .keyBy(_.rideId)
-        .process(new MatchFunction())
+        .process(new AlertFunction())
         .addSink(sink)
 
       // execute the pipeline
@@ -75,13 +75,13 @@ object LongRidesExercise {
   }
 
   @throws[Exception]
-  def main (args: Array[String]) {
+  def main(args: Array[String]) {
     val job = new LongRidesJob(new TaxiRideGenerator, new PrintSinkFunction)
 
     job.execute
   }
 
-  class MatchFunction extends KeyedProcessFunction[Long, TaxiRide, Long] {
+  class AlertFunction extends KeyedProcessFunction[Long, TaxiRide, Long] {
 
     override def open(parameters: Configuration): Unit = {
       throw new MissingSolutionException()
@@ -89,13 +89,11 @@ object LongRidesExercise {
 
     override def processElement(ride: TaxiRide,
                                 context: KeyedProcessFunction[Long, TaxiRide, Long]#Context,
-                                out: Collector[Long]): Unit = {
-    }
+                                out: Collector[Long]): Unit = {}
 
     override def onTimer(timestamp: Long,
                          ctx: KeyedProcessFunction[Long, TaxiRide, Long]#OnTimerContext,
-                         out: Collector[Long]): Unit = {
-    }
+                         out: Collector[Long]): Unit = {}
 
   }
 

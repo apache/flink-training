@@ -18,11 +18,12 @@
 
 package org.apache.flink.training.exercises.common.datatypes;
 
+import org.apache.flink.annotation.VisibleForTesting;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.training.exercises.common.utils.DataGenerator;
 import org.apache.flink.training.exercises.common.utils.GeoUtils;
 
 import javax.annotation.Nullable;
-
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -180,5 +181,15 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
             return GeoUtils.getEuclideanDistance(
                     (float) longitude, (float) latitude, this.endLon, this.endLat);
         }
+    }
+
+    @VisibleForTesting
+    public StreamRecord asStreamRecord() {
+        return new StreamRecord(this, this.getEventTime());
+    }
+
+    @VisibleForTesting
+    public StreamRecord idAsStreamRecord() {
+        return new StreamRecord(this.rideId, this.getEventTime());
     }
 }

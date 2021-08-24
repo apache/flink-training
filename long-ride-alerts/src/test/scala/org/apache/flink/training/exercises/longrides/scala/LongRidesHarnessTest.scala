@@ -18,25 +18,22 @@
 
 package org.apache.flink.training.exercises.longrides.scala
 
-import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.longrides
-import org.apache.flink.training.exercises.testing.{ComposedPipeline, ExecutablePipeline, TestSink}
+import org.apache.flink.training.exercises.testing.ComposedKeyedProcessFunction
 import org.apache.flink.training.solutions.longrides.scala.LongRidesSolution
 
 /**
-  * The Scala tests extend the Java tests by overriding the longRidesPipeline() method
+  * The Scala tests extend the Java tests by overriding the composedAlertFunction() method
   * to use the Scala implementations of the exercise and solution.
   */
-class LongRidesTest extends longrides.LongRidesTest {
-  private val EXERCISE: ExecutablePipeline[TaxiRide, Long] =
-    (source: SourceFunction[TaxiRide], sink: TestSink[Long]) =>
-      (new LongRidesExercise.LongRidesJob(source, sink)).execute()
+class LongRidesHarnessTest extends longrides.LongRidesHarnessTest {
 
-  private val SOLUTION: ExecutablePipeline[TaxiRide, Long] =
-    (source: SourceFunction[TaxiRide], sink: TestSink[Long]) =>
-      (new LongRidesSolution.LongRidesJob(source, sink)).execute()
+  private val scalaExercise = new LongRidesExercise.AlertFunction
 
-  override def longRidesPipeline: ComposedPipeline[TaxiRide, Long] =
-    new ComposedPipeline[TaxiRide, Long](EXERCISE, SOLUTION)
+  private val scalaSolution = new LongRidesSolution.AlertFunction
+
+  override def composedAlertFunction: ComposedKeyedProcessFunction[Long, TaxiRide, Long] =
+    new ComposedKeyedProcessFunction[Long, TaxiRide, Long](scalaExercise, scalaSolution)
+
 }

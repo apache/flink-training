@@ -72,12 +72,13 @@ public class LongRidesSolution {
         // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
         WatermarkStrategy<TaxiRide> watermarkStrategy =
                 WatermarkStrategy.<TaxiRide>forBoundedOutOfOrderness(Duration.ofSeconds(60))
-                        .withTimestampAssigner((ride, timestamp) -> ride.getEventTime());
+                        .withTimestampAssigner(
+                                (ride, streamRecordTimestamp) -> ride.getEventTime());
 
         // create the pipeline
         rides.assignTimestampsAndWatermarks(watermarkStrategy)
-                .keyBy((TaxiRide ride) -> ride.rideId)
-                .process(new MatchFunction())
+                .keyBy(ride -> ride.rideId)
+                .process(new AlertFunction())
                 .addSink(sink);
 
         // execute the pipeline
@@ -97,7 +98,7 @@ public class LongRidesSolution {
     }
 
     @VisibleForTesting
-    public static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
+    public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
         private ValueState<TaxiRide> rideState;
 
@@ -131,7 +132,8 @@ public class LongRidesSolution {
                     // There may be a timer that hasn't fired yet.
                     context.timerService().deleteEventTimeTimer(getTimerTime(firstRideEvent));
 
-                    // It could be that the ride has gone on too long, but the timer hasn't fired.
+                    // It could be that the ride has gone on too long, but the timer hasn't fired
+                    // yet.
                     if (rideTooLong(ride)) {
                         out.collect(ride.rideId);
                     }

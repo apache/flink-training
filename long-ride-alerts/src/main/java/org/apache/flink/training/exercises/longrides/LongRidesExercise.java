@@ -18,10 +18,9 @@
 
 package org.apache.flink.training.exercises.longrides;
 
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.TimerService;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -69,12 +68,13 @@ public class LongRidesExercise {
         // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
         WatermarkStrategy<TaxiRide> watermarkStrategy =
                 WatermarkStrategy.<TaxiRide>forBoundedOutOfOrderness(Duration.ofSeconds(60))
-                        .withTimestampAssigner((ride, timestamp) -> ride.getEventTime());
+                        .withTimestampAssigner(
+                                (ride, streamRecordTimestamp) -> ride.getEventTime());
 
         // create the pipeline
         rides.assignTimestampsAndWatermarks(watermarkStrategy)
-                .keyBy((TaxiRide ride) -> ride.rideId)
-                .process(new MatchFunction())
+                .keyBy(ride -> ride.rideId)
+                .process(new AlertFunction())
                 .addSink(sink);
 
         // execute the pipeline
@@ -93,7 +93,8 @@ public class LongRidesExercise {
         job.execute();
     }
 
-    private static class MatchFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
+    @VisibleForTesting
+    public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
         @Override
         public void open(Configuration config) throws Exception {
@@ -102,9 +103,7 @@ public class LongRidesExercise {
 
         @Override
         public void processElement(TaxiRide ride, Context context, Collector<Long> out)
-                throws Exception {
-            TimerService timerService = context.timerService();
-        }
+                throws Exception {}
 
         @Override
         public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out)

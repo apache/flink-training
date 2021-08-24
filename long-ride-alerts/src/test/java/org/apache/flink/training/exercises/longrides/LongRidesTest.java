@@ -25,17 +25,13 @@ import org.apache.flink.training.exercises.testing.ComposedPipeline;
 import org.apache.flink.training.exercises.testing.ExecutablePipeline;
 import org.apache.flink.training.exercises.testing.ParallelTestSource;
 import org.apache.flink.training.exercises.testing.TestSink;
-import org.apache.flink.training.exercises.testing.TestSourcePartitioner;
 import org.apache.flink.training.solutions.longrides.LongRidesSolution;
-
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.time.Instant;
-
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class LongRidesTest {
+public class LongRidesTest extends LongRidesTestBase {
 
     private static final int PARALLELISM = 2;
 
@@ -48,10 +44,6 @@ public class LongRidesTest {
                             .setNumberTaskManagers(1)
                             .build());
 
-    public static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
-    public static final Instant ONE_MINUTE_LATER = BEGINNING.plusSeconds(60);
-    public static final Instant THREE_HOURS_LATER = BEGINNING.plusSeconds(180 * 60);
-
     @Test
     public void shortRide() throws Exception {
 
@@ -59,7 +51,7 @@ public class LongRidesTest {
         TaxiRide endedOneMinLater = endRide(rideStarted, ONE_MINUTE_LATER);
 
         ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(new PartitionByRideId(), rideStarted, endedOneMinLater);
+                new ParallelTestSource<>(rideStarted, endedOneMinLater);
         TestSink<Long> sink = new TestSink<Long>();
 
         longRidesPipeline().execute(source, sink);
@@ -67,121 +59,42 @@ public class LongRidesTest {
     }
 
     @Test
-    public void outOfOrder() throws Exception {
+    public void shortRideOutOfOrder() throws Exception {
         TaxiRide rideStarted = startRide(1, BEGINNING);
         TaxiRide endedOneMinLater = endRide(rideStarted, ONE_MINUTE_LATER);
 
         ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(new PartitionByRideId(), endedOneMinLater, rideStarted);
+                new ParallelTestSource<>(endedOneMinLater, rideStarted);
         TestSink<Long> sink = new TestSink<Long>();
 
         longRidesPipeline().execute(source, sink);
         assertThat(sink.results()).isEmpty();
-    }
-
-    @Test
-    public void noStartShort() throws Exception {
-        TaxiRide rideStarted = startRide(1, BEGINNING);
-        TaxiRide endedOneMinLater = endRide(rideStarted, ONE_MINUTE_LATER);
-
-        ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(new PartitionByRideId(), endedOneMinLater);
-        TestSink<Long> sink = new TestSink<Long>();
-
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results()).isEmpty();
-    }
-
-    @Test
-    public void noStartLong() throws Exception {
-        TaxiRide rideStarted = startRide(1, BEGINNING);
-        TaxiRide endedThreeHoursLater = endRide(rideStarted, THREE_HOURS_LATER);
-
-        ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(new PartitionByRideId(), endedThreeHoursLater);
-        TestSink<Long> sink = new TestSink<Long>();
-
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results()).containsExactly(rideStarted.rideId);
-    }
-
-    @Test
-    public void endIsMissing() throws Exception {
-        TaxiRide rideStarted = startRide(1, BEGINNING);
-
-        ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(new PartitionByRideId(), rideStarted);
-        TestSink<Long> sink = new TestSink<Long>();
-
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results()).containsExactly(rideStarted.rideId);
-    }
-
-    @Test
-    public void endComesAfter3Hours() throws Exception {
-        TaxiRide startOfLongRide = startRide(1, BEGINNING);
-        TaxiRide longRideEndedAfter3Hours = endRide(startOfLongRide, THREE_HOURS_LATER);
-
-        ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(
-                        new PartitionByRideId(), startOfLongRide, longRideEndedAfter3Hours);
-        TestSink<Long> sink = new TestSink<Long>();
-
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results()).containsExactly(startOfLongRide.rideId);
     }
 
     @Test
     public void multipleRides() throws Exception {
-        TaxiRide startOfOneRide = startRide(1, BEGINNING);
-        TaxiRide otherRide = startRide(2, ONE_MINUTE_LATER);
-        TaxiRide oneRideEnded = endRide(startOfOneRide, THREE_HOURS_LATER);
-        TaxiRide otherRideEnded = endRide(otherRide, THREE_HOURS_LATER);
+        TaxiRide longRideWithoutEnd = startRide(1, BEGINNING);
+        TaxiRide twoHourRide = startRide(2, BEGINNING);
+        TaxiRide otherLongRide = startRide(3, ONE_MINUTE_LATER);
+        TaxiRide shortRide = startRide(4, ONE_HOUR_LATER);
+        TaxiRide shortRideEnded = endRide(shortRide, TWO_HOURS_LATER);
+        TaxiRide twoHourRideEnded = endRide(twoHourRide, BEGINNING);
+        TaxiRide otherLongRideEnded = endRide(otherLongRide, THREE_HOURS_LATER);
 
         ParallelTestSource<TaxiRide> source =
                 new ParallelTestSource<>(
-                        new PartitionByRideId(),
-                        startOfOneRide,
-                        otherRide,
-                        oneRideEnded,
-                        otherRideEnded);
+                        longRideWithoutEnd,
+                        twoHourRide,
+                        otherLongRide,
+                        shortRide,
+                        shortRideEnded,
+                        twoHourRideEnded,
+                        otherLongRideEnded);
         TestSink<Long> sink = new TestSink<Long>();
 
         longRidesPipeline().execute(source, sink);
         assertThat(sink.results())
-                .containsExactlyInAnyOrder(startOfOneRide.rideId, otherRide.rideId);
-    }
-
-    // Arranges for all events for a given rideId to be generated by the same source subtask.
-    private static class PartitionByRideId implements TestSourcePartitioner<TaxiRide> {
-        @Override
-        public long partition(TaxiRide ride) {
-            return ride.rideId;
-        }
-    }
-
-    private static TaxiRide testRide(
-            long rideId, Boolean isStart, Instant startTime, Instant endTime) {
-        return new TaxiRide(
-                rideId,
-                isStart,
-                startTime,
-                endTime,
-                -73.9947F,
-                40.750626F,
-                -73.9947F,
-                40.750626F,
-                (short) 1,
-                0,
-                0);
-    }
-
-    public static TaxiRide startRide(long rideId, Instant startTime) {
-        return testRide(rideId, true, startTime, Instant.EPOCH);
-    }
-
-    public static TaxiRide endRide(TaxiRide started, Instant endTime) {
-        return testRide(started.rideId, false, started.startTime, endTime);
+                .containsExactlyInAnyOrder(longRideWithoutEnd.rideId, otherLongRide.rideId);
     }
 
     protected ComposedPipeline longRidesPipeline() {

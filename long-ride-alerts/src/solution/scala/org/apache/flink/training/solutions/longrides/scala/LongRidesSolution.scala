@@ -29,8 +29,8 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
 import org.apache.flink.util.Collector
 
-import scala.concurrent.duration._
 import java.time.Duration
+import scala.concurrent.duration._
 
 /**
   * Scala solution for the "Long Ride Alerts" exercise.
@@ -45,8 +45,8 @@ object LongRidesSolution {
   class LongRidesJob(source: SourceFunction[TaxiRide], sink: SinkFunction[Long]) {
 
     /**
-     * Creates and executes the ride cleansing pipeline.
-     */
+      * Creates and executes the ride cleansing pipeline.
+      */
     @throws[Exception]
     def execute(): Unit = {
       val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -58,15 +58,15 @@ object LongRidesSolution {
       val watermarkStrategy = WatermarkStrategy
         .forBoundedOutOfOrderness[TaxiRide](Duration.ofSeconds(60))
         .withTimestampAssigner(new SerializableTimestampAssigner[TaxiRide] {
-          override def extractTimestamp(element: TaxiRide, recordTimestamp: Long): Long =
-            element.getEventTime
+          override def extractTimestamp(ride: TaxiRide, streamRecordTimestamp: Long): Long =
+            ride.getEventTime
         })
 
       // create the pipeline
       rides
         .assignTimestampsAndWatermarks(watermarkStrategy)
         .keyBy(_.rideId)
-        .process(new MatchFunction())
+        .process(new AlertFunction())
         .addSink(sink)
 
       // execute the pipeline
@@ -76,13 +76,13 @@ object LongRidesSolution {
   }
 
   @throws[Exception]
-  def main (args: Array[String]) {
+  def main(args: Array[String]) {
     val job = new LongRidesJob(new TaxiRideGenerator, new PrintSinkFunction)
 
     job.execute
   }
 
-  class MatchFunction extends KeyedProcessFunction[Long, TaxiRide, Long] {
+  class AlertFunction extends KeyedProcessFunction[Long, TaxiRide, Long] {
     private var rideState: ValueState[TaxiRide] = _
 
     override def open(parameters: Configuration): Unit = {
@@ -100,20 +100,17 @@ object LongRidesSolution {
         rideState.update(ride)
         if (ride.isStart) {
           context.timerService.registerEventTimeTimer(getTimerTime(ride))
-        }
-        else if (rideTooLong(ride)) {
+        } else if (rideTooLong(ride)) {
           out.collect(ride.rideId)
         }
-      }
-      else {
+      } else {
         if (ride.isStart) {
           // There's nothing to do but clear the state (which is done below).
-        }
-        else {
+        } else {
           // There may be a timer that hasn't fired yet.
           context.timerService.deleteEventTimeTimer(getTimerTime(firstRideEvent))
 
-          // It could be that the ride has gone on too long, but the timer hasn't fired.
+          // It could be that the ride has gone on too long, but the timer hasn't fired yet.
           if (rideTooLong(ride)) {
             out.collect(ride.rideId)
           }
@@ -133,7 +130,9 @@ object LongRidesSolution {
     }
 
     private def rideTooLong(rideEndEvent: TaxiRide) =
-      Duration.between(rideEndEvent.startTime, rideEndEvent.endTime).compareTo(Duration.ofHours(2)) > 0
+      Duration
+        .between(rideEndEvent.startTime, rideEndEvent.endTime)
+        .compareTo(Duration.ofHours(2)) > 0
 
     private def getTimerTime(ride: TaxiRide) = ride.startTime.toEpochMilli + 2.hours.toMillis
   }

@@ -18,55 +18,46 @@
 
 package org.apache.flink.training.exercises.testing;
 
-import org.apache.flink.configuration.Configuration;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
+import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class ParallelTestSource<T> extends RichParallelSourceFunction<T> {
-    protected T[] testStream;
-    TestSourcePartitioner<T> partitioner;
-    private List<T> substream;
-
-    public ParallelTestSource(TestSourcePartitioner<T> partitioner, T... events) {
-        this.partitioner = partitioner;
-        this.testStream = events;
-    }
+public class ParallelTestSource<T> extends RichParallelSourceFunction<T>
+        implements ResultTypeQueryable<T> {
+    private T[] testStream;
+    private TypeInformation typeInfo;
 
     public ParallelTestSource(T... events) {
-        this.partitioner = (e -> 0);
+        this.typeInfo = TypeExtractor.createTypeInfo(events[0].getClass());
         this.testStream = events;
-    }
-
-    @Override
-    public void open(Configuration parameters) throws Exception {
-
-        int indexOfThisSubtask = getRuntimeContext().getIndexOfThisSubtask();
-        int numberOfParallelSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
-        substream = new ArrayList<>();
-
-        for (T element : testStream) {
-            long subtaskToUse = partitioner.partition(element) % numberOfParallelSubtasks;
-
-            if (subtaskToUse == indexOfThisSubtask) {
-                substream.add(element);
-            } else if (subtaskToUse < 0 || subtaskToUse > numberOfParallelSubtasks - 1) {
-                throw new RuntimeException("Requested subtask is out-of-bounds: " + subtaskToUse);
-            }
-        }
     }
 
     @Override
     public void run(SourceContext<T> ctx) {
-        for (T element : substream) {
-            ctx.collect(element);
+        int indexOfThisSubtask = getRuntimeContext().getIndexOfThisSubtask();
+        int numberOfParallelSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
+        int subtask = 0;
+
+        // the elements of the testStream are assigned to the parallel instances in a round-robin
+        // fashion
+        for (T element : testStream) {
+            if (subtask == indexOfThisSubtask) {
+                ctx.collect(element);
+            }
+            subtask = (subtask + 1) % numberOfParallelSubtasks;
         }
+
         // test sources are finite, so they emit a Long.MAX_VALUE watermark when they finish
     }
 
     @Override
     public void cancel() {
         // ignore cancel, finite anyway
+    }
+
+    @Override
+    public TypeInformation<T> getProducedType() {
+        return typeInfo;
     }
 }
