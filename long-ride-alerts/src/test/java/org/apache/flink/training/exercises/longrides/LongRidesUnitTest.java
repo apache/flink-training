@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class LongRidesHarnessTest extends LongRidesTestBase {
+public class LongRidesUnitTest extends LongRidesTestBase {
 
     private KeyedOneInputStreamOperatorTestHarness<Long, TaxiRide, Long> harness;
 

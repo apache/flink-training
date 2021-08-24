@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class LongRidesTest extends LongRidesTestBase {
+public class LongRidesIntegrationTest extends LongRidesTestBase {
 
     private static final int PARALLELISM = 2;
 
