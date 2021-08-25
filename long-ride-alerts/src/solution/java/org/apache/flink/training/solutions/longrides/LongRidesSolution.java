@@ -19,6 +19,7 @@
 package org.apache.flink.training.solutions.longrides;
 
 import org.apache.flink.annotation.VisibleForTesting;
+import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -60,7 +61,7 @@ public class LongRidesSolution {
      *
      * <p>@throws Exception which occurs during job execution.
      */
-    public void execute() throws Exception {
+    public JobExecutionResult execute() throws Exception {
 
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -80,8 +81,8 @@ public class LongRidesSolution {
                 .process(new AlertFunction())
                 .addSink(sink);
 
-        // execute the pipeline
-        env.execute("Long Taxi Rides");
+        // execute the pipeline and return the result
+        return env.execute("Long Taxi Rides");
     }
 
     /**

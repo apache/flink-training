@@ -18,6 +18,7 @@
 
 package org.apache.flink.training.exercises.longrides;
 
+import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
@@ -57,8 +58,8 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
                 new ParallelTestSource<>(rideStarted, endedOneMinLater);
         TestSink<Long> sink = new TestSink<>();
 
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results()).isEmpty();
+        JobExecutionResult jobResult = longRidesPipeline().execute(source, sink);
+        assertThat(sink.getResults(jobResult)).isEmpty();
     }
 
     @Test
@@ -70,8 +71,8 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
                 new ParallelTestSource<>(endedOneMinLater, rideStarted);
         TestSink<Long> sink = new TestSink<>();
 
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results()).isEmpty();
+        JobExecutionResult jobResult = longRidesPipeline().execute(source, sink);
+        assertThat(sink.getResults(jobResult)).isEmpty();
     }
 
     @Test
@@ -95,8 +96,8 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
                         otherLongRideEnded);
         TestSink<Long> sink = new TestSink<>();
 
-        longRidesPipeline().execute(source, sink);
-        assertThat(sink.results())
+        JobExecutionResult jobResult = longRidesPipeline().execute(source, sink);
+        assertThat(sink.getResults(jobResult))
                 .containsExactlyInAnyOrder(longRideWithoutEnd.rideId, otherLongRide.rideId);
     }
 

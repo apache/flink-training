@@ -18,6 +18,7 @@
 
 package org.apache.flink.training.exercises.longrides.scala
 
+import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
@@ -47,7 +48,7 @@ object LongRidesExercise {
       * Creates and executes the ride cleansing pipeline.
       */
     @throws[Exception]
-    def execute(): Unit = {
+    def execute(): JobExecutionResult = {
       val env = StreamExecutionEnvironment.getExecutionEnvironment
 
       // start the data generator
@@ -68,7 +69,7 @@ object LongRidesExercise {
         .process(new AlertFunction())
         .addSink(sink)
 
-      // execute the pipeline
+      // execute the pipeline and return the result
       env.execute("Long Taxi Rides")
     }
 

@@ -1,5 +1,6 @@
 package org.apache.flink.training.exercises.testing;
 
+import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 
@@ -20,18 +21,21 @@ public class ComposedPipeline<IN, OUT> implements ExecutablePipeline<IN, OUT> {
     }
 
     @Override
-    public void execute(SourceFunction<IN> source, TestSink<OUT> sink) throws Exception {
+    public JobExecutionResult execute(SourceFunction<IN> source, TestSink<OUT> sink)
+            throws Exception {
 
-        sink.reset();
+        JobExecutionResult result;
 
         try {
-            exercise.execute(source, sink);
+            result = exercise.execute(source, sink);
         } catch (Exception e) {
             if (MissingSolutionException.ultimateCauseIsMissingSolution(e)) {
-                solution.execute(source, sink);
+                result = solution.execute(source, sink);
             } else {
                 throw e;
             }
         }
+
+        return result;
     }
 }

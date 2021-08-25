@@ -18,6 +18,7 @@
 
 package org.apache.flink.training.solutions.longrides.scala
 
+import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
@@ -48,7 +49,7 @@ object LongRidesSolution {
       * Creates and executes the ride cleansing pipeline.
       */
     @throws[Exception]
-    def execute(): Unit = {
+    def execute(): JobExecutionResult = {
       val env = StreamExecutionEnvironment.getExecutionEnvironment
 
       // start the data generator
