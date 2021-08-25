@@ -56,7 +56,8 @@ public class LongRidesExercise {
     /**
      * Creates and executes the long rides pipeline.
      *
-     * <p>@throws Exception which occurs during job execution.
+     * @return {JobExecutionResult}
+     * @throws Exception which occurs during job execution.
      */
     public JobExecutionResult execute() throws Exception {
 
