@@ -76,10 +76,10 @@ object LongRidesSolution {
   }
 
   @throws[Exception]
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val job = new LongRidesJob(new TaxiRideGenerator, new PrintSinkFunction)
 
-    job.execute
+    job.execute()
   }
 
   class AlertFunction extends KeyedProcessFunction[Long, TaxiRide, Long] {

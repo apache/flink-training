@@ -43,8 +43,8 @@ import java.time.Duration;
  * <p>You should eventually clear any state you create.
  */
 public class LongRidesExercise {
-    private SourceFunction<TaxiRide> source;
-    private SinkFunction<Long> sink;
+    private final SourceFunction<TaxiRide> source;
+    private final SinkFunction<Long> sink;
 
     /** Creates a job using the source and sink provided. */
     public LongRidesExercise(SourceFunction<TaxiRide> source, SinkFunction<Long> sink) {

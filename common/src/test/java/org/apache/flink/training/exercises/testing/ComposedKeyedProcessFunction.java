@@ -17,8 +17,8 @@ import org.apache.flink.util.Collector;
  * @param <OUT> output type
  */
 public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFunction<K, IN, OUT> {
-    private KeyedProcessFunction<K, IN, OUT> exercise;
-    private KeyedProcessFunction<K, IN, OUT> solution;
+    private final KeyedProcessFunction<K, IN, OUT> exercise;
+    private final KeyedProcessFunction<K, IN, OUT> solution;
     private boolean useExercise;
 
     public ComposedKeyedProcessFunction(
@@ -48,9 +48,7 @@ public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFuncti
 
     @Override
     public void processElement(
-            IN value,
-            org.apache.flink.streaming.api.functions.KeyedProcessFunction<K, IN, OUT>.Context ctx,
-            Collector<OUT> out)
+            IN value, KeyedProcessFunction<K, IN, OUT>.Context ctx, Collector<OUT> out)
             throws Exception {
 
         if (useExercise) {
@@ -62,10 +60,7 @@ public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFuncti
 
     @Override
     public void onTimer(
-            long timestamp,
-            org.apache.flink.streaming.api.functions.KeyedProcessFunction<K, IN, OUT>.OnTimerContext
-                    ctx,
-            Collector<OUT> out)
+            long timestamp, KeyedProcessFunction<K, IN, OUT>.OnTimerContext ctx, Collector<OUT> out)
             throws Exception {
 
         if (useExercise) {

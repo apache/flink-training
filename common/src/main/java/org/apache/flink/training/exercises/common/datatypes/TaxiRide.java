@@ -186,13 +186,13 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
     /** Creates a StreamRecord, using the ride and its timestamp. Used in tests. */
     @VisibleForTesting
-    public StreamRecord asStreamRecord() {
-        return new StreamRecord(this, this.getEventTime());
+    public StreamRecord<TaxiRide> asStreamRecord() {
+        return new StreamRecord<>(this, this.getEventTime());
     }
 
     /** Creates a StreamRecord from this taxi ride, using its id and timestamp. Used in tests. */
     @VisibleForTesting
-    public StreamRecord idAsStreamRecord() {
-        return new StreamRecord(this.rideId, this.getEventTime());
+    public StreamRecord<Long> idAsStreamRecord() {
+        return new StreamRecord<>(this.rideId, this.getEventTime());
     }
 }

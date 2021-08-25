@@ -17,18 +17,20 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+// needed for the Scala tests to use scala.Long with this Java test
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class LongRidesUnitTest extends LongRidesTestBase {
 
     private KeyedOneInputStreamOperatorTestHarness<Long, TaxiRide, Long> harness;
 
-    private KeyedProcessFunction<Long, TaxiRide, Long> javaExercise =
+    private final KeyedProcessFunction<Long, TaxiRide, Long> javaExercise =
             new LongRidesExercise.AlertFunction();
 
-    private KeyedProcessFunction<Long, TaxiRide, Long> javaSolution =
+    private final KeyedProcessFunction<Long, TaxiRide, Long> javaSolution =
             new LongRidesSolution.AlertFunction();
 
     protected ComposedKeyedProcessFunction composedAlertFunction() {
-        return new ComposedKeyedProcessFunction(javaExercise, javaSolution);
+        return new ComposedKeyedProcessFunction<>(javaExercise, javaSolution);
     }
 
     @Before
@@ -108,8 +110,7 @@ public class LongRidesUnitTest extends LongRidesTestBase {
         KeyedProcessOperator<Long, TaxiRide, Long> operator = new KeyedProcessOperator<>(function);
 
         KeyedOneInputStreamOperatorTestHarness<Long, TaxiRide, Long> testHarness =
-                new KeyedOneInputStreamOperatorTestHarness<>(
-                        operator, (TaxiRide r) -> r.rideId, Types.LONG);
+                new KeyedOneInputStreamOperatorTestHarness<>(operator, r -> r.rideId, Types.LONG);
 
         testHarness.setup();
         testHarness.open();

@@ -45,8 +45,8 @@ import java.time.Duration;
  */
 public class LongRidesSolution {
 
-    private SourceFunction<TaxiRide> source;
-    private SinkFunction<Long> sink;
+    private final SourceFunction<TaxiRide> source;
+    private final SinkFunction<Long> sink;
 
     /** Creates a job using the source and sink provided. */
     public LongRidesSolution(SourceFunction<TaxiRide> source, SinkFunction<Long> sink) {

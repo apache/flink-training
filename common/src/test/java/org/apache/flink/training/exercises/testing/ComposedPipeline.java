@@ -10,8 +10,8 @@ import org.apache.flink.training.exercises.common.utils.MissingSolutionException
  */
 public class ComposedPipeline<IN, OUT> implements ExecutablePipeline<IN, OUT> {
 
-    private ExecutablePipeline<IN, OUT> exercise;
-    private ExecutablePipeline<IN, OUT> solution;
+    private final ExecutablePipeline<IN, OUT> exercise;
+    private final ExecutablePipeline<IN, OUT> solution;
 
     public ComposedPipeline(
             ExecutablePipeline<IN, OUT> exercise, ExecutablePipeline<IN, OUT> solution) {

@@ -25,11 +25,13 @@ import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunctio
 
 public class ParallelTestSource<T> extends RichParallelSourceFunction<T>
         implements ResultTypeQueryable<T> {
-    private T[] testStream;
-    private TypeInformation typeInfo;
+    private final T[] testStream;
+    private final TypeInformation<T> typeInfo;
 
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public ParallelTestSource(T... events) {
-        this.typeInfo = TypeExtractor.createTypeInfo(events[0].getClass());
+        this.typeInfo = (TypeInformation<T>) TypeExtractor.createTypeInfo(events[0].getClass());
         this.testStream = events;
     }
 

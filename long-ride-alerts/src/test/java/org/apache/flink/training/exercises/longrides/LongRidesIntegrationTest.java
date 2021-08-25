@@ -32,6 +32,8 @@ import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+// needed for the Scala tests to use scala.Long with this Java test
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class LongRidesIntegrationTest extends LongRidesTestBase {
 
     private static final int PARALLELISM = 2;
@@ -53,7 +55,7 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
 
         ParallelTestSource<TaxiRide> source =
                 new ParallelTestSource<>(rideStarted, endedOneMinLater);
-        TestSink<Long> sink = new TestSink<Long>();
+        TestSink<Long> sink = new TestSink<>();
 
         longRidesPipeline().execute(source, sink);
         assertThat(sink.results()).isEmpty();
@@ -66,7 +68,7 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
 
         ParallelTestSource<TaxiRide> source =
                 new ParallelTestSource<>(endedOneMinLater, rideStarted);
-        TestSink<Long> sink = new TestSink<Long>();
+        TestSink<Long> sink = new TestSink<>();
 
         longRidesPipeline().execute(source, sink);
         assertThat(sink.results()).isEmpty();
@@ -91,7 +93,7 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
                         shortRideEnded,
                         twoHourRideEnded,
                         otherLongRideEnded);
-        TestSink<Long> sink = new TestSink<Long>();
+        TestSink<Long> sink = new TestSink<>();
 
         longRidesPipeline().execute(source, sink);
         assertThat(sink.results())
@@ -104,6 +106,6 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
         ExecutablePipeline<TaxiRide, Long> solution =
                 (source, sink) -> (new LongRidesSolution(source, sink)).execute();
 
-        return new ComposedPipeline(exercise, solution);
+        return new ComposedPipeline<>(exercise, solution);
     }
 }
