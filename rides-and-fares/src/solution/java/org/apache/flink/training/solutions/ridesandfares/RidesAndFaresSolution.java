@@ -68,13 +68,10 @@ public class RidesAndFaresSolution {
 
         // A stream of taxi ride START events, keyed by rideId.
         DataStream<TaxiRide> rides =
-                env.addSource(rideSource)
-                        .filter(ride -> ride.isStart)
-                        .keyBy(ride -> ride.rideId);
+                env.addSource(rideSource).filter(ride -> ride.isStart).keyBy(ride -> ride.rideId);
 
         // A stream of taxi fare events, also keyed by rideId.
-        DataStream<TaxiFare> fares =
-                env.addSource(fareSource).keyBy(fare -> fare.rideId);
+        DataStream<TaxiFare> fares = env.addSource(fareSource).keyBy(fare -> fare.rideId);
 
         // Create the pipeline.
         rides.connect(fares)
