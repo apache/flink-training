@@ -111,14 +111,14 @@ If you are in China, we recommend configuring the Maven repository to use a mirr
 
 The exercises in this project are also available in Scala but due to a couple
 of reported problems from non-Scala users, we decided to disable these by
-default. You can re-enable all Scala exercises and solutions by uncommenting
-this section in our [`build.gradle`](build.gradle) file:
+default. You can re-enable all Scala exercises and solutions adapting the
+[`gradle.properties`](gradle.properties) file like this:
 
-```groovy
-subprojects {
-    //...
-    apply plugin: 'scala' // optional; uncomment if needed
-}
+```properties
+#...
+
+# Scala exercises can be enabled by setting this to true
+org.gradle.project.enable_scala = true
 ```
 
 You can also selectively apply this plugin in a single subproject if desired.
