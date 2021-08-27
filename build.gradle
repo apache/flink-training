@@ -43,7 +43,9 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    // apply plugin: 'scala' // optional; uncomment if needed
+    if (project.properties['org.gradle.project.enable_scala'] == 'true') {
+        apply plugin: 'scala'
+    }
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
