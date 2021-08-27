@@ -18,10 +18,13 @@
 
 package org.apache.flink.training.exercises.common.datatypes;
 
+import org.apache.flink.annotation.VisibleForTesting;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.training.exercises.common.utils.DataGenerator;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * A TaxiFare has payment information about a taxi ride.
@@ -102,17 +105,38 @@ public class TaxiFare implements Serializable {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof TaxiFare && this.rideId == ((TaxiFare) other).rideId;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TaxiFare taxiFare = (TaxiFare) o;
+        return rideId == taxiFare.rideId
+                && taxiId == taxiFare.taxiId
+                && driverId == taxiFare.driverId
+                && Float.compare(taxiFare.tip, tip) == 0
+                && Float.compare(taxiFare.tolls, tolls) == 0
+                && Float.compare(taxiFare.totalFare, totalFare) == 0
+                && Objects.equals(startTime, taxiFare.startTime)
+                && Objects.equals(paymentType, taxiFare.paymentType);
     }
 
     @Override
     public int hashCode() {
-        return (int) this.rideId;
+        return Objects.hash(
+                rideId, taxiId, driverId, startTime, paymentType, tip, tolls, totalFare);
     }
 
     /** Gets the fare's start time. */
     public long getEventTime() {
         return startTime.toEpochMilli();
+    }
+
+    /** Creates a StreamRecord, using the fare and its timestamp. Used in tests. */
+    @VisibleForTesting
+    public StreamRecord<TaxiFare> asStreamRecord() {
+        return new StreamRecord<>(this, this.getEventTime());
     }
 }

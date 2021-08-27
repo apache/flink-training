@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * A TaxiRide is a taxi ride event. There are two types of events, a taxi ride start event and a
@@ -155,15 +156,41 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof TaxiRide
-                && this.rideId == ((TaxiRide) other).rideId
-                && this.isStart == ((TaxiRide) other).isStart;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TaxiRide taxiRide = (TaxiRide) o;
+        return rideId == taxiRide.rideId
+                && isStart == taxiRide.isStart
+                && Float.compare(taxiRide.startLon, startLon) == 0
+                && Float.compare(taxiRide.startLat, startLat) == 0
+                && Float.compare(taxiRide.endLon, endLon) == 0
+                && Float.compare(taxiRide.endLat, endLat) == 0
+                && passengerCnt == taxiRide.passengerCnt
+                && taxiId == taxiRide.taxiId
+                && driverId == taxiRide.driverId
+                && Objects.equals(startTime, taxiRide.startTime)
+                && Objects.equals(endTime, taxiRide.endTime);
     }
 
     @Override
     public int hashCode() {
-        return (int) this.rideId;
+        return Objects.hash(
+                rideId,
+                isStart,
+                startTime,
+                endTime,
+                startLon,
+                startLat,
+                endLon,
+                endLat,
+                passengerCnt,
+                taxiId,
+                driverId);
     }
 
     /** Gets the ride's time stamp (start or end time depending on {@link #isStart}). */
