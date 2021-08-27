@@ -19,7 +19,6 @@
 package org.apache.flink.training.exercises.ridesandfares.scala
 
 import org.apache.flink.api.common.JobExecutionResult
-import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction
 import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
@@ -78,12 +77,16 @@ object RidesAndFaresExercise {
 
   class EnrichmentFunction() extends RichCoFlatMapFunction[TaxiRide, TaxiFare, RideAndFare] {
 
+    override def open(parameters: Configuration): Unit = {
+      throw new MissingSolutionException()
+    }
+
     override def flatMap1(ride: TaxiRide, out: Collector[RideAndFare]): Unit = {
-      throw new MissingSolutionException();
+      throw new MissingSolutionException()
     }
 
     override def flatMap2(fare: TaxiFare, out: Collector[RideAndFare]): Unit = {
-      throw new MissingSolutionException();
+      throw new MissingSolutionException()
     }
   }
 
