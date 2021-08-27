@@ -18,72 +18,92 @@
 
 package org.apache.flink.training.solutions.ridesandfares.scala
 
+import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction
+import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
+import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
-import org.apache.flink.training.exercises.common.datatypes.{TaxiFare, TaxiRide}
+import org.apache.flink.training.exercises.common.datatypes.{RideAndFare, TaxiFare, TaxiRide}
 import org.apache.flink.training.exercises.common.sources.{TaxiFareGenerator, TaxiRideGenerator}
-import org.apache.flink.training.exercises.common.utils.ExerciseBase
-import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.util.Collector
 
 /**
-  * Scala reference implementation for the "Stateful Enrichment" exercise of the Flink training in the docs.
+  * Scala reference implementation for the Stateful Enrichment exercise from the Flink training.
   *
   * The goal for this exercise is to enrich TaxiRides with fare information.
-  *
   */
 object RidesAndFaresSolution {
 
-  def main(args: Array[String]) {
+  class RidesAndFaresJob(rideSource: SourceFunction[TaxiRide],
+                         fareSource: SourceFunction[TaxiFare],
+                         sink: SinkFunction[RideAndFare]) {
 
-    // set up streaming execution environment
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(ExerciseBase.parallelism)
+    def execute(): JobExecutionResult = {
+      val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    val rides = env
-      .addSource(rideSourceOrTest(new TaxiRideGenerator()))
-      .filter { ride => ride.isStart }
-      .keyBy { ride => ride.rideId }
+      val rides = env
+        .addSource(rideSource)
+        .filter { ride =>
+          ride.isStart
+        }
+        .keyBy { ride =>
+          ride.rideId
+        }
 
-    val fares = env
-      .addSource(fareSourceOrTest(new TaxiFareGenerator()))
-      .keyBy { fare => fare.rideId }
+      val fares = env
+        .addSource(fareSource)
+        .keyBy { fare =>
+          fare.rideId
+        }
 
-    val processed = rides
-      .connect(fares)
-      .flatMap(new EnrichmentFunction)
+      rides
+        .connect(fares)
+        .flatMap(new EnrichmentFunction)
+        .addSink(sink)
 
-    printOrTest(processed)
-
-    env.execute("Join Rides with Fares (scala RichCoFlatMap)")
+      env.execute()
+    }
   }
 
-  class EnrichmentFunction extends RichCoFlatMapFunction[TaxiRide, TaxiFare, (TaxiRide, TaxiFare)] {
-    // keyed, managed state
-    lazy val rideState: ValueState[TaxiRide] = getRuntimeContext.getState(
-      new ValueStateDescriptor[TaxiRide]("saved ride", classOf[TaxiRide]))
-    lazy val fareState: ValueState[TaxiFare] = getRuntimeContext.getState(
-      new ValueStateDescriptor[TaxiFare]("saved fare", classOf[TaxiFare]))
+  @throws[Exception]
+  def main(args: Array[String]): Unit = {
+    val job =
+      new RidesAndFaresJob(new TaxiRideGenerator, new TaxiFareGenerator, new PrintSinkFunction)
 
-    override def flatMap1(ride: TaxiRide, out: Collector[(TaxiRide, TaxiFare)]): Unit = {
+    job.execute()
+  }
+
+  class EnrichmentFunction() extends RichCoFlatMapFunction[TaxiRide, TaxiFare, RideAndFare] {
+
+    private var rideState: ValueState[TaxiRide] = _
+    private var fareState: ValueState[TaxiFare] = _
+
+    override def open(parameters: Configuration): Unit = {
+      rideState = getRuntimeContext.getState(
+        new ValueStateDescriptor[TaxiRide]("saved ride", classOf[TaxiRide]))
+
+      fareState = getRuntimeContext.getState(
+        new ValueStateDescriptor[TaxiFare]("saved fare", classOf[TaxiFare]))
+    }
+
+    override def flatMap1(ride: TaxiRide, out: Collector[RideAndFare]): Unit = {
       val fare = fareState.value
       if (fare != null) {
         fareState.clear()
-        out.collect((ride, fare))
-      }
-      else {
+        out.collect(new RideAndFare(ride, fare))
+      } else {
         rideState.update(ride)
       }
     }
 
-    override def flatMap2(fare: TaxiFare, out: Collector[(TaxiRide, TaxiFare)]): Unit = {
+    override def flatMap2(fare: TaxiFare, out: Collector[RideAndFare]): Unit = {
       val ride = rideState.value
       if (ride != null) {
         rideState.clear()
-        out.collect((ride, fare))
-      }
-      else {
+        out.collect(new RideAndFare(ride, fare))
+      } else {
         fareState.update(fare)
       }
     }

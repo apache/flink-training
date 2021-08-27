@@ -156,7 +156,9 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof TaxiRide && this.rideId == ((TaxiRide) other).rideId;
+        return other instanceof TaxiRide
+                && this.rideId == ((TaxiRide) other).rideId
+                && this.isStart == ((TaxiRide) other).isStart;
     }
 
     @Override
