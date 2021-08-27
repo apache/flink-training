@@ -18,39 +18,55 @@
 
 package org.apache.flink.training.exercises.ridecleansing.scala
 
+import org.apache.flink.api.common.JobExecutionResult
+import org.apache.flink.api.common.functions.FilterFunction
+import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
+import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
-import org.apache.flink.training.exercises.common.utils.ExerciseBase._
-import org.apache.flink.training.exercises.common.utils.{ExerciseBase, GeoUtils, MissingSolutionException}
+import org.apache.flink.training.exercises.common.utils.{ExerciseBase, MissingSolutionException}
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 
 /**
- * The "Ride Cleansing" exercise of the Flink training in the docs.
- *
- * The task of the exercise is to filter a data stream of taxi ride records to keep only rides that
- * start and end within New York City. The resulting stream should be printed to the
- * standard out.
- *
- */
+  * The Ride Cleansing exercise from the Flink training.
+  *
+  * The task of this exercise is to filter a data stream of taxi ride records to keep only
+  * rides that both start and end within New York City. The resulting stream should be printed
+  * to the standard out.
+  *
+  */
 object RideCleansingExercise extends ExerciseBase {
 
-  def main(args: Array[String]) {
+  @throws[Exception]
+  def main(args: Array[String]): Unit = {
+    val job = new RideCleansingJob(new TaxiRideGenerator, new PrintSinkFunction)
 
-    // set up the execution environment
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(parallelism)
-
-    // get the taxi ride data stream
-    val rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()))
-
-    val filteredRides = rides
-      // filter out rides that do not start and end in NYC
-      .filter(ride => throw new MissingSolutionException)
-
-    // print the filtered stream
-    printOrTest(filteredRides)
-
-    // run the cleansing pipeline
-    env.execute("Taxi Ride Cleansing")
+    job.execute()
   }
 
+  class RideCleansingJob(source: SourceFunction[TaxiRide], sink: SinkFunction[TaxiRide]) {
+
+    /**
+      * Creates and executes the ride cleansing pipeline.
+      */
+    @throws[Exception]
+    def execute(): JobExecutionResult = {
+      val env = StreamExecutionEnvironment.getExecutionEnvironment
+
+      // set up the pipeline
+      env
+        .addSource(source)
+        .filter(new NYCFilter())
+        .addSink(sink)
+
+      // execute the pipeline and return the result
+      env.execute()
+    }
+  }
+
+  /** Keep only those rides and both start and end in NYC. */
+  class NYCFilter extends FilterFunction[TaxiRide] {
+    override def filter(taxiRide: TaxiRide): Boolean =
+      throw new MissingSolutionException()
+  }
 }
