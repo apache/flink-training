@@ -20,6 +20,7 @@ package org.apache.flink.training.exercises.longrides;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.ComposedPipeline;
@@ -31,10 +32,10 @@ import org.apache.flink.training.solutions.longrides.LongRidesSolution;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-// needed for the Scala tests to use scala.Long with this Java test
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class LongRidesIntegrationTest extends LongRidesTestBase {
 
     private static final int PARALLELISM = 2;
@@ -56,10 +57,8 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
 
         ParallelTestSource<TaxiRide> source =
                 new ParallelTestSource<>(rideStarted, endedOneMinLater);
-        TestSink<Long> sink = new TestSink<>();
 
-        JobExecutionResult jobResult = longRidesPipeline().execute(source, sink);
-        assertThat(sink.getResults(jobResult)).isEmpty();
+        assertThat(results(source)).isEmpty();
     }
 
     @Test
@@ -69,10 +68,8 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
 
         ParallelTestSource<TaxiRide> source =
                 new ParallelTestSource<>(endedOneMinLater, rideStarted);
-        TestSink<Long> sink = new TestSink<>();
 
-        JobExecutionResult jobResult = longRidesPipeline().execute(source, sink);
-        assertThat(sink.getResults(jobResult)).isEmpty();
+        assertThat(results(source)).isEmpty();
     }
 
     @Test
@@ -94,19 +91,23 @@ public class LongRidesIntegrationTest extends LongRidesTestBase {
                         shortRideEnded,
                         twoHourRideEnded,
                         otherLongRideEnded);
-        TestSink<Long> sink = new TestSink<>();
 
-        JobExecutionResult jobResult = longRidesPipeline().execute(source, sink);
-        assertThat(sink.getResults(jobResult))
+        assertThat(results(source))
                 .containsExactlyInAnyOrder(longRideWithoutEnd.rideId, otherLongRide.rideId);
     }
 
-    protected ComposedPipeline longRidesPipeline() {
-        ExecutablePipeline<TaxiRide, Long> exercise =
-                (source, sink) -> (new LongRidesExercise(source, sink)).execute();
-        ExecutablePipeline<TaxiRide, Long> solution =
-                (source, sink) -> (new LongRidesSolution(source, sink)).execute();
+    private static final ExecutablePipeline<TaxiRide, Long> exercise =
+            (source, sink) -> new LongRidesExercise(source, sink).execute();
 
-        return new ComposedPipeline<>(exercise, solution);
+    private static final ExecutablePipeline<TaxiRide, Long> solution =
+            (source, sink) -> new LongRidesSolution(source, sink).execute();
+
+    protected List<Long> results(SourceFunction<TaxiRide> source) throws Exception {
+
+        TestSink<Long> sink = new TestSink<>();
+        ComposedPipeline<TaxiRide, Long> longRidesPipeline =
+                new ComposedPipeline<>(exercise, solution);
+        JobExecutionResult jobResult = longRidesPipeline.execute(source, sink);
+        return sink.getResults(jobResult);
     }
 }

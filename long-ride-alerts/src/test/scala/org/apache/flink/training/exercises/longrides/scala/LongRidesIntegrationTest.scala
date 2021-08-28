@@ -18,6 +18,7 @@
 
 package org.apache.flink.training.exercises.longrides.scala
 
+import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.longrides
@@ -25,18 +26,29 @@ import org.apache.flink.training.exercises.testing.{ComposedPipeline, Executable
 import org.apache.flink.training.solutions.longrides.scala.LongRidesSolution
 
 /**
-  * The Scala tests extend the Java tests by overriding the longRidesPipeline() method
+  * The Scala tests extend the Java tests by overriding the results() method
   * to use the Scala implementations of the exercise and solution.
   */
 class LongRidesIntegrationTest extends longrides.LongRidesIntegrationTest {
-  private val EXERCISE: ExecutablePipeline[TaxiRide, Long] =
-    (source: SourceFunction[TaxiRide], sink: TestSink[Long]) =>
-      new LongRidesExercise.LongRidesJob(source, sink).execute()
 
-  private val SOLUTION: ExecutablePipeline[TaxiRide, Long] =
-    (source: SourceFunction[TaxiRide], sink: TestSink[Long]) =>
-      new LongRidesSolution.LongRidesJob(source, sink).execute()
+  @throws[Exception]
+  override def results(source: SourceFunction[TaxiRide]): java.util.List[java.lang.Long] = {
+    val exercise: ExecutablePipeline[TaxiRide, Long] =
+      (source: SourceFunction[TaxiRide], sink: TestSink[Long]) =>
+        new LongRidesExercise.LongRidesJob(source, sink).execute()
 
-  override def longRidesPipeline: ComposedPipeline[TaxiRide, Long] =
-    new ComposedPipeline[TaxiRide, Long](EXERCISE, SOLUTION)
+    val solution: ExecutablePipeline[TaxiRide, Long] =
+      (source: SourceFunction[TaxiRide], sink: TestSink[Long]) =>
+        new LongRidesSolution.LongRidesJob(source, sink).execute()
+
+    def longRidesPipeline: ComposedPipeline[TaxiRide, Long] =
+      new ComposedPipeline[TaxiRide, Long](exercise, solution)
+
+    val sink: TestSink[Long] = new TestSink[Long]
+    val jobResult: JobExecutionResult = longRidesPipeline.execute(source, sink)
+    val results = sink.getResults(jobResult)
+
+    results.asInstanceOf[java.util.List[java.lang.Long]]
+  }
+
 }
