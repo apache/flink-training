@@ -26,6 +26,11 @@ import org.apache.flink.training.exercises.hourlytips
 import org.apache.flink.training.exercises.testing.{ComposedPipeline, ExecutablePipeline, TestSink}
 import org.apache.flink.training.solutions.hourlytips.scala.HourlyTipsSolution
 
+/** This class uses the java tests to test the scala implementations
+  * of the hourly tips exercise and solution. This gets a bit messy because
+  * the scala implementations use native scala tuples, which requires converting
+  * the list of results to java tuples.
+  * */
 class HourlyTipsTest extends hourlytips.HourlyTipsTest {
 
   @throws[Exception]
