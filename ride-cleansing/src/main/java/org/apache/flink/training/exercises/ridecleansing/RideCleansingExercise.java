@@ -26,7 +26,6 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.ExerciseBase;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 
 /**
@@ -35,7 +34,7 @@ import org.apache.flink.training.exercises.common.utils.MissingSolutionException
  * <p>The task of this exercise is to filter a data stream of taxi ride records to keep only rides
  * that both start and end within New York City. The resulting stream should be printed.
  */
-public class RideCleansingExercise extends ExerciseBase {
+public class RideCleansingExercise {
 
     private final SourceFunction<TaxiRide> source;
     private final SinkFunction<TaxiRide> sink;

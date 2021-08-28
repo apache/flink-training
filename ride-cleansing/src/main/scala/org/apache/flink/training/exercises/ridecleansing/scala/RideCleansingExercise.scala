@@ -23,7 +23,7 @@ import org.apache.flink.api.common.functions.FilterFunction
 import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
-import org.apache.flink.training.exercises.common.utils.{ExerciseBase, MissingSolutionException}
+import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 
@@ -35,7 +35,7 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide
   * to the standard out.
   *
   */
-object RideCleansingExercise extends ExerciseBase {
+object RideCleansingExercise {
 
   @throws[Exception]
   def main(args: Array[String]): Unit = {
