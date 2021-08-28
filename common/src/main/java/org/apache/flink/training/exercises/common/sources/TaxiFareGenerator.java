@@ -19,14 +19,12 @@
 package org.apache.flink.training.exercises.common.sources;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 
 /**
- * This SourceFunction generates a data stream of TaxiFare records that include event time
- * timestamps.
+ * This SourceFunction generates a data stream of TaxiFare records.
  *
- * <p>The stream is generated in order, and it includes Watermarks.
+ * <p>The stream is generated in order.
  */
 public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
 
@@ -41,8 +39,7 @@ public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
             TaxiFare fare = new TaxiFare(id);
             id += 1;
 
-            ctx.collectWithTimestamp(fare, fare.getEventTime());
-            ctx.emitWatermark(new Watermark(fare.getEventTime()));
+            ctx.collect(fare);
 
             // match our event production rate to that of the TaxiRideGenerator
             Thread.sleep(TaxiRideGenerator.SLEEP_MILLIS_PER_EVENT);
