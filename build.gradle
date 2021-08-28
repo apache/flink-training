@@ -53,7 +53,7 @@ subprojects {
         flinkVersion = '1.13.2'
         scalaBinaryVersion = '2.12'
         log4jVersion = '2.12.1'
-        junitVersion = '4.12'
+        junitVersion = '4.13'
     }
 
     sourceCompatibility = javaVersion
