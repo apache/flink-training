@@ -18,6 +18,10 @@
 
 package org.apache.flink.training.solutions.hourlytips.scala
 
+import org.apache.flink.api.common.JobExecutionResult
+import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
+import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
+import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.scala.function.ProcessWindowFunction
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
@@ -25,51 +29,67 @@ import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator
-import org.apache.flink.training.exercises.common.utils.ExerciseBase
-import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.util.Collector
 
 /**
-  * Scala reference implementation for the "Hourly Tips" exercise of the Flink training in the docs.
+  * Scala reference implementation for the Hourly Tips exercise from the Flink training.
   *
-  * The task of the exercise is to first calculate the total tips collected by each driver, hour by hour, and
-  * then from that stream, find the highest tip total in each hour.
+  * The task of the exercise is to first calculate the total tips collected by each driver,
+  * hour by hour, and then from that stream, find the highest tip total in each hour.
   *
   */
 object HourlyTipsSolution {
 
-  def main(args: Array[String]) {
+  @throws[Exception]
+  def main(args: Array[String]): Unit = {
+    val job = new HourlyTipsJob(new TaxiFareGenerator, new PrintSinkFunction)
 
-    // set up streaming execution environment
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(ExerciseBase.parallelism)
-
-    // start the data generator
-    val fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()))
-
-    // total tips per hour by driver
-    val hourlyTips = fares
-      .map((f: TaxiFare) => (f.driverId, f.tip))
-      .keyBy(_._1)
-      .window(TumblingEventTimeWindows.of(Time.hours(1)))
-      .reduce(
-        (f1: (Long, Float), f2: (Long, Float)) => { (f1._1, f1._2 + f2._2) },
-        new WrapWithWindowInfo())
-
-    // max tip total in each hour
-    val hourlyMax = hourlyTips
-      .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
-      .maxBy(2)
-
-    // print result on stdout
-    printOrTest(hourlyMax)
-
-    // execute the transformation pipeline
-    env.execute("Hourly Tips (scala)")
+    job.execute()
   }
 
-  class WrapWithWindowInfo() extends ProcessWindowFunction[(Long, Float), (Long, Long, Float), Long, TimeWindow] {
-    override def process(key: Long, context: Context, elements: Iterable[(Long, Float)], out: Collector[(Long, Long, Float)]): Unit = {
+  class HourlyTipsJob(source: SourceFunction[TaxiFare], sink: SinkFunction[(Long, Long, Float)]) {
+
+    /**
+      * Create and execute the ride cleansing pipeline.
+      */
+    @throws[Exception]
+    def execute(): JobExecutionResult = {
+
+      val env = StreamExecutionEnvironment.getExecutionEnvironment
+
+      // the taxi fare stream is in order, by timestamp
+      val watermarkStrategy = WatermarkStrategy
+        .forMonotonousTimestamps[TaxiFare]()
+        .withTimestampAssigner(new SerializableTimestampAssigner[TaxiFare] {
+          override def extractTimestamp(fare: TaxiFare, streamRecordTimestamp: Long): Long =
+            fare.getEventTime
+        })
+
+      // setup the pipeline
+      env
+        .addSource(source)
+        .assignTimestampsAndWatermarks(watermarkStrategy)
+        .map((f: TaxiFare) => (f.driverId, f.tip))
+        .keyBy(_._1)
+        .window(TumblingEventTimeWindows.of(Time.hours(1)))
+        .reduce((f1: (Long, Float), f2: (Long, Float)) => { (f1._1, f1._2 + f2._2) },
+                new WrapWithWindowInfo())
+        .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
+        .maxBy(2)
+        .addSink(sink)
+
+      // execute the pipeline and return the result
+      env.execute("Hourly Tips")
+    }
+  }
+
+  class WrapWithWindowInfo()
+      extends ProcessWindowFunction[(Long, Float), (Long, Long, Float), Long, TimeWindow] {
+    override def process(key: Long,
+                         context: Context,
+                         elements: Iterable[(Long, Float)],
+                         out: Collector[(Long, Long, Float)]): Unit = {
+
       val sumOfTips = elements.iterator.next()._2
       out.collect((context.window.getEnd, key, sumOfTips))
     }
