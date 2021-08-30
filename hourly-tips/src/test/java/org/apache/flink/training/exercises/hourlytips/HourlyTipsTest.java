@@ -83,9 +83,21 @@ public class HourlyTipsTest {
         TaxiFare fiveFor1In1 = testFare(1, t(15), 5.0F);
         TaxiFare tenFor1In2 = testFare(1, t(90), 10.0F);
         TaxiFare twentyFor2In2 = testFare(2, t(90), 20.0F);
+        TaxiFare zeroFor3In2 = testFare(3, t(70), 0.0F);
+        TaxiFare zeroFor4In2 = testFare(4, t(70), 0.0F);
+        TaxiFare oneFor4In2 = testFare(4, t(80), 1.0F);
+        TaxiFare tenFor5In2 = testFare(5, t(100), 10.0F);
 
         ParallelTestSource<TaxiFare> source =
-                new ParallelTestSource<>(oneFor1In1, fiveFor1In1, tenFor1In2, twentyFor2In2);
+                new ParallelTestSource<>(
+                        oneFor1In1,
+                        fiveFor1In1,
+                        tenFor1In2,
+                        twentyFor2In2,
+                        zeroFor3In2,
+                        zeroFor4In2,
+                        oneFor4In2,
+                        tenFor5In2);
 
         Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60).toEpochMilli(), 1L, 6.0F);
         Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120).toEpochMilli(), 2L, 20.0F);
@@ -93,8 +105,10 @@ public class HourlyTipsTest {
         assertThat(results(source)).containsExactlyInAnyOrder(hour1, hour2);
     }
 
+    private static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
+
     private Instant t(int minutes) {
-        return Instant.parse("2020-01-01T12:00:00.00Z").plusSeconds(60L * minutes);
+        return BEGINNING.plusSeconds(60L * minutes);
     }
 
     private TaxiFare testFare(long driverId, Instant startTime, float tip) {
