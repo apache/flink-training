@@ -28,7 +28,6 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
-import org.apache.flink.training.solutions.hourlytips.HourlyTipsSolution;
 
 /**
  * The Hourly Tips exercise from the Flink training.
@@ -56,8 +55,8 @@ public class HourlyTipsExercise {
      */
     public static void main(String[] args) throws Exception {
 
-        HourlyTipsSolution job =
-                new HourlyTipsSolution(new TaxiFareGenerator(), new PrintSinkFunction<>());
+        HourlyTipsExercise job =
+                new HourlyTipsExercise(new TaxiFareGenerator(), new PrintSinkFunction<>());
 
         job.execute();
     }
@@ -74,14 +73,21 @@ public class HourlyTipsExercise {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // start the data generator
-        DataStream<TaxiFare> fares = env.addSource(new TaxiFareGenerator());
+        DataStream<TaxiFare> fares = env.addSource(source);
 
         // replace this with your solution
         if (true) {
             throw new MissingSolutionException();
         }
 
-        // execute the transformation pipeline
+        // the results should be sent to the sink that was passed in
+        // (otherwise the tests won't work)
+        // you can end the pipeline with something like this:
+
+        // DataStream<Tuple3<Long, Long, Float>> hourlyMax = ...
+        // hourlyMax.addSink(sink);
+
+        // execute the pipeline and return the result
         return env.execute("Hourly Tips");
     }
 }

@@ -52,12 +52,22 @@ object HourlyTipsExercise {
 
       val env = StreamExecutionEnvironment.getExecutionEnvironment
 
+      // start the data generator
+      val fares: DataStream[TaxiFare] = env.addSource(source)
+
       // replace this with your solution
       if (true) {
         throw new MissingSolutionException
       }
 
-      // execute the pipeline
+      // the results should be sent to the sink that was passed in
+      // (otherwise the tests won't work)
+      // you can end the pipeline with something like this:
+
+      // val hourlyMax = ...
+      // hourlyMax.addSink(sink);
+
+      // execute the pipeline and return the result
       env.execute("Hourly Tips")
     }
   }
