@@ -60,10 +60,11 @@ public class RidesAndFaresExercise {
      * Creates and executes the pipeline using the StreamExecutionEnvironment provided.
      *
      * @throws Exception which occurs during job execution.
-     * @param env The {StreamExecutionEnvironment}.
      * @return {JobExecutionResult}
      */
-    public JobExecutionResult execute(StreamExecutionEnvironment env) throws Exception {
+    public JobExecutionResult execute() throws Exception {
+
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // A stream of taxi ride START events, keyed by rideId.
         DataStream<TaxiRide> rides =
@@ -73,21 +74,10 @@ public class RidesAndFaresExercise {
         DataStream<TaxiFare> fares = env.addSource(fareSource).keyBy(fare -> fare.rideId);
 
         // Create the pipeline.
-        rides.connect(fares)
-                .flatMap(new EnrichmentFunction())
-                .uid("enrichment") // uid for this operator's state
-                .name("enrichment") // name for this operator in the web UI
-                .addSink(sink);
+        rides.connect(fares).flatMap(new EnrichmentFunction()).addSink(sink);
 
         // Execute the pipeline and return the result.
         return env.execute("Join Rides with Fares");
-    }
-
-    /** Creates and executes the pipeline using the default StreamExecutionEnvironment. */
-    public JobExecutionResult execute() throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
-        return execute(env);
     }
 
     /**
@@ -103,34 +93,25 @@ public class RidesAndFaresExercise {
                         new TaxiFareGenerator(),
                         new PrintSinkFunction<>());
 
-        // Setting up checkpointing so that the state can be explored with the State Processor API.
-        // Generally it's better to separate configuration settings from the code,
-        // but for this example it's convenient to have it here for running in the IDE.
-        Configuration conf = new Configuration();
-        conf.setString("state.backend", "filesystem");
-        conf.setString("state.checkpoints.dir", "file:///tmp/checkpoints");
-        conf.setString("execution.checkpointing.interval", "10s");
-        conf.setString(
-                "execution.checkpointing.externalized-checkpoint-retention",
-                "RETAIN_ON_CANCELLATION");
-
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
-
-        job.execute(env);
+        job.execute();
     }
 
     public static class EnrichmentFunction
             extends RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> {
 
         @Override
-        public void open(Configuration config) throws MissingSolutionException {
+        public void open(Configuration config) throws Exception {
             throw new MissingSolutionException();
         }
 
         @Override
-        public void flatMap1(TaxiRide ride, Collector<RideAndFare> out) throws Exception {}
+        public void flatMap1(TaxiRide ride, Collector<RideAndFare> out) throws Exception {
+            throw new MissingSolutionException();
+        }
 
         @Override
-        public void flatMap2(TaxiFare fare, Collector<RideAndFare> out) throws Exception {}
+        public void flatMap2(TaxiFare fare, Collector<RideAndFare> out) throws Exception {
+            throw new MissingSolutionException();
+        }
     }
 }
