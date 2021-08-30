@@ -19,7 +19,7 @@ public class RideCleansingUnitTest extends RideCleansingTestBase {
     public void testRideThatStartsAndEndsInNYC() throws Exception {
 
         TaxiRide atPennStation = testRide(-73.9947F, 40.750626F, -73.9947F, 40.750626F);
-        assertThat(filterFunction().filter(atPennStation)).isEqualTo(true);
+        assertThat(filterFunction().filter(atPennStation)).isTrue();
     }
 
     @Test
