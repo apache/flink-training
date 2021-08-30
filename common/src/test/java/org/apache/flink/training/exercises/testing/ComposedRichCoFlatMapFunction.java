@@ -20,7 +20,7 @@ public class ComposedRichCoFlatMapFunction<IN1, IN2, OUT>
         extends RichCoFlatMapFunction<IN1, IN2, OUT> {
     private final RichCoFlatMapFunction<IN1, IN2, OUT> exercise;
     private final RichCoFlatMapFunction<IN1, IN2, OUT> solution;
-    private boolean useExercise;
+    private RichCoFlatMapFunction<IN1, IN2, OUT> implementationToTest;
 
     public ComposedRichCoFlatMapFunction(
             RichCoFlatMapFunction<IN1, IN2, OUT> exercise,
@@ -28,7 +28,7 @@ public class ComposedRichCoFlatMapFunction<IN1, IN2, OUT>
 
         this.exercise = exercise;
         this.solution = solution;
-        this.useExercise = true;
+        this.implementationToTest = exercise;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ComposedRichCoFlatMapFunction<IN1, IN2, OUT>
             exercise.open(parameters);
         } catch (Exception e) {
             if (MissingSolutionException.ultimateCauseIsMissingSolution(e)) {
-                this.useExercise = false;
+                this.implementationToTest = solution;
                 solution.setRuntimeContext(this.getRuntimeContext());
                 solution.open(parameters);
             } else {
@@ -51,20 +51,12 @@ public class ComposedRichCoFlatMapFunction<IN1, IN2, OUT>
     @Override
     public void flatMap1(IN1 value, Collector<OUT> out) throws Exception {
 
-        if (useExercise) {
-            exercise.flatMap1(value, out);
-        } else {
-            solution.flatMap1(value, out);
-        }
+        implementationToTest.flatMap1(value, out);
     }
 
     @Override
     public void flatMap2(IN2 value, Collector<OUT> out) throws Exception {
 
-        if (useExercise) {
-            exercise.flatMap2(value, out);
-        } else {
-            solution.flatMap2(value, out);
-        }
+        implementationToTest.flatMap2(value, out);
     }
 }

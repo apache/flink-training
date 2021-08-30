@@ -19,14 +19,14 @@ import org.apache.flink.util.Collector;
 public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFunction<K, IN, OUT> {
     private final KeyedProcessFunction<K, IN, OUT> exercise;
     private final KeyedProcessFunction<K, IN, OUT> solution;
-    private boolean useExercise;
+    private KeyedProcessFunction<K, IN, OUT> implementationToTest;
 
     public ComposedKeyedProcessFunction(
             KeyedProcessFunction<K, IN, OUT> exercise, KeyedProcessFunction<K, IN, OUT> solution) {
 
         this.exercise = exercise;
         this.solution = solution;
-        this.useExercise = true;
+        this.implementationToTest = exercise;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFuncti
             exercise.open(parameters);
         } catch (Exception e) {
             if (MissingSolutionException.ultimateCauseIsMissingSolution(e)) {
-                this.useExercise = false;
+                this.implementationToTest = solution;
                 solution.setRuntimeContext(this.getRuntimeContext());
                 solution.open(parameters);
             } else {
@@ -51,11 +51,7 @@ public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFuncti
             IN value, KeyedProcessFunction<K, IN, OUT>.Context ctx, Collector<OUT> out)
             throws Exception {
 
-        if (useExercise) {
-            exercise.processElement(value, ctx, out);
-        } else {
-            solution.processElement(value, ctx, out);
-        }
+        implementationToTest.processElement(value, ctx, out);
     }
 
     @Override
@@ -63,10 +59,6 @@ public class ComposedKeyedProcessFunction<K, IN, OUT> extends KeyedProcessFuncti
             long timestamp, KeyedProcessFunction<K, IN, OUT>.OnTimerContext ctx, Collector<OUT> out)
             throws Exception {
 
-        if (useExercise) {
-            exercise.onTimer(timestamp, ctx, out);
-        } else {
-            solution.onTimer(timestamp, ctx, out);
-        }
+        implementationToTest.onTimer(timestamp, ctx, out);
     }
 }
