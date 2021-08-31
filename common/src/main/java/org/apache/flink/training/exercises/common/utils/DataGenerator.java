@@ -32,7 +32,7 @@ public class DataGenerator {
 
     private static final int SECONDS_BETWEEN_RIDES = 20;
     private static final int NUMBER_OF_DRIVERS = 200;
-    private static final Instant beginTime = Instant.parse("2020-01-01T12:00:00.00Z");
+    public static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
 
     private transient long rideId;
 
@@ -43,7 +43,7 @@ public class DataGenerator {
 
     /** Deterministically generates and returns the startTime for this ride. */
     public Instant startTime() {
-        return beginTime.plusSeconds(SECONDS_BETWEEN_RIDES * rideId);
+        return BEGINNING.plusSeconds(SECONDS_BETWEEN_RIDES * rideId);
     }
 
     /** Deterministically generates and returns the endTime for this ride. */
