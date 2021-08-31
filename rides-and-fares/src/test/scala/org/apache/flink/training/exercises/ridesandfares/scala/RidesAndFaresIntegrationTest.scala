@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.ridesandfares.scala
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction
@@ -28,23 +27,24 @@ import org.apache.flink.training.exercises.testing.{
 }
 import org.apache.flink.training.solutions.ridesandfares.scala.RidesAndFaresSolution
 
-/**
-  * The Scala tests extend the Java tests by overriding the ridesAndFaresPipeline() method
+/** The Scala tests extend the Java tests by overriding the ridesAndFaresPipeline() method
   * to use the Scala implementations of the exercise and solution.
   */
 class RidesAndFaresIntegrationTest extends ridesandfares.RidesAndFaresIntegrationTest {
 
   private val EXERCISE: ExecutableTwoInputPipeline[TaxiRide, TaxiFare, RideAndFare] =
-    (rides: SourceFunction[TaxiRide],
-     fares: SourceFunction[TaxiFare],
-     sink: TestSink[RideAndFare]) =>
-      new RidesAndFaresExercise.RidesAndFaresJob(rides, fares, sink).execute()
+    (
+        rides: SourceFunction[TaxiRide],
+        fares: SourceFunction[TaxiFare],
+        sink: TestSink[RideAndFare]
+    ) => new RidesAndFaresExercise.RidesAndFaresJob(rides, fares, sink).execute()
 
   private val SOLUTION: ExecutableTwoInputPipeline[TaxiRide, TaxiFare, RideAndFare] =
-    (rides: SourceFunction[TaxiRide],
-     fares: SourceFunction[TaxiFare],
-     sink: TestSink[RideAndFare]) =>
-      new RidesAndFaresSolution.RidesAndFaresJob(rides, fares, sink).execute()
+    (
+        rides: SourceFunction[TaxiRide],
+        fares: SourceFunction[TaxiFare],
+        sink: TestSink[RideAndFare]
+    ) => new RidesAndFaresSolution.RidesAndFaresJob(rides, fares, sink).execute()
 
   override def ridesAndFaresPipeline: ComposedTwoInputPipeline[TaxiRide, TaxiFare, RideAndFare] =
     new ComposedTwoInputPipeline[TaxiRide, TaxiFare, RideAndFare](EXERCISE, SOLUTION)

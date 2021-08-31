@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.solutions.longrides.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -33,8 +32,7 @@ import org.apache.flink.util.Collector
 import java.time.Duration
 import scala.concurrent.duration._
 
-/**
-  * Scala solution for the "Long Ride Alerts" exercise.
+/** Scala solution for the "Long Ride Alerts" exercise.
   *
   * <p>The goal for this exercise is to emit the rideIds for taxi rides with a duration of more than
   * two hours. You should assume that TaxiRide events can be lost, but there are no duplicates.
@@ -45,8 +43,7 @@ object LongRidesSolution {
 
   class LongRidesJob(source: SourceFunction[TaxiRide], sink: SinkFunction[Long]) {
 
-    /**
-      * Creates and executes the ride cleansing pipeline.
+    /** Creates and executes the ride cleansing pipeline.
       */
     @throws[Exception]
     def execute(): JobExecutionResult = {
@@ -88,12 +85,15 @@ object LongRidesSolution {
 
     override def open(parameters: Configuration): Unit = {
       rideState = getRuntimeContext.getState(
-        new ValueStateDescriptor[TaxiRide]("ride event", classOf[TaxiRide]))
+        new ValueStateDescriptor[TaxiRide]("ride event", classOf[TaxiRide])
+      )
     }
 
-    override def processElement(ride: TaxiRide,
-                                context: KeyedProcessFunction[Long, TaxiRide, Long]#Context,
-                                out: Collector[Long]): Unit = {
+    override def processElement(
+        ride: TaxiRide,
+        context: KeyedProcessFunction[Long, TaxiRide, Long]#Context,
+        out: Collector[Long]
+    ): Unit = {
 
       val firstRideEvent = rideState.value()
 
@@ -121,9 +121,11 @@ object LongRidesSolution {
       }
     }
 
-    override def onTimer(timestamp: Long,
-                         ctx: KeyedProcessFunction[Long, TaxiRide, Long]#OnTimerContext,
-                         out: Collector[Long]): Unit = {
+    override def onTimer(
+        timestamp: Long,
+        ctx: KeyedProcessFunction[Long, TaxiRide, Long]#OnTimerContext,
+        out: Collector[Long]
+    ): Unit = {
 
       // The timer only fires if the ride was too long.
       out.collect(rideState.value().rideId)

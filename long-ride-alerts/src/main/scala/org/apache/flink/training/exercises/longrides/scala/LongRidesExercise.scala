@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.longrides.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -32,8 +31,7 @@ import org.apache.flink.util.Collector
 
 import java.time.Duration
 
-/**
-  * The "Long Ride Alerts" exercise.
+/** The "Long Ride Alerts" exercise.
   *
   * <p>The goal for this exercise is to emit the rideIds for taxi rides with a duration of more than
   * two hours. You should assume that TaxiRide events can be lost, but there are no duplicates.
@@ -44,8 +42,7 @@ object LongRidesExercise {
 
   class LongRidesJob(source: SourceFunction[TaxiRide], sink: SinkFunction[Long]) {
 
-    /**
-      * Creates and executes the ride cleansing pipeline.
+    /** Creates and executes the ride cleansing pipeline.
       */
     @throws[Exception]
     def execute(): JobExecutionResult = {
@@ -88,13 +85,17 @@ object LongRidesExercise {
       throw new MissingSolutionException()
     }
 
-    override def processElement(ride: TaxiRide,
-                                context: KeyedProcessFunction[Long, TaxiRide, Long]#Context,
-                                out: Collector[Long]): Unit = {}
+    override def processElement(
+        ride: TaxiRide,
+        context: KeyedProcessFunction[Long, TaxiRide, Long]#Context,
+        out: Collector[Long]
+    ): Unit = {}
 
-    override def onTimer(timestamp: Long,
-                         ctx: KeyedProcessFunction[Long, TaxiRide, Long]#OnTimerContext,
-                         out: Collector[Long]): Unit = {}
+    override def onTimer(
+        timestamp: Long,
+        ctx: KeyedProcessFunction[Long, TaxiRide, Long]#OnTimerContext,
+        out: Collector[Long]
+    ): Unit = {}
 
   }
 

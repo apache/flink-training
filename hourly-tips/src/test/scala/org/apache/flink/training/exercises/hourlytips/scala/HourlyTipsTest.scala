@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.hourlytips.scala
 
 import java.util
@@ -30,12 +29,13 @@ import org.apache.flink.training.solutions.hourlytips.scala.HourlyTipsSolution
   * of the hourly tips exercise and solution. This gets a bit messy because
   * the scala implementations use native scala tuples, which requires converting
   * the list of results to java tuples.
-  * */
+  */
 class HourlyTipsTest extends hourlytips.HourlyTipsTest {
 
   @throws[Exception]
-  override def results(source: SourceFunction[TaxiFare])
-    : util.List[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
+  override def results(
+      source: SourceFunction[TaxiFare]
+  ): util.List[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
 
     val sink = new TestSink[(Long, Long, Float)]
     val jobResult = hourlyTipsPipeline.execute(source, sink)
@@ -58,16 +58,19 @@ class HourlyTipsTest extends hourlytips.HourlyTipsTest {
 
   // The scala pipeline uses scala tuples, while the java pipeline uses Flink's java tuples.
   // This method constructs a list of java tuples from the list of scala tuples passed in.
-  private def javaTuples(listOfScalaTuples: util.List[(Long, Long, Float)])
-    : util.ArrayList[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
+  private def javaTuples(
+      listOfScalaTuples: util.List[(Long, Long, Float)]
+  ): util.ArrayList[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] = {
 
     val listOfJavaTuples
-      : util.ArrayList[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] =
+        : util.ArrayList[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]] =
       new util.ArrayList[tuple.Tuple3[java.lang.Long, java.lang.Long, java.lang.Float]](
-        listOfScalaTuples.size)
+        listOfScalaTuples.size
+      )
 
     listOfScalaTuples.iterator.forEachRemaining((t: (Long, Long, Float)) =>
-      listOfJavaTuples.add(tuple.Tuple3.of(t._1, t._2, t._3)))
+      listOfJavaTuples.add(tuple.Tuple3.of(t._1, t._2, t._3))
+    )
 
     listOfJavaTuples
   }

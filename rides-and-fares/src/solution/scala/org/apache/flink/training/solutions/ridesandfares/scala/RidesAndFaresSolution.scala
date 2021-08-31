@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.solutions.ridesandfares.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -29,16 +28,17 @@ import org.apache.flink.training.exercises.common.datatypes.{RideAndFare, TaxiFa
 import org.apache.flink.training.exercises.common.sources.{TaxiFareGenerator, TaxiRideGenerator}
 import org.apache.flink.util.Collector
 
-/**
-  * Scala reference implementation for the Stateful Enrichment exercise from the Flink training.
+/** Scala reference implementation for the Stateful Enrichment exercise from the Flink training.
   *
   * The goal for this exercise is to enrich TaxiRides with fare information.
   */
 object RidesAndFaresSolution {
 
-  class RidesAndFaresJob(rideSource: SourceFunction[TaxiRide],
-                         fareSource: SourceFunction[TaxiFare],
-                         sink: SinkFunction[RideAndFare]) {
+  class RidesAndFaresJob(
+      rideSource: SourceFunction[TaxiRide],
+      fareSource: SourceFunction[TaxiFare],
+      sink: SinkFunction[RideAndFare]
+  ) {
 
     def execute(): JobExecutionResult = {
       val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -82,10 +82,12 @@ object RidesAndFaresSolution {
 
     override def open(parameters: Configuration): Unit = {
       rideState = getRuntimeContext.getState(
-        new ValueStateDescriptor[TaxiRide]("saved ride", classOf[TaxiRide]))
+        new ValueStateDescriptor[TaxiRide]("saved ride", classOf[TaxiRide])
+      )
 
       fareState = getRuntimeContext.getState(
-        new ValueStateDescriptor[TaxiFare]("saved fare", classOf[TaxiFare]))
+        new ValueStateDescriptor[TaxiFare]("saved fare", classOf[TaxiFare])
+      )
     }
 
     override def flatMap1(ride: TaxiRide, out: Collector[RideAndFare]): Unit = {

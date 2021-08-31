@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.ridecleansing.scala
 
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
@@ -26,8 +25,10 @@ import org.apache.flink.training.solutions.ridecleansing.scala.RideCleansingSolu
 class RideCleansingUnitTest extends ridecleansing.RideCleansingUnitTest {
 
   override def filterFunction: ComposedFilterFunction[TaxiRide] = {
-    new ComposedFilterFunction[TaxiRide](new RideCleansingExercise.NYCFilter,
-                                         new RideCleansingSolution.NYCFilter)
+    new ComposedFilterFunction[TaxiRide](
+      new RideCleansingExercise.NYCFilter,
+      new RideCleansingSolution.NYCFilter
+    )
   }
 
 }

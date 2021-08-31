@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.longrides.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -25,8 +24,7 @@ import org.apache.flink.training.exercises.longrides
 import org.apache.flink.training.exercises.testing.{ComposedPipeline, ExecutablePipeline, TestSink}
 import org.apache.flink.training.solutions.longrides.scala.LongRidesSolution
 
-/**
-  * The Scala tests extend the Java tests by overriding the results() method
+/** The Scala tests extend the Java tests by overriding the results() method
   * to use the Scala implementations of the exercise and solution.
   */
 class LongRidesIntegrationTest extends longrides.LongRidesIntegrationTest {

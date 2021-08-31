@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.ridesandfares.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -29,16 +28,17 @@ import org.apache.flink.training.exercises.common.sources.{TaxiFareGenerator, Ta
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 import org.apache.flink.util.Collector
 
-/**
-  * The Stateful Enrichment exercise from the Flink training.
+/** The Stateful Enrichment exercise from the Flink training.
   *
   * The goal for this exercise is to enrich TaxiRides with fare information.
   */
 object RidesAndFaresExercise {
 
-  class RidesAndFaresJob(rideSource: SourceFunction[TaxiRide],
-                         fareSource: SourceFunction[TaxiFare],
-                         sink: SinkFunction[RideAndFare]) {
+  class RidesAndFaresJob(
+      rideSource: SourceFunction[TaxiRide],
+      fareSource: SourceFunction[TaxiFare],
+      sink: SinkFunction[RideAndFare]
+  ) {
 
     def execute(): JobExecutionResult = {
       val env = StreamExecutionEnvironment.getExecutionEnvironment

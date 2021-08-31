@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.exercises.longrides.scala
 
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
@@ -23,8 +22,7 @@ import org.apache.flink.training.exercises.longrides
 import org.apache.flink.training.exercises.testing.ComposedKeyedProcessFunction
 import org.apache.flink.training.solutions.longrides.scala.LongRidesSolution
 
-/**
-  * The Scala tests extend the Java tests by overriding the composedAlertFunction() method
+/** The Scala tests extend the Java tests by overriding the composedAlertFunction() method
   * to use the Scala implementations of the exercise and solution.
   */
 class LongRidesUnitTest extends longrides.LongRidesUnitTest {

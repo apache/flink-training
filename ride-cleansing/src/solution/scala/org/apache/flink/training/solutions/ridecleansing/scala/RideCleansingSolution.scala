@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.solutions.ridecleansing.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -27,13 +26,11 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
 import org.apache.flink.training.exercises.common.utils.GeoUtils
 
-/**
-  * Scala reference implementation for the Ride Cleansing exercise from the Flink training.
+/** Scala reference implementation for the Ride Cleansing exercise from the Flink training.
   *
   * The task of this exercise is to filter a data stream of taxi ride records to keep only
   * rides that both start and end within New York City. The resulting stream should be printed
   * to the standard out.
-  *
   */
 object RideCleansingSolution {
 
@@ -46,8 +43,7 @@ object RideCleansingSolution {
 
   class RideCleansingJob(source: SourceFunction[TaxiRide], sink: SinkFunction[TaxiRide]) {
 
-    /**
-      * Create and execute the ride cleansing pipeline.
+    /** Create and execute the ride cleansing pipeline.
       */
     @throws[Exception]
     def execute(): JobExecutionResult = {

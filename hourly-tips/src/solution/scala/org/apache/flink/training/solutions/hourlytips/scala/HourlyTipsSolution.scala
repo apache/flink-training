@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.training.solutions.hourlytips.scala
 
 import org.apache.flink.api.common.JobExecutionResult
@@ -31,12 +30,10 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator
 import org.apache.flink.util.Collector
 
-/**
-  * Scala reference implementation for the Hourly Tips exercise from the Flink training.
+/** Scala reference implementation for the Hourly Tips exercise from the Flink training.
   *
   * The task of the exercise is to first calculate the total tips collected by each driver,
   * hour by hour, and then from that stream, find the highest tip total in each hour.
-  *
   */
 object HourlyTipsSolution {
 
@@ -49,8 +46,7 @@ object HourlyTipsSolution {
 
   class HourlyTipsJob(source: SourceFunction[TaxiFare], sink: SinkFunction[(Long, Long, Float)]) {
 
-    /**
-      * Create and execute the ride cleansing pipeline.
+    /** Create and execute the ride cleansing pipeline.
       */
     @throws[Exception]
     def execute(): JobExecutionResult = {
@@ -72,8 +68,10 @@ object HourlyTipsSolution {
         .map((f: TaxiFare) => (f.driverId, f.tip))
         .keyBy(_._1)
         .window(TumblingEventTimeWindows.of(Time.hours(1)))
-        .reduce((f1: (Long, Float), f2: (Long, Float)) => { (f1._1, f1._2 + f2._2) },
-                new WrapWithWindowInfo())
+        .reduce(
+          (f1: (Long, Float), f2: (Long, Float)) => { (f1._1, f1._2 + f2._2) },
+          new WrapWithWindowInfo()
+        )
         .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
         .maxBy(2)
         .addSink(sink)
@@ -85,10 +83,12 @@ object HourlyTipsSolution {
 
   class WrapWithWindowInfo()
       extends ProcessWindowFunction[(Long, Float), (Long, Long, Float), Long, TimeWindow] {
-    override def process(key: Long,
-                         context: Context,
-                         elements: Iterable[(Long, Float)],
-                         out: Collector[(Long, Long, Float)]): Unit = {
+    override def process(
+        key: Long,
+        context: Context,
+        elements: Iterable[(Long, Float)],
+        out: Collector[(Long, Long, Float)]
+    ): Unit = {
 
       val sumOfTips = elements.iterator.next()._2
       out.collect((context.window.getEnd, key, sumOfTips))
