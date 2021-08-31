@@ -18,55 +18,76 @@
 
 package org.apache.flink.training.exercises.ridesandfares.scala
 
+import org.apache.flink.api.common.JobExecutionResult
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction
+import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
+import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
-import org.apache.flink.training.exercises.common.datatypes.{TaxiFare, TaxiRide}
+import org.apache.flink.training.exercises.common.datatypes.{RideAndFare, TaxiFare, TaxiRide}
 import org.apache.flink.training.exercises.common.sources.{TaxiFareGenerator, TaxiRideGenerator}
-import org.apache.flink.training.exercises.common.utils.ExerciseBase._
-import org.apache.flink.training.exercises.common.utils.{ExerciseBase, MissingSolutionException}
+import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 import org.apache.flink.util.Collector
 
 /**
-  * The "Stateful Enrichment" exercise of the Flink training in the docs.
+  * The Stateful Enrichment exercise from the Flink training.
   *
   * The goal for this exercise is to enrich TaxiRides with fare information.
-  *
   */
 object RidesAndFaresExercise {
 
-  def main(args: Array[String]) {
+  class RidesAndFaresJob(rideSource: SourceFunction[TaxiRide],
+                         fareSource: SourceFunction[TaxiFare],
+                         sink: SinkFunction[RideAndFare]) {
 
-    // set up streaming execution environment
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(ExerciseBase.parallelism)
+    def execute(): JobExecutionResult = {
+      val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    val rides = env
-      .addSource(rideSourceOrTest(new TaxiRideGenerator()))
-      .filter { ride => ride.isStart }
-      .keyBy { ride => ride.rideId }
+      val rides = env
+        .addSource(rideSource)
+        .filter { ride =>
+          ride.isStart
+        }
+        .keyBy { ride =>
+          ride.rideId
+        }
 
-    val fares = env
-      .addSource(fareSourceOrTest(new TaxiFareGenerator()))
-      .keyBy { fare => fare.rideId }
+      val fares = env
+        .addSource(fareSource)
+        .keyBy { fare =>
+          fare.rideId
+        }
 
-    val processed = rides
-      .connect(fares)
-      .flatMap(new EnrichmentFunction)
+      rides
+        .connect(fares)
+        .flatMap(new EnrichmentFunction())
+        .addSink(sink)
 
-    printOrTest(processed)
-
-    env.execute("Join Rides with Fares (scala RichCoFlatMap)")
+      env.execute()
+    }
   }
 
-  class EnrichmentFunction extends RichCoFlatMapFunction[TaxiRide, TaxiFare, (TaxiRide, TaxiFare)] {
+  @throws[Exception]
+  def main(args: Array[String]): Unit = {
+    val job =
+      new RidesAndFaresJob(new TaxiRideGenerator, new TaxiFareGenerator, new PrintSinkFunction)
 
-    override def flatMap1(ride: TaxiRide, out: Collector[(TaxiRide, TaxiFare)]): Unit = {
+    job.execute()
+  }
+
+  class EnrichmentFunction() extends RichCoFlatMapFunction[TaxiRide, TaxiFare, RideAndFare] {
+
+    override def open(parameters: Configuration): Unit = {
       throw new MissingSolutionException()
     }
 
-    override def flatMap2(fare: TaxiFare, out: Collector[(TaxiRide, TaxiFare)]): Unit = {
+    override def flatMap1(ride: TaxiRide, out: Collector[RideAndFare]): Unit = {
+      throw new MissingSolutionException()
     }
 
+    override def flatMap2(fare: TaxiFare, out: Collector[RideAndFare]): Unit = {
+      throw new MissingSolutionException()
+    }
   }
 
 }

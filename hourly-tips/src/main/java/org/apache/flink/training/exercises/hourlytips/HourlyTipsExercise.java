@@ -18,20 +18,35 @@
 
 package org.apache.flink.training.exercises.hourlytips;
 
+import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
-import org.apache.flink.training.exercises.common.utils.ExerciseBase;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 
 /**
- * The "Hourly Tips" exercise of the Flink training in the docs.
+ * The Hourly Tips exercise from the Flink training.
  *
  * <p>The task of the exercise is to first calculate the total tips collected by each driver, hour
  * by hour, and then from that stream, find the highest tip total in each hour.
  */
-public class HourlyTipsExercise extends ExerciseBase {
+public class HourlyTipsExercise {
+
+    private final SourceFunction<TaxiFare> source;
+    private final SinkFunction<Tuple3<Long, Long, Float>> sink;
+
+    /** Creates a job using the source and sink provided. */
+    public HourlyTipsExercise(
+            SourceFunction<TaxiFare> source, SinkFunction<Tuple3<Long, Long, Float>> sink) {
+
+        this.source = source;
+        this.sink = sink;
+    }
 
     /**
      * Main method.
@@ -40,18 +55,39 @@ public class HourlyTipsExercise extends ExerciseBase {
      */
     public static void main(String[] args) throws Exception {
 
+        HourlyTipsExercise job =
+                new HourlyTipsExercise(new TaxiFareGenerator(), new PrintSinkFunction<>());
+
+        job.execute();
+    }
+
+    /**
+     * Create and execute the hourly tips pipeline.
+     *
+     * @return {JobExecutionResult}
+     * @throws Exception which occurs during job execution.
+     */
+    public JobExecutionResult execute() throws Exception {
+
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(ExerciseBase.parallelism);
 
         // start the data generator
-        DataStream<TaxiFare> fares = env.addSource(fareSourceOrTest(new TaxiFareGenerator()));
+        DataStream<TaxiFare> fares = env.addSource(source);
 
-        throw new MissingSolutionException();
+        // replace this with your solution
+        if (true) {
+            throw new MissingSolutionException();
+        }
 
-        //		printOrTest(hourlyMax);
+        // the results should be sent to the sink that was passed in
+        // (otherwise the tests won't work)
+        // you can end the pipeline with something like this:
 
-        // execute the transformation pipeline
-        //		env.execute("Hourly Tips (java)");
+        // DataStream<Tuple3<Long, Long, Float>> hourlyMax = ...
+        // hourlyMax.addSink(sink);
+
+        // execute the pipeline and return the result
+        return env.execute("Hourly Tips");
     }
 }

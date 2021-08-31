@@ -49,10 +49,12 @@ This exercise uses these classes:
 
 ### Tests
 
-You will find the test for this exercise in
+You will find the tests for this exercise in
 
-- Java:  [`org.apache.flink.training.exercises.ridecleansing.RideCleansingTest`](src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingTest.java)
-- Scala: [`org.apache.flink.training.exercises.ridecleansing.scala.RideCleansingTest`](src/test/scala/org/apache/flink/training/exercises/ridecleansing/scala/RideCleansingTest.scala)
+- Java:  [`org.apache.flink.training.exercises.ridecleansing.RideCleansingIntegrationTest`](src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingIntegrationTest.java)
+- Java:  [`org.apache.flink.training.exercises.ridecleansing.RideCleansingUnitTest`](src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingUnitTest.java)
+- Scala: [`org.apache.flink.training.exercises.ridecleansing.scala.RideCleansingIntegrationTest`](src/test/scala/org/apache/flink/training/exercises/ridecleansing/scala/RideCleansingIntegrationTest.scala)
+- Scala: [`org.apache.flink.training.exercises.ridecleansing.scala.RideCleansingUnitTest`](src/test/scala/org/apache/flink/training/exercises/ridecleansing/scala/RideCleansingUnitTest.scala)
 
 Like most of these exercises, at some point the `RideCleansingExercise` class throws an exception
 

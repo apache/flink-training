@@ -19,7 +19,6 @@
 package org.apache.flink.training.exercises.common.sources;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 
 import java.util.ArrayList;
@@ -28,10 +27,9 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 /**
- * This SourceFunction generates a data stream of TaxiRide records that include event time
- * timestamps.
+ * This SourceFunction generates a data stream of TaxiRide records.
  *
- * <p>The stream is produced out-of-order, and includes Watermarks (with no late events).
+ * <p>The stream is produced out-of-order.
  */
 public class TaxiRideGenerator implements SourceFunction<TaxiRide> {
 
@@ -66,7 +64,7 @@ public class TaxiRideGenerator implements SourceFunction<TaxiRide> {
             // (this allows a few END events to precede their matching START event)
             while (endEventQ.peek().getEventTime() <= maxStartTime) {
                 TaxiRide ride = endEventQ.poll();
-                ctx.collectWithTimestamp(ride, ride.getEventTime());
+                ctx.collect(ride);
             }
 
             // then emit the new START events (out-of-order)
@@ -74,9 +72,6 @@ public class TaxiRideGenerator implements SourceFunction<TaxiRide> {
             startEvents
                     .iterator()
                     .forEachRemaining(r -> ctx.collectWithTimestamp(r, r.getEventTime()));
-
-            // produce a Watermark
-            ctx.emitWatermark(new Watermark(maxStartTime));
 
             // prepare for the next batch
             id += BATCH_SIZE;

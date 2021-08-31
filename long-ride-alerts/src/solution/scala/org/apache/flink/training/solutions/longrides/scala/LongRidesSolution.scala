@@ -18,81 +18,124 @@
 
 package org.apache.flink.training.solutions.longrides.scala
 
-import scala.concurrent.duration._
+import org.apache.flink.api.common.JobExecutionResult
+import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
+import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
+import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
-import org.apache.flink.training.exercises.common.utils.ExerciseBase
-import org.apache.flink.training.exercises.common.utils.ExerciseBase._
 import org.apache.flink.util.Collector
 
+import java.time.Duration
+import scala.concurrent.duration._
+
 /**
-  * Scala reference implementation for the "Long Ride Alerts" exercise of the Flink training in the docs.
+  * Scala solution for the "Long Ride Alerts" exercise.
   *
-  * The goal for this exercise is to emit START events for taxi rides that have not been matched
-  * by an END event during the first 2 hours of the ride.
+  * <p>The goal for this exercise is to emit the rideIds for taxi rides with a duration of more than
+  * two hours. You should assume that TaxiRide events can be lost, but there are no duplicates.
   *
+  * <p>You should eventually clear any state you create.
   */
 object LongRidesSolution {
 
-  def main(args: Array[String]) {
+  class LongRidesJob(source: SourceFunction[TaxiRide], sink: SinkFunction[Long]) {
 
-    // set up the execution environment
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
-    // operate in Event-time
-    env.setParallelism(ExerciseBase.parallelism)
+    /**
+      * Creates and executes the ride cleansing pipeline.
+      */
+    @throws[Exception]
+    def execute(): JobExecutionResult = {
+      val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    val rides = env.addSource(rideSourceOrTest(new TaxiRideGenerator()))
+      // start the data generator
+      val rides = env.addSource(source)
 
-    val longRides = rides
-      .keyBy(_.rideId)
-      .process(new MatchFunction())
+      // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
+      val watermarkStrategy = WatermarkStrategy
+        .forBoundedOutOfOrderness[TaxiRide](Duration.ofSeconds(60))
+        .withTimestampAssigner(new SerializableTimestampAssigner[TaxiRide] {
+          override def extractTimestamp(ride: TaxiRide, streamRecordTimestamp: Long): Long =
+            ride.getEventTime
+        })
 
-    printOrTest(longRides)
+      // create the pipeline
+      rides
+        .assignTimestampsAndWatermarks(watermarkStrategy)
+        .keyBy(_.rideId)
+        .process(new AlertFunction())
+        .addSink(sink)
 
-    env.execute("Long Taxi Rides")
+      // execute the pipeline
+      env.execute("Long Taxi Rides")
+    }
+
   }
 
-  class MatchFunction extends KeyedProcessFunction[Long, TaxiRide, TaxiRide] {
-    lazy val rideState: ValueState[TaxiRide] = getRuntimeContext.getState(
-      new ValueStateDescriptor[TaxiRide]("ride event", classOf[TaxiRide]))
+  @throws[Exception]
+  def main(args: Array[String]): Unit = {
+    val job = new LongRidesJob(new TaxiRideGenerator, new PrintSinkFunction)
+
+    job.execute()
+  }
+
+  class AlertFunction extends KeyedProcessFunction[Long, TaxiRide, Long] {
+    private var rideState: ValueState[TaxiRide] = _
+
+    override def open(parameters: Configuration): Unit = {
+      rideState = getRuntimeContext.getState(
+        new ValueStateDescriptor[TaxiRide]("ride event", classOf[TaxiRide]))
+    }
 
     override def processElement(ride: TaxiRide,
-                                context: KeyedProcessFunction[Long, TaxiRide, TaxiRide]#Context,
-                                out: Collector[TaxiRide]): Unit = {
+                                context: KeyedProcessFunction[Long, TaxiRide, Long]#Context,
+                                out: Collector[Long]): Unit = {
 
-      val previousRideEvent = rideState.value()
+      val firstRideEvent = rideState.value()
 
-      if (previousRideEvent == null) {
+      if (firstRideEvent == null) {
         rideState.update(ride)
         if (ride.isStart) {
-          context.timerService().registerEventTimeTimer(getTimerTime(ride))
+          context.timerService.registerEventTimeTimer(getTimerTime(ride))
+        } else if (rideTooLong(ride)) {
+          out.collect(ride.rideId)
         }
       } else {
-        if (!ride.isStart) {
-          // it's an END event, so event saved was the START event and has a timer
-          // the timer hasn't fired yet, and we can safely kill the timer
-          context.timerService().deleteEventTimeTimer(getTimerTime(previousRideEvent))
+        if (ride.isStart) {
+          // There's nothing to do but clear the state (which is done below).
+        } else {
+          // There may be a timer that hasn't fired yet.
+          context.timerService.deleteEventTimeTimer(getTimerTime(firstRideEvent))
+
+          // It could be that the ride has gone on too long, but the timer hasn't fired yet.
+          if (rideTooLong(ride)) {
+            out.collect(ride.rideId)
+          }
         }
-        // both events have now been seen, we can clear the state
+        // Both events have now been seen, we can clear the state.
         rideState.clear()
       }
     }
 
     override def onTimer(timestamp: Long,
-                         ctx: KeyedProcessFunction[Long, TaxiRide, TaxiRide]#OnTimerContext,
-                         out: Collector[TaxiRide]): Unit = {
+                         ctx: KeyedProcessFunction[Long, TaxiRide, Long]#OnTimerContext,
+                         out: Collector[Long]): Unit = {
 
-      // if we get here, we know that the ride started two hours ago, and the END hasn't been processed
-      out.collect(rideState.value())
+      // The timer only fires if the ride was too long.
+      out.collect(rideState.value().rideId)
       rideState.clear()
     }
 
-    private def getTimerTime(ride: TaxiRide) = {
-      ride.startTime.toEpochMilli + 2.hours.toMillis
-    }
+    private def rideTooLong(rideEndEvent: TaxiRide) =
+      Duration
+        .between(rideEndEvent.startTime, rideEndEvent.endTime)
+        .compareTo(Duration.ofHours(2)) > 0
+
+    private def getTimerTime(ride: TaxiRide) = ride.startTime.toEpochMilli + 2.hours.toMillis
   }
 
 }

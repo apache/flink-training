@@ -37,7 +37,6 @@ Exercises that accompany the training content in the documentation.
 [**How to do the lab exercises**](#how-to-do-the-lab-exercises)
 
 1. [Learn about the data](#learn-about-the-data)
-1. [Modify `ExerciseBase`](#modify-exercisebase)
 1. [Run and debug Flink programs in your IDE](#run-and-debug-flink-programs-in-your-ide)
 1. [Exercises, tests, and solutions](#exercises-tests-and-solutions)
 

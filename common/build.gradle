@@ -17,6 +17,9 @@ dependencies {
     shadow "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}"
 
     testApi "junit:junit:${junitVersion}"
+    testApi "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
+    testApi "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}:tests"
     testApi "org.apache.flink:flink-test-utils-junit:${flinkVersion}"
-    testApi 'org.hamcrest:hamcrest-library:1.3'
+    testApi "org.apache.flink:flink-test-utils_${scalaBinaryVersion}:${flinkVersion}"
+    testApi 'org.assertj:assertj-core:3.20.2'
 }

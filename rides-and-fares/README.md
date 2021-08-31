@@ -27,7 +27,7 @@ For each distinct `rideId`, there are exactly three events:
 1. a `TaxiRide` END event
 1. a `TaxiFare` event (whose timestamp happens to match the start time)
 
-The result should be a `DataStream<Tuple2<TaxiRide, TaxiFare>>`, with one record for each distinct `rideId`. Each tuple should pair the `TaxiRide` START event for some `rideId` with its matching `TaxiFare`.
+The result should be a `DataStream<RideAndFare>`, with one record for each distinct `rideId`. Each tuple should pair the `TaxiRide` START event for some `rideId` with its matching `TaxiFare`.
 
 ### Input Data
 
@@ -35,9 +35,13 @@ For this exercise you will work with two data streams, one with `TaxiRide` event
 
 ### Expected Output
 
-The result of this exercise is a data stream of `Tuple2<TaxiRide, TaxiFare>` records, one for each distinct `rideId`. The exercise is setup to ignore the END events, and you should join the event for the START of each ride with its corresponding fare event.
+The result of this exercise is a data stream of `RideAndFare` records, one for each distinct `rideId`. The exercise is setup to ignore the END events, and you should join the event for the START of each ride with its corresponding fare event.
 
-The resulting stream is printed to standard out.
+Once you have both the ride and fare that belong together, you can create the desired object for the output stream by using
+
+`new RideAndFare(ride, fare)`
+
+The stream will be printed to standard out.
 
 ## Getting Started
 
@@ -48,17 +52,17 @@ The resulting stream is printed to standard out.
 - Java:  [`org.apache.flink.training.exercises.ridesandfares.RidesAndFaresExercise`](src/main/java/org/apache/flink/training/exercises/ridesandfares/RidesAndFaresExercise.java)
 - Scala: [`org.apache.flink.training.exercises.ridesandfares.scala.RidesAndFaresExercise`](src/main/scala/org/apache/flink/training/exercises/ridesandfares/scala/RidesAndFaresExercise.scala)
 
-### Tests
+### Integration Tests
 
-- Java:  [`org.apache.flink.training.exercises.ridesandfares.RidesAndFaresTest`](src/test/java/org/apache/flink/training/exercises/ridesandfares/RidesAndFaresTest.java)
-- Scala: [`org.apache.flink.training.exercises.ridesandfares.scala.RidesAndFaresTest`](src/test/scala/org/apache/flink/training/exercises/ridesandfares/scala/RidesAndFaresTest.scala)
+- Java:  [`org.apache.flink.training.exercises.ridesandfares.RidesAndFaresIntegrationTest`](src/test/java/org/apache/flink/training/exercises/ridesandfares/RidesAndFaresIntegrationTest.java)
+- Scala: [`org.apache.flink.training.exercises.ridesandfares.scala.RidesAndFaresIntegrationTest`](src/test/scala/org/apache/flink/training/exercises/ridesandfares/scala/RidesAndFaresIntegrationTest.scala)
 
 ## Implementation Hints
 
 <details>
 <summary><strong>Program Structure</strong></summary>
 
-You can use a `RichCoFlatMap` to implement this join operation. Note that you have no control over the order of arrival of the ride and fare records for each rideId, so you'll need to be prepared to store either piece of information until the matching info arrives, at which point you can emit a `Tuple2<TaxiRide, TaxiFare>` joining the two records together.
+You can use a `RichCoFlatMap` to implement this join operation. Note that you have no control over the order of arrival of the ride and fare records for each rideId, so you'll need to be prepared to store either piece of information until the matching info arrives, at which point you can emit a `RideAndFare` joining the two records together.
 </details>
 
 <details>

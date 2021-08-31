@@ -18,6 +18,8 @@
 
 package org.apache.flink.training.exercises.common.datatypes;
 
+import org.apache.flink.annotation.VisibleForTesting;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.training.exercises.common.utils.DataGenerator;
 import org.apache.flink.training.exercises.common.utils.GeoUtils;
 
@@ -25,6 +27,7 @@ import javax.annotation.Nullable;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * A TaxiRide is a taxi ride event. There are two types of events, a taxi ride start event and a
@@ -153,13 +156,41 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof TaxiRide && this.rideId == ((TaxiRide) other).rideId;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TaxiRide taxiRide = (TaxiRide) o;
+        return rideId == taxiRide.rideId
+                && isStart == taxiRide.isStart
+                && Float.compare(taxiRide.startLon, startLon) == 0
+                && Float.compare(taxiRide.startLat, startLat) == 0
+                && Float.compare(taxiRide.endLon, endLon) == 0
+                && Float.compare(taxiRide.endLat, endLat) == 0
+                && passengerCnt == taxiRide.passengerCnt
+                && taxiId == taxiRide.taxiId
+                && driverId == taxiRide.driverId
+                && Objects.equals(startTime, taxiRide.startTime)
+                && Objects.equals(endTime, taxiRide.endTime);
     }
 
     @Override
     public int hashCode() {
-        return (int) this.rideId;
+        return Objects.hash(
+                rideId,
+                isStart,
+                startTime,
+                endTime,
+                startLon,
+                startLat,
+                endLon,
+                endLat,
+                passengerCnt,
+                taxiId,
+                driverId);
     }
 
     /** Gets the ride's time stamp (start or end time depending on {@link #isStart}). */
@@ -180,5 +211,17 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
             return GeoUtils.getEuclideanDistance(
                     (float) longitude, (float) latitude, this.endLon, this.endLat);
         }
+    }
+
+    /** Creates a StreamRecord, using the ride and its timestamp. Used in tests. */
+    @VisibleForTesting
+    public StreamRecord<TaxiRide> asStreamRecord() {
+        return new StreamRecord<>(this, this.getEventTime());
+    }
+
+    /** Creates a StreamRecord from this taxi ride, using its id and timestamp. Used in tests. */
+    @VisibleForTesting
+    public StreamRecord<Long> idAsStreamRecord() {
+        return new StreamRecord<>(this.rideId, this.getEventTime());
     }
 }

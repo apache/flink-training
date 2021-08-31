@@ -18,20 +18,16 @@
 
 package org.apache.flink.training.exercises.ridecleansing.scala
 
-import java.util
-
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 import org.apache.flink.training.exercises.ridecleansing
-import org.apache.flink.training.exercises.testing.TaxiRideTestBase
+import org.apache.flink.training.exercises.testing.ComposedFilterFunction
 import org.apache.flink.training.solutions.ridecleansing.scala.RideCleansingSolution
 
-class RideCleansingTest extends ridecleansing.RideCleansingTest{
-  private val scalaExercise: TaxiRideTestBase.Testable = () => RideCleansingExercise.main(Array.empty[String])
+class RideCleansingUnitTest extends ridecleansing.RideCleansingUnitTest {
 
-  @throws[Exception]
-  override protected def results(source: TaxiRideTestBase.TestRideSource): util.List[TaxiRide] = {
-    val scalaSolution: TaxiRideTestBase.Testable = () => RideCleansingSolution.main(Array.empty[String])
-    runApp(source, new TaxiRideTestBase.TestSink[TaxiRide], scalaExercise, scalaSolution)
+  override def filterFunction: ComposedFilterFunction[TaxiRide] = {
+    new ComposedFilterFunction[TaxiRide](new RideCleansingExercise.NYCFilter,
+                                         new RideCleansingSolution.NYCFilter)
   }
 
 }
