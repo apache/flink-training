@@ -4,6 +4,7 @@ jdk:
   - openjdk11
 
 script:
+  - ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=false
   - ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=true
 
 before_cache:
