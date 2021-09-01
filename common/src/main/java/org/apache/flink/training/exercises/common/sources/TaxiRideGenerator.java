@@ -69,9 +69,7 @@ public class TaxiRideGenerator implements SourceFunction<TaxiRide> {
 
             // then emit the new START events (out-of-order)
             java.util.Collections.shuffle(startEvents, new Random(id));
-            startEvents
-                    .iterator()
-                    .forEachRemaining(r -> ctx.collectWithTimestamp(r, r.getEventTimeMillis()));
+            startEvents.iterator().forEachRemaining(r -> ctx.collect(r));
 
             // prepare for the next batch
             id += BATCH_SIZE;
