@@ -10,7 +10,7 @@ import org.apache.flink.training.exercises.common.datatypes.RideAndFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.testing.ComposedRichCoFlatMapFunction;
-import org.apache.flink.training.solutions.ridesandfares.scala.RidesAndFaresSolution;
+import org.apache.flink.training.solutions.ridesandfares.RidesAndFaresSolution;
 
 import org.junit.Before;
 import org.junit.Test;
