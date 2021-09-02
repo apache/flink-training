@@ -35,6 +35,7 @@ public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
     private volatile boolean running = true;
     private Instant limitingTimestamp = Instant.MAX;
 
+    /** Create a bounded TaxiFareGenerator that runs only for the specified duration. */
     public static TaxiFareGenerator runFor(Duration duration) {
         TaxiFareGenerator generator = new TaxiFareGenerator();
         generator.limitingTimestamp = DataGenerator.BEGINNING.plus(duration);
