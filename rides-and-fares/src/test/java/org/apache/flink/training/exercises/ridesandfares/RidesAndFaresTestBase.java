@@ -8,8 +8,7 @@ import java.time.Instant;
 public class RidesAndFaresTestBase {
 
     public static TaxiRide testRide(long rideId) {
-        return new TaxiRide(
-                rideId, true, Instant.EPOCH, Instant.EPOCH, 0F, 0F, 0F, 0F, (short) 1, 0, rideId);
+        return new TaxiRide(rideId, true, Instant.EPOCH, 0F, 0F, 0F, 0F, (short) 1, 0, rideId);
     }
 
     public static TaxiFare testFare(long rideId) {

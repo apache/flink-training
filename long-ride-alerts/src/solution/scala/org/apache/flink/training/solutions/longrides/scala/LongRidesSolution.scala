@@ -57,7 +57,7 @@ object LongRidesSolution {
         .forBoundedOutOfOrderness[TaxiRide](Duration.ofSeconds(60))
         .withTimestampAssigner(new SerializableTimestampAssigner[TaxiRide] {
           override def extractTimestamp(ride: TaxiRide, streamRecordTimestamp: Long): Long =
-            ride.getEventTime
+            ride.getEventTimeMillis
         })
 
       // create the pipeline
@@ -95,28 +95,35 @@ object LongRidesSolution {
         out: Collector[Long]
     ): Unit = {
 
-      val firstRideEvent = rideState.value()
+      val firstRideEvent: TaxiRide = rideState.value
 
       if (firstRideEvent == null) {
+        // whatever event comes first, remember it
         rideState.update(ride)
+
         if (ride.isStart) {
+          // we will use this timer to check for rides that have gone on too long and may
+          // not yet have an END event (or the END event could be missing)
           context.timerService.registerEventTimeTimer(getTimerTime(ride))
-        } else if (rideTooLong(ride)) {
-          out.collect(ride.rideId)
         }
       } else {
         if (ride.isStart) {
-          // There's nothing to do but clear the state (which is done below).
+          if (rideTooLong(ride, firstRideEvent)) {
+            out.collect(ride.rideId)
+          }
         } else {
-          // There may be a timer that hasn't fired yet.
+          // the first ride was a START event, so there is a timer unless it has fired
           context.timerService.deleteEventTimeTimer(getTimerTime(firstRideEvent))
 
-          // It could be that the ride has gone on too long, but the timer hasn't fired yet.
-          if (rideTooLong(ride)) {
+          // perhaps the ride has gone on too long, but the timer didn't fire yet
+          if (rideTooLong(firstRideEvent, ride)) {
             out.collect(ride.rideId)
           }
         }
-        // Both events have now been seen, we can clear the state.
+
+        // both events have now been seen, we can clear the state
+        // this solution can leak state if an event is missing
+        // see DISCUSSION.md for more information
         rideState.clear()
       }
     }
@@ -127,17 +134,19 @@ object LongRidesSolution {
         out: Collector[Long]
     ): Unit = {
 
-      // The timer only fires if the ride was too long.
+      // the timer only fires if the ride was too long
       out.collect(rideState.value().rideId)
+
+      // clearing now prevents duplicate alerts, but will leak state if the END arrives
       rideState.clear()
     }
 
-    private def rideTooLong(rideEndEvent: TaxiRide) =
+    private def rideTooLong(startEvent: TaxiRide, endEvent: TaxiRide) =
       Duration
-        .between(rideEndEvent.startTime, rideEndEvent.endTime)
+        .between(startEvent.eventTime, endEvent.eventTime)
         .compareTo(Duration.ofHours(2)) > 0
 
-    private def getTimerTime(ride: TaxiRide) = ride.startTime.toEpochMilli + 2.hours.toMillis
+    private def getTimerTime(ride: TaxiRide) = ride.eventTime.toEpochMilli + 2.hours.toMillis
   }
 
 }

@@ -56,7 +56,7 @@ object LongRidesExercise {
         .forBoundedOutOfOrderness[TaxiRide](Duration.ofSeconds(60))
         .withTimestampAssigner(new SerializableTimestampAssigner[TaxiRide] {
           override def extractTimestamp(ride: TaxiRide, streamRecordTimestamp: Long): Long =
-            ride.getEventTime
+            ride.getEventTimeMillis
         })
 
       // create the pipeline

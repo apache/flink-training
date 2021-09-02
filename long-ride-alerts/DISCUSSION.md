@@ -21,24 +21,35 @@ under the License.
 
 (Discussion of [Lab: `KeyedProcessFunction` and Timers (Long Ride Alerts)](./))
 
-Flaws in the reference solutions:
+### Analysis
 
-* The reference solutions leak state in the case where a START event is missing.
-* In the case where the END event eventually arrives, but after the timer
-has fired and has cleared the matching START event, then a duplicate alert is generated.
+These cases are worth noting:
 
-A good way to write unit tests for a `KeyedProcessFunction` to check for state retention, etc., is to
-use the test harnesses described in the
-[documentation on testing](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/testing.html#unit-testing-stateful-or-timely-udfs--custom-operators).
+* _The START event is missing_. Then END event will sit in state indefinitely (this is a leak!).
+* _The END event is missing_. The timer will fire and the state will be cleared (this is ok).
+* _The END event arrives after the timer has fired and cleared the state._ In this case the END
+event will be stored in state indefinitely (this is another leak!).
 
-These issues could be addressed by keeping some state longer, and then either
+These leaks could be addressed by either
 using [state TTL](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/state/state.html#state-time-to-live-ttl),
 or another timer, to eventually clear any lingering state.
 
-But regardless of how long we retain the state, we must eventually clear it, and thereafter we would
-still run the risk of extremely late events causing incorrect or duplicated results.
+### Bottom line
+
+Regardless of how clever we are with what state we keep, and how long we choose to keep it,
+we should eventually clear it -- because otherwise our state will grow in an unbounded fashion.
+And having lost that information, we will run the risk of late events causing incorrect or duplicated results.
+
 This tradeoff between keeping state indefinitely versus occasionally getting things wrong when events are
-exceptionally late is a challenge that is inherent to stateful stream processing.
+ late is a challenge that is inherent to stateful stream processing.
+
+### If you want to go further
+
+For each of these, add tests to check for the desired behavior.
+
+* Extend the solution so that it never leaks state.
+* Define what it means for an event to be missing, detect missing START and END events,
+and send some notification of this to a side output.
 
 -----
 

@@ -12,21 +12,19 @@ public class LongRidesTestBase {
     public static final Instant THREE_HOURS_LATER = BEGINNING.plusSeconds(180 * 60);
 
     public static TaxiRide startRide(long rideId, Instant startTime) {
-        return testRide(rideId, true, startTime, Instant.EPOCH);
+        return testRide(rideId, true, startTime);
     }
 
     public static TaxiRide endRide(TaxiRide started, Instant endTime) {
-        return testRide(started.rideId, false, started.startTime, endTime);
+        return testRide(started.rideId, false, endTime);
     }
 
-    private static TaxiRide testRide(
-            long rideId, Boolean isStart, Instant startTime, Instant endTime) {
+    private static TaxiRide testRide(long rideId, Boolean isStart, Instant eventTime) {
 
         return new TaxiRide(
                 rideId,
                 isStart,
-                startTime,
-                endTime,
+                eventTime,
                 -73.9947F,
                 40.750626F,
                 -73.9947F,

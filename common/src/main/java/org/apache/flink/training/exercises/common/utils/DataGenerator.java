@@ -25,8 +25,8 @@ import java.util.Random;
  * Data generator for the fields in TaxiRide and TaxiFare objects.
  *
  * <p>Results are deterministically determined by the rideId. This guarantees (among other things)
- * that the startTime for a TaxiRide START event matches the startTime for the TaxiRide END and
- * TaxiFare events for that same rideId.
+ * that the eventTime for a TaxiRide START event matches the startTime for the TaxiFare event for
+ * that same rideId.
  */
 public class DataGenerator {
 

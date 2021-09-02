@@ -153,9 +153,7 @@ rideId         : Long      // a unique id for each ride
 taxiId         : Long      // a unique id for each taxi
 driverId       : Long      // a unique id for each driver
 isStart        : Boolean   // TRUE for ride start events, FALSE for ride end events
-startTime      : Instant   // the start time of a ride
-endTime        : Instant   // the end time of a ride,
-                           //   "1970-01-01 00:00:00" for start events
+eventTime      : Instant   // the timestamp for this event
 startLon       : Float     // the longitude of the ride start location
 startLat       : Float     // the latitude of the ride start location
 endLon         : Float     // the longitude of the ride end location
@@ -171,7 +169,7 @@ There is also a related data set containing fare data about those same rides, wi
 rideId         : Long      // a unique id for each ride
 taxiId         : Long      // a unique id for each taxi
 driverId       : Long      // a unique id for each driver
-startTime      : Instant   // the start time of a ride
+startTime      : Instant   // the start time for this ride
 paymentType    : String    // CASH or CARD
 tip            : Float     // tip for this ride
 tolls          : Float     // tolls for this ride

@@ -39,23 +39,69 @@ public class LongRidesUnitTest extends LongRidesTestBase {
     }
 
     @Test
-    public void shouldAlertOnLongEndEvent() throws Exception {
+    public void shouldUseTimersAndState() throws Exception {
 
-        TaxiRide rideStartedButNotSent = startRide(1, BEGINNING);
-        TaxiRide endedThreeHoursLater = endRide(rideStartedButNotSent, THREE_HOURS_LATER);
+        TaxiRide rideStarted = startRide(1, BEGINNING);
+        harness.processElement(rideStarted.asStreamRecord());
 
-        harness.processElement(endedThreeHoursLater.asStreamRecord());
-        assertThat(harness.getOutput()).containsExactly(endedThreeHoursLater.idAsStreamRecord());
+        // check for state and timers
+        assertThat(harness.numEventTimeTimers()).isGreaterThan(0);
+        assertThat(harness.numKeyedStateEntries()).isGreaterThan(0);
+
+        TaxiRide endedOneMinuteLater = endRide(rideStarted, ONE_MINUTE_LATER);
+        harness.processElement(endedOneMinuteLater.asStreamRecord());
+
+        // in this case, state and timers should be gone now
+        assertThat(harness.numEventTimeTimers()).isZero();
+        assertThat(harness.numKeyedStateEntries()).isZero();
     }
 
     @Test
-    public void shouldNotAlertOnShortEndEvent() throws Exception {
+    public void shouldNotAlertWithStartFirst() throws Exception {
 
-        TaxiRide rideStartedButNotSent = startRide(1, BEGINNING);
-        TaxiRide endedOneMinuteLater = endRide(rideStartedButNotSent, ONE_MINUTE_LATER);
+        TaxiRide rideStarted = startRide(1, BEGINNING);
+        TaxiRide endedOneMinuteLater = endRide(rideStarted, ONE_MINUTE_LATER);
+
+        harness.processElement(rideStarted.asStreamRecord());
+        harness.processElement(endedOneMinuteLater.asStreamRecord());
+
+        assertThat(harness.getOutput()).isEmpty();
+    }
+
+    @Test
+    public void shouldNotAlertWithEndFirst() throws Exception {
+
+        TaxiRide rideStarted = startRide(1, BEGINNING);
+        TaxiRide endedOneMinuteLater = endRide(rideStarted, ONE_MINUTE_LATER);
 
         harness.processElement(endedOneMinuteLater.asStreamRecord());
+        harness.processElement(rideStarted.asStreamRecord());
+
         assertThat(harness.getOutput()).isEmpty();
+    }
+
+    @Test
+    public void shouldAlertWithStartFirst() throws Exception {
+
+        TaxiRide rideStarted = startRide(1, BEGINNING);
+        TaxiRide endedThreeHoursLater = endRide(rideStarted, THREE_HOURS_LATER);
+
+        harness.processElement(rideStarted.asStreamRecord());
+        harness.processElement(endedThreeHoursLater.asStreamRecord());
+
+        assertThat(resultingRideId()).isEqualTo(rideStarted.rideId);
+    }
+
+    @Test
+    public void shouldAlertWithEndFirst() throws Exception {
+
+        TaxiRide rideStarted = startRide(1, BEGINNING);
+        TaxiRide endedThreeHoursLater = endRide(rideStarted, THREE_HOURS_LATER);
+
+        harness.processElement(endedThreeHoursLater.asStreamRecord());
+        harness.processElement(rideStarted.asStreamRecord());
+
+        assertThat(resultingRideId()).isEqualTo(rideStarted.rideId);
     }
 
     @Test
@@ -98,10 +144,15 @@ public class LongRidesUnitTest extends LongRidesTestBase {
         StreamRecord<Long> rideIdAtTimeOfWatermark =
                 new StreamRecord<>(startOfLongRide.rideId, mark2HoursLater.getTimestamp());
         assertThat(harness.getOutput()).containsExactly(rideIdAtTimeOfWatermark, mark2HoursLater);
+    }
 
-        // Check that no state or timers are left behind
-        assertThat(harness.numKeyedStateEntries()).isZero();
-        assertThat(harness.numEventTimeTimers()).isZero();
+    private Long resultingRideId() {
+        ConcurrentLinkedQueue<Object> results = harness.getOutput();
+        assertThat(results.size())
+                .withFailMessage("Expecting test to have exactly one result")
+                .isEqualTo(1);
+        StreamRecord<Long> resultingRecord = (StreamRecord<Long>) results.element();
+        return resultingRecord.getValue();
     }
 
     private KeyedOneInputStreamOperatorTestHarness<Long, TaxiRide, Long> setupHarness(

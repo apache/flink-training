@@ -58,7 +58,7 @@ object HourlyTipsSolution {
         .forMonotonousTimestamps[TaxiFare]()
         .withTimestampAssigner(new SerializableTimestampAssigner[TaxiFare] {
           override def extractTimestamp(fare: TaxiFare, streamRecordTimestamp: Long): Long =
-            fare.getEventTime
+            fare.getEventTimeMillis
         })
 
       // setup the pipeline
