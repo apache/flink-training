@@ -42,8 +42,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
     /** Creates a new TaxiRide with now as start and end time. */
     public TaxiRide() {
-        this.startTime = Instant.now();
-        this.endTime = Instant.now();
+        this.eventTime = Instant.now();
     }
 
     /** Invents a TaxiRide. */
@@ -52,8 +51,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
         this.rideId = rideId;
         this.isStart = isStart;
-        this.startTime = g.startTime();
-        this.endTime = isStart ? Instant.ofEpochMilli(0) : g.endTime();
+        this.eventTime = isStart ? g.startTime() : g.endTime();
         this.startLon = g.startLon();
         this.startLat = g.startLat();
         this.endLon = g.endLon();
@@ -67,8 +65,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
     public TaxiRide(
             long rideId,
             boolean isStart,
-            Instant startTime,
-            Instant endTime,
+            Instant eventTime,
             float startLon,
             float startLat,
             float endLon,
@@ -78,8 +75,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
             long driverId) {
         this.rideId = rideId;
         this.isStart = isStart;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.eventTime = eventTime;
         this.startLon = startLon;
         this.startLat = startLat;
         this.endLon = endLon;
@@ -91,8 +87,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
 
     public long rideId;
     public boolean isStart;
-    public Instant startTime;
-    public Instant endTime;
+    public Instant eventTime;
     public float startLon;
     public float startLat;
     public float endLon;
@@ -108,9 +103,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
                 + ","
                 + (isStart ? "START" : "END")
                 + ","
-                + startTime.toString()
-                + ","
-                + endTime.toString()
+                + eventTime.toString()
                 + ","
                 + startLon
                 + ","
@@ -139,7 +132,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
         if (other == null) {
             return 1;
         }
-        int compareTimes = Long.compare(this.getEventTime(), other.getEventTime());
+        int compareTimes = this.eventTime.compareTo(other.eventTime);
         if (compareTimes == 0) {
             if (this.isStart == other.isStart) {
                 return 0;
@@ -173,8 +166,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
                 && passengerCnt == taxiRide.passengerCnt
                 && taxiId == taxiRide.taxiId
                 && driverId == taxiRide.driverId
-                && Objects.equals(startTime, taxiRide.startTime)
-                && Objects.equals(endTime, taxiRide.endTime);
+                && Objects.equals(eventTime, taxiRide.eventTime);
     }
 
     @Override
@@ -182,8 +174,7 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
         return Objects.hash(
                 rideId,
                 isStart,
-                startTime,
-                endTime,
+                eventTime,
                 startLon,
                 startLat,
                 endLon,
@@ -193,13 +184,9 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
                 driverId);
     }
 
-    /** Gets the ride's time stamp (start or end time depending on {@link #isStart}). */
-    public long getEventTime() {
-        if (isStart) {
-            return startTime.toEpochMilli();
-        } else {
-            return endTime.toEpochMilli();
-        }
+    /** Gets the ride's time stamp as a long in millis since the epoch. */
+    public long getEventTimeMillis() {
+        return eventTime.toEpochMilli();
     }
 
     /** Gets the distance from the ride location to the given one. */
@@ -216,12 +203,12 @@ public class TaxiRide implements Comparable<TaxiRide>, Serializable {
     /** Creates a StreamRecord, using the ride and its timestamp. Used in tests. */
     @VisibleForTesting
     public StreamRecord<TaxiRide> asStreamRecord() {
-        return new StreamRecord<>(this, this.getEventTime());
+        return new StreamRecord<>(this, this.getEventTimeMillis());
     }
 
     /** Creates a StreamRecord from this taxi ride, using its id and timestamp. Used in tests. */
     @VisibleForTesting
     public StreamRecord<Long> idAsStreamRecord() {
-        return new StreamRecord<>(this.rideId, this.getEventTime());
+        return new StreamRecord<>(this.rideId, this.getEventTimeMillis());
     }
 }

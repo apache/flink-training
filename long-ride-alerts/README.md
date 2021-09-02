@@ -27,7 +27,10 @@ This should be done using the event time timestamps and watermarks that are prov
 The stream is out-of-order, and it is possible that the END event for a ride will be processed before
 its START event.
 
-A START or END event may be missing, but you may assume there are no duplicated events.
+An END event may be missing, but you may assume there are no duplicated events, and no missing START events.
+
+It is not enough to simply wait for the END event and calculate the duration, as we want to be alerted
+about the long ride as soon as possible.
 
 You should eventually clear any state you create.
 
@@ -69,8 +72,6 @@ The resulting stream should be printed to standard out.
 This exercise revolves around using a `KeyedProcessFunction` to manage some state and event time timers,
 and doing so in a way that works even when the END event for a given `rideId` arrives before the START.
 The challenge is figuring out what state and timers to use, and when to set and clear the state (and timers).
-It is not enough to simply wait for the END event and calculate the duration, as the END event
-may be missing.
 </details>
 
 ## Documentation

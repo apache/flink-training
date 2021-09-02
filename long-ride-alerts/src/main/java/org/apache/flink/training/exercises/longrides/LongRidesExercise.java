@@ -71,7 +71,7 @@ public class LongRidesExercise {
         WatermarkStrategy<TaxiRide> watermarkStrategy =
                 WatermarkStrategy.<TaxiRide>forBoundedOutOfOrderness(Duration.ofSeconds(60))
                         .withTimestampAssigner(
-                                (ride, streamRecordTimestamp) -> ride.getEventTime());
+                                (ride, streamRecordTimestamp) -> ride.getEventTimeMillis());
 
         // create the pipeline
         rides.assignTimestampsAndWatermarks(watermarkStrategy)

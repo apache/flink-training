@@ -74,7 +74,7 @@ public class LongRidesSolution {
         WatermarkStrategy<TaxiRide> watermarkStrategy =
                 WatermarkStrategy.<TaxiRide>forBoundedOutOfOrderness(Duration.ofSeconds(60))
                         .withTimestampAssigner(
-                                (ride, streamRecordTimestamp) -> ride.getEventTime());
+                                (ride, streamRecordTimestamp) -> ride.getEventTimeMillis());
 
         // create the pipeline
         rides.assignTimestampsAndWatermarks(watermarkStrategy)
@@ -105,9 +105,9 @@ public class LongRidesSolution {
 
         @Override
         public void open(Configuration config) {
-            ValueStateDescriptor<TaxiRide> stateDescriptor =
+            ValueStateDescriptor<TaxiRide> rideStateDescriptor =
                     new ValueStateDescriptor<>("ride event", TaxiRide.class);
-            rideState = getRuntimeContext().getState(stateDescriptor);
+            rideState = getRuntimeContext().getState(rideStateDescriptor);
         }
 
         @Override
@@ -117,29 +117,32 @@ public class LongRidesSolution {
             TaxiRide firstRideEvent = rideState.value();
 
             if (firstRideEvent == null) {
+                // whatever event comes first, remember it
                 rideState.update(ride);
 
                 if (ride.isStart) {
+                    // we will use this timer to check for rides that have gone on too long and may
+                    // not yet have an END event (or the END event could be missing)
                     context.timerService().registerEventTimeTimer(getTimerTime(ride));
-                } else {
-                    if (rideTooLong(ride)) {
-                        out.collect(ride.rideId);
-                    }
                 }
             } else {
                 if (ride.isStart) {
-                    // There's nothing to do but clear the state (which is done below).
+                    if (rideTooLong(ride, firstRideEvent)) {
+                        out.collect(ride.rideId);
+                    }
                 } else {
-                    // There may be a timer that hasn't fired yet.
+                    // the first ride was a START event, so there is a timer unless it has fired
                     context.timerService().deleteEventTimeTimer(getTimerTime(firstRideEvent));
 
-                    // It could be that the ride has gone on too long, but the timer hasn't fired
-                    // yet.
-                    if (rideTooLong(ride)) {
+                    // perhaps the ride has gone on too long, but the timer didn't fire yet
+                    if (rideTooLong(firstRideEvent, ride)) {
                         out.collect(ride.rideId);
                     }
                 }
-                // Both events have now been seen, we can clear the state.
+
+                // both events have now been seen, we can clear the state
+                // this solution can leak state if an event is missing
+                // see DISCUSSION.md for more information
                 rideState.clear();
             }
         }
@@ -148,19 +151,25 @@ public class LongRidesSolution {
         public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out)
                 throws Exception {
 
-            // The timer only fires if the ride was too long.
+            // the timer only fires if the ride was too long
             out.collect(rideState.value().rideId);
+
+            // clearing now prevents duplicate alerts, but will leak state if the END arrives
             rideState.clear();
         }
 
-        private boolean rideTooLong(TaxiRide rideEndEvent) {
-            return Duration.between(rideEndEvent.startTime, rideEndEvent.endTime)
+        private boolean rideTooLong(TaxiRide startEvent, TaxiRide endEvent) {
+            return Duration.between(startEvent.eventTime, endEvent.eventTime)
                             .compareTo(Duration.ofHours(2))
                     > 0;
         }
 
-        private long getTimerTime(TaxiRide ride) {
-            return ride.startTime.plusSeconds(120 * 60).toEpochMilli();
+        private long getTimerTime(TaxiRide ride) throws RuntimeException {
+            if (ride.isStart) {
+                return ride.eventTime.plusSeconds(120 * 60).toEpochMilli();
+            } else {
+                throw new RuntimeException("Can not get start time from END event.");
+            }
         }
     }
 }

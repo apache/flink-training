@@ -83,7 +83,8 @@ public class HourlyTipsSolution {
                         .assignTimestampsAndWatermarks(
                                 // taxi fares are in order
                                 WatermarkStrategy.<TaxiFare>forMonotonousTimestamps()
-                                        .withTimestampAssigner((fare, t) -> fare.getEventTime()));
+                                        .withTimestampAssigner(
+                                                (fare, t) -> fare.getEventTimeMillis()));
 
         // compute tips per hour for each driver
         DataStream<Tuple3<Long, Long, Float>> hourlyTips =
