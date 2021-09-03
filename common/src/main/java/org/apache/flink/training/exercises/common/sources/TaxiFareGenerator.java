@@ -46,13 +46,16 @@ public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
     public void run(SourceContext<TaxiFare> ctx) throws Exception {
 
         long id = 1;
-        Instant latestTimestamp = Instant.MIN;
 
-        while (running && (latestTimestamp.compareTo(limitingTimestamp) < 0)) {
+        while (running) {
             TaxiFare fare = new TaxiFare(id);
-            id += 1;
-            latestTimestamp = fare.startTime;
 
+            // don't emit events that exceed the specified limit
+            if (fare.startTime.compareTo(limitingTimestamp) >= 0) {
+                break;
+            }
+
+            ++id;
             ctx.collect(fare);
 
             // match our event production rate to that of the TaxiRideGenerator
