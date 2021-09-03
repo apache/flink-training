@@ -24,6 +24,7 @@ import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
+import org.apache.flink.training.exercises.common.utils.DataGenerator;
 import org.apache.flink.training.exercises.testing.ComposedPipeline;
 import org.apache.flink.training.exercises.testing.ExecutablePipeline;
 import org.apache.flink.training.exercises.testing.ParallelTestSource;
@@ -33,6 +34,7 @@ import org.apache.flink.training.solutions.hourlytips.HourlyTipsSolution;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -105,10 +107,8 @@ public class HourlyTipsTest {
         assertThat(results(source)).containsExactlyInAnyOrder(hour1, hour2);
     }
 
-    private static final Instant BEGINNING = Instant.parse("2020-01-01T12:00:00.00Z");
-
-    private Instant t(int minutes) {
-        return BEGINNING.plusSeconds(60L * minutes);
+    public Instant t(int minutes) {
+        return DataGenerator.BEGINNING.plus(Duration.ofMinutes(minutes));
     }
 
     private TaxiFare testFare(long driverId, Instant startTime, float tip) {

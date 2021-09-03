@@ -20,6 +20,10 @@ package org.apache.flink.training.exercises.common.sources;
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
+import org.apache.flink.training.exercises.common.utils.DataGenerator;
+
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * This SourceFunction generates a data stream of TaxiFare records.
@@ -29,6 +33,14 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
 
     private volatile boolean running = true;
+    private Instant limitingTimestamp = Instant.MAX;
+
+    /** Create a bounded TaxiFareGenerator that runs only for the specified duration. */
+    public static TaxiFareGenerator runFor(Duration duration) {
+        TaxiFareGenerator generator = new TaxiFareGenerator();
+        generator.limitingTimestamp = DataGenerator.BEGINNING.plus(duration);
+        return generator;
+    }
 
     @Override
     public void run(SourceContext<TaxiFare> ctx) throws Exception {
@@ -37,8 +49,13 @@ public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
 
         while (running) {
             TaxiFare fare = new TaxiFare(id);
-            id += 1;
 
+            // don't emit events that exceed the specified limit
+            if (fare.startTime.compareTo(limitingTimestamp) >= 0) {
+                break;
+            }
+
+            ++id;
             ctx.collect(fare);
 
             // match our event production rate to that of the TaxiRideGenerator
