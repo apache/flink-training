@@ -80,8 +80,8 @@ Flink's DataStream API features a `DataStream.filter(FilterFunction)` transforma
 
 ## Documentation
 
-- [DataStream API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/datastream_api.html)
-- [Flink JavaDocs](https://ci.apache.org/projects/flink/flink-docs-stable/api/java/)
+- [DataStream API](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/overview)
+- [Flink JavaDocs](https://nightlies.apache.org/flink/flink-docs-stable/api/java)
 
 ## Reference Solutions
 

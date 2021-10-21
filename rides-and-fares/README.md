@@ -77,7 +77,7 @@ For the purposes of this exercise it's okay to assume that the START and fare ev
 
 ## Documentation
 
-- [Working with State](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/state/index.html)
+- [Working with State](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/fault-tolerance/state)
 
 ## Reference Solutions
 

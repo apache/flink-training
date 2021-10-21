@@ -132,7 +132,7 @@ Then you should be able to open [`RideCleansingTest`](ride-cleansing/src/test/ja
 
 > **:information_source: Note for Scala users:** You will need to use IntelliJ with the JetBrains Scala plugin, and you will need to add a Scala 2.12 SDK to the Global Libraries section of the Project Structure as well as to the module you are working on.
 > IntelliJ will ask you for the latter when you open a Scala file.
-> Please note that Scala 2.12.8 and above are not supported (see [Flink Scala Versions](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/datastream/project-configuration/#scala-versions for details))!
+> Please note that Scala 2.12.8 and above are not supported (see [Flink Scala Versions](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/project-configuration/#scala-versions for details))!
 
 ## Use the taxi data streams
 

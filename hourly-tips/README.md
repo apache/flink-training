@@ -59,8 +59,8 @@ Note that it is possible to cascade one set of time windows after another, so lo
 
 ## Documentation
 
-- [Windows](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html)
-- [See the section on aggregations on windows](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/#datastream-transformations)
+- [Windows](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/operators/windows)
+- [See the section on aggregations on windows](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/operators/overview/#datastream-transformations)
 
 ## Reference Solutions
 

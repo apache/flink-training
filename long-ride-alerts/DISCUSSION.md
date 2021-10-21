@@ -31,7 +31,7 @@ These cases are worth noting:
 event will be stored in state indefinitely (this is another leak!).
 
 These leaks could be addressed by either
-using [state TTL](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/state/state.html#state-time-to-live-ttl),
+using [state TTL](https://nightlies.apache.org/flink/flink-docs-stable/docs/dev/datastream/fault-tolerance/state/#state-time-to-live-ttl),
 or another timer, to eventually clear any lingering state.
 
 ### Bottom line
