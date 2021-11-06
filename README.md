@@ -93,7 +93,7 @@ If you are in China, we recommend configuring the Maven repository to use a mirr
 ```groovy
     repositories {
         // for access from China, you may need to uncomment this line
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'https://maven.aliyun.com/repository/public/' }
         mavenCentral()
         maven {
             url "https://repository.apache.org/content/repositories/snapshots/"
