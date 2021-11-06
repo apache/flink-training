@@ -67,7 +67,7 @@ subprojects {
     // declare where to find the dependencies of your project
     repositories {
         // for access from China, you may need to uncomment this line
-        // maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        // maven { url 'https://maven.aliyun.com/repository/public/' }
         mavenCentral()
         maven {
             url "https://repository.apache.org/content/repositories/snapshots/"
