@@ -77,7 +77,7 @@ The challenge is figuring out what state and timers to use, and when to set and 
 ## Documentation
 
 - [ProcessFunction](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html)
-- [Working with State](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/state/index.html)
+- [Working with State](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/datastream/fault-tolerance/state)
 
 ## After you've completed the exercise
 
