@@ -87,6 +87,7 @@ subprojects {
         shadow "org.apache.flink:flink-java:${flinkVersion}"
         shadow "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
         shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "org.apache.flink:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
 
         if (project != project(":common")) {
             implementation project(path: ':common')
