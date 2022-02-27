@@ -17,6 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+[中文版](./README_zh.md)
+
 # Lab: Windowed Analytics (Hourly Tips)
 
 The task of the "Hourly Tips" exercise is to identify, for each hour, the driver earning the most tips. It's easiest to approach this in two steps: first use hour-long windows that compute the total tips for each driver during the hour, and then from that stream of window results, find the driver with the maximum tip total for each hour.
