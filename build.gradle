@@ -17,7 +17,7 @@
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
-    id "com.diffplug.spotless" version "5.14.2" apply false
+    id "com.diffplug.spotless" version "6.4.2" apply false
 }
 
 description = "Flink Training Exercises"
@@ -159,7 +159,7 @@ subprojects {
                         ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n' +
                         ' * See the License for the specific language governing permissions and\n' +
                         ' * limitations under the License.\n' +
-                        ' */\n', 'package '
+                        ' */\n\n', 'package '
             }
         }
     }
