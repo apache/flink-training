@@ -87,7 +87,7 @@ cd flink-training
 ./gradlew test shadowJar
 ```
 
-如果是第一次构建，将会下载此 Flink 练习项目的所有依赖项。这通常需要几分钟事件，但具体取决于互联网连接速度。
+如果是第一次构建，将会下载此 Flink 练习项目的所有依赖项。这通常需要几分钟时间，但具体取决于互联网连接速度。
 
 如果所有测试都通过并且构建成功，这说明你的实践练习已经开了一个好头。
 
@@ -114,7 +114,7 @@ cd flink-training
 <details>
 <summary><strong>启用 Scala (可选)</strong></summary>
 这个项目中的练习也可以使用 Scala ，但由于非 Scala 用户报告的一些问题，我们决定默认禁用 Scala。
-可以通过以下的方法修改 [`gradle.properties`](gradle.properties) 文件以重新启用所有 Scala 练习和解决方案：
+可以通过以下的方法修改 `gradle.properties` 文件以重新启用所有 Scala 练习和解决方案：
 
 [`gradle.properties`](gradle.properties) 文件如下：
 

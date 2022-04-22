@@ -41,7 +41,7 @@ under the License.
 
 ## 入门指南
 
-> :information_source: 最好在 IDE 的 flink-training 项目中找到这些类，而不是实用本节中源文件的链接。
+> :information_source: 最好在 IDE 的 flink-training 项目中找到这些类，而不是使用本节中源文件的链接。
 
 ### 练习相关类
 

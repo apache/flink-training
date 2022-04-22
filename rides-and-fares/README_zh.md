@@ -46,7 +46,7 @@ under the License.
 
 ## 入门指南
 
-> :information_source: 最好在 IDE 的 flink-training 项目中找到这些类，而不是实用本节中源文件的链接。
+> :information_source: 最好在 IDE 的 flink-training 项目中找到这些类，而不是使用本节中源文件的链接。
 
 ### 练习相关类
 
@@ -63,7 +63,7 @@ under the License.
 <details>
 <summary><strong>程序结构</strong></summary>
 
-可以使用 `RichCoFlatMap` 来实现连接操作。请注意，你无法控制每个 rideId 的车程和车费记录的到达顺序，因此需要存储一个事件，直到与其匹配事件到达。
+可以使用 `RichCoFlatMap` 来实现连接操作。请注意，你无法控制每个 rideId 的车程和车费记录的到达顺序，因此需要存储其中一个事件，直到与其匹配的另一事件到达。
 此时你可以创建并发出 `RideAndFare` 以将两条记录连接在一起。
 </details>
 

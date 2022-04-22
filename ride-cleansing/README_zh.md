@@ -38,7 +38,7 @@ under the License.
 
 ## 入门指南
 
-> :information_source: 最好在 IDE 的 flink-training 项目中找到这些类，而不是实用本节中源文件的链接。
+> :information_source: 最好在 IDE 的 flink-training 项目中找到这些类，而不是使用本节中源文件的链接。
 > IntelliJ 和 Eclipse 都可以轻松搜索和导航到类和文件。对于 IntelliJ，请参阅[搜索帮助](https://www.jetbrains.com/help/idea/searching-everywhere.html)，或者只需按 Shift 键两次，然后继续输入类似 `RideCleansing` 的内容，接着从弹出的选项中选择。
 
 ### 练习相关类
