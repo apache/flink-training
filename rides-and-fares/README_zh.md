@@ -27,7 +27,7 @@ under the License.
 1. `TaxiRide` END 事件
 1. 一个 `TaxiFare` 事件（其时间戳恰好与开始时间匹配）
 
-最终的结果应该是 `DataStream<RideAndFare>`，每个不同的 `rideId` 都产生一个 `RideAndFare` 记录。 
+最终的结果应该是 `DataStream<RideAndFare>`，每个不同的 `rideId` 都产生一个 `RideAndFare` 记录。
 每个 `RideAndFare` 都应该将某个 `rideId` 的 `TaxiRide` START 事件与其匹配的 `TaxiFare` 配对。
 
 ### 输入数据
@@ -37,7 +37,7 @@ under the License.
 
 ### 期望输出
 
-所希望的结果是一个 `RideAndFare` 记录的数据流，每个不同的 `rideId` 都有一条这样的记录。 
+所希望的结果是一个 `RideAndFare` 记录的数据流，每个不同的 `rideId` 都有一条这样的记录。
 本练习设置为忽略 END 事件，你应该连接每次乘车的 START 事件及其相应的车费事件。
 
 一旦具有了相互关联的车程和车费事件，你可以使用 `new RideAndFare(ride, fare)` 方法为输出流创建所需的对象。
@@ -76,7 +76,7 @@ under the License.
 ## 讨论
 
 出于练习的目的，可以假设 START 和 fare 事件完美配对。
-但是在现实世界的应用程序中，你应该担心每当一个事件丢失时，同一个 `rideId` 的另一个事件的状态将被永远保持。 
+但是在现实世界的应用程序中，你应该担心每当一个事件丢失时，同一个 `rideId` 的另一个事件的状态将被永远保持。
 在 [稍后的练习](../long-ride-alerts/README_zh.md) 中，我们将看到 `ProcessFunction` 和定时器，它们将有助于处理这样的情况。
 
 ## 相关文档
