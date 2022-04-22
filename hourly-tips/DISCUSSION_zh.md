@@ -17,13 +17,13 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-[中文版](./DISCUSSION_zh.md)
+# 练习讨论: 窗口分析（每小时小费）
 
-# Lab Discussion: Windowed Analytics (Hourly Tips)
+(关于[窗口分析（每小时小费）](./README_zh.md)的讨论)
 
-(Discussion of [Lab: Windowed Analytics (Hourly Tips)](./))
-
-The Java and Scala reference solutions illustrate two different approaches, though they have a lot of similarities. Both first compute the sum of the tips for every hour for each driver. In [`HourlyTipsSolution.java`](src/solution/java/org/apache/flink/training/solutions/hourlytips/HourlyTipsSolution.java) that looks like this,
+尽管有很多相似之处，Java 和 Scala 参考解决方案展示了两种不同的方法.
+两者首先都计算每个司机每小时的小费总和。
+[`HourlyTipsSolution.java`](src/solution/java/org/apache/flink/training/solutions/hourlytips/HourlyTipsSolution.java) 看起来像这样，
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyTips = fares
@@ -32,7 +32,7 @@ DataStream<Tuple3<Long, Long, Float>> hourlyTips = fares
     .process(new AddTips());
 ```
 
-where a `ProcessWindowFunction` does all the heavy lifting:
+其中， `ProcessWindowFunction` 完成了所有繁重的工作：
 
 ```java
 public static class AddTips extends ProcessWindowFunction<
@@ -48,9 +48,10 @@ public static class AddTips extends ProcessWindowFunction<
 }
 ```
 
-This is straightforward, but has the drawback that it is buffering all of the `TaxiFare` objects in the windows until the windows are triggered, which is less efficient than computing the sum of the tips incrementally, using a `reduce` or `agggregate` function.
+这很简单，但缺点是它会缓冲窗口中所有的 `TaxiFare` 对象，直到窗口被触发。
+相比使用 `reduce` 或 `aggregate` 方法来增量计算小费总额，这种方法的效率较低。
 
-The [Scala solution](src/solution/scala/org/apache/flink/training/solutions/hourlytips/scala/HourlyTipsSolution.scala) uses a `reduce` function
+[Scala 解决方案](src/solution/scala/org/apache/flink/training/solutions/hourlytips/scala/HourlyTipsSolution.scala)使用了 `reduce` 函数：
 
 ```scala
 val hourlyTips = fares
@@ -62,7 +63,7 @@ val hourlyTips = fares
     new WrapWithWindowInfo())
 ```
 
-along with this `ProcessWindowFunction`
+连同这样的 `ProcessWindowFunction`：
 
 ```scala
 class WrapWithWindowInfo() extends ProcessWindowFunction[(Long, Float), (Long, Long, Float), Long, TimeWindow] {
@@ -73,9 +74,9 @@ class WrapWithWindowInfo() extends ProcessWindowFunction[(Long, Float), (Long, L
 }
 ```
 
-to compute `hourlyTips`.
+以计算 `hourlyTips`.
 
-Having computed `hourlyTips`, it is a good idea to take a look at what this stream looks like. `hourlyTips.print()` yields something like this,
+计算出 `hourlyTips` 之后，让我们来看看这个流是什么样的。`hourlyTips.print()` 产生了类似这样的结果：
 
 ```
 2> (1577883600000,2013000185,33.0)
@@ -91,9 +92,9 @@ Having computed `hourlyTips`, it is a good idea to take a look at what this stre
 ...
 ```
 
-or in other words, lots of tuples for each hour that show for each driver, the sum of their tips for that hour.
+可以看到，每个小时都有大量的三元组显示每个司机在这一个小时内的小费总额。
 
-Now, how to find the maximum within each hour? The reference solutions both do this, more or less:
+现在，如何找到每个小时内的最大值？ 参考解决方案或多或少都这样做：
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
@@ -101,7 +102,7 @@ DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
     .maxBy(2);
 ```
 
-which works just fine, producing this stream of results:
+这样做也不错，因为它产生了正确的结果流：
 
 ```
 3> (1577883600000,2013000089,76.0)
@@ -112,7 +113,7 @@ which works just fine, producing this stream of results:
 4> (1577901600000,2013000072,123.0)
 ```
 
-But, what if we were to do this, instead?
+但是，如果换成这样呢？
 
 ```java
 DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
@@ -120,13 +121,11 @@ DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlyTips
     .maxBy(2);
 ```
 
-This says to group the stream of `hourlyTips` by timestamp, and within each timestamp, find the maximum of the sum of the tips.
-That sounds like it is exactly what we want. And while this alternative does find the same results,
-there are a couple of reasons why it is not a very good solution.
+这表示按时间戳对 `hourlyTips` 流进行分组，并在每个时间戳分组内找到小费总和的最大值，而听起来这正是我们想要的。
+虽然这个替代方案确实找到了相同的结果，但是有几个原因可以解释它为什么不是一个很好的解决方案。
 
-First, instead of producing a single result at the end of each window, with this approach we get a stream that is
-continuously reporting the maximum achieved so far, for each key (i.e., each hour), which is an awkward way to consume
-the result if all you wanted was a single value for each hour.
+首先，这种方法不是在每个窗口的结束时产生一个结果，而是创建了一个连续报告每个键值（即每小时）迄今为止达到的最大值的流。
+如果仅仅是想得到每个小时中的一个单一值的话，那么这是一种笨拙的消费方式。
 
 ```
 1> (1577883600000,2013000108,14.0)
@@ -145,10 +144,9 @@ the result if all you wanted was a single value for each hour.
 ...
 ```
 
-Second, Flink will be keeping in state the maximum seen so far for each key (each hour), forever.
-Flink has no idea that these keys are event-time timestamps, and that the watermarks could be used as
-an indicator of when this state can be cleared -- to get those semantics, we need to use windows.
+其次，Flink 将永远保持每个键值（每小时）迄今为止出现的最大值。
+Flink 不知道这些键值是事件的时间戳，也不知道水位线可以被用作何时清除此状态的指示器——为了获得这些语义，我们需要使用窗口。
 
 -----
 
-[**Back to Labs Overview**](../README.md#lab-exercises)
+[**返回练习概述**](../README_zh.md#lab-exercises)
