@@ -57,7 +57,7 @@ allprojects {
                     'KIND, either express or implied.  See the License for the\n' +
                     'specific language governing permissions and limitations\n' +
                     'under the License.\n' +
-                    '-->\n\n', '# '
+                    '-->\n\n', '(# )|(\\[.*\\]\\(.*\\))'
 
         }
 

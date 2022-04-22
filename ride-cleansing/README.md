@@ -17,6 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+[中文版](./README_zh.md)
+
 # Lab: Filtering a Stream (Ride Cleansing)
 
 If you haven't already done so, you'll need to first [setup your Flink development environment](../README.md). See [How to do the Labs](../README.md#how-to-do-the-labs) for an overall introduction to these exercises.

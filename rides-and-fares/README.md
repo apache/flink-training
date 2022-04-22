@@ -17,6 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+[中文版](./README_zh.md)
+
 # Lab: Stateful Enrichment (Rides and Fares)
 
 The goal of this exercise is to join together the `TaxiRide` and `TaxiFare` records for each ride.

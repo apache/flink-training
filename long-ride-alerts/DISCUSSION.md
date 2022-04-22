@@ -17,6 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+[中文版](./DISCUSSION_zh.md)
+
 # Lab Discussion: `KeyedProcessFunction` and Timers (Long Ride Alerts)
 
 (Discussion of [Lab: `KeyedProcessFunction` and Timers (Long Ride Alerts)](./))

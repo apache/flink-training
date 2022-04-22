@@ -17,6 +17,8 @@ specific language governing permissions and limitations
 under the License.
 -->
 
+[中文版](./README_zh.md)
+
 # Apache Flink Training Exercises
 
 Exercises that accompany the training content in the documentation.
