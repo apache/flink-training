@@ -24,7 +24,7 @@ description = "Flink Training Exercises"
 
 allprojects {
     group = 'org.apache.flink'
-    version = '1.14-SNAPSHOT'
+    version = '1.15-SNAPSHOT'
 
     apply plugin: 'com.diffplug.spotless'
 
@@ -95,7 +95,7 @@ subprojects {
 
     ext {
         javaVersion = '1.8'
-        flinkVersion = '1.14.0'
+        flinkVersion = '1.15.0'
         scalaBinaryVersion = '2.12'
         log4jVersion = '2.12.1'
         junitVersion = '4.13'
@@ -126,13 +126,13 @@ subprojects {
         shadow "org.apache.logging.log4j:log4j-api:${log4jVersion}"
         shadow "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
-        shadow "org.apache.flink:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "org.apache.flink:flink-clients:${flinkVersion}"
         shadow "org.apache.flink:flink-java:${flinkVersion}"
-        shadow "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "org.apache.flink:flink-streaming-java:${flinkVersion}"
         shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
 
         // allows using Flink's web UI when running in the IDE:
-        shadow "org.apache.flink:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "org.apache.flink:flink-runtime-web:${flinkVersion}"
 
         if (project != project(":common")) {
             implementation project(path: ':common')

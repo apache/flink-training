@@ -28,9 +28,9 @@ java {
 // common set of dependencies
 dependencies {
     testApi "junit:junit:${junitVersion}"
-    testApi "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
+    testApi "org.apache.flink:flink-streaming-java:${flinkVersion}:tests"
     testApi "org.apache.flink:flink-runtime:${flinkVersion}:tests"
     testApi "org.apache.flink:flink-test-utils-junit:${flinkVersion}"
-    testApi "org.apache.flink:flink-test-utils_${scalaBinaryVersion}:${flinkVersion}"
+    testApi "org.apache.flink:flink-test-utils:${flinkVersion}"
     testApi 'org.assertj:assertj-core:3.20.2'
 }
