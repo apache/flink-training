@@ -19,6 +19,8 @@
 package org.apache.flink.training.exercises.ridesandfares;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -99,19 +101,73 @@ public class RidesAndFaresExercise {
     public static class EnrichmentFunction
             extends RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> {
 
+        private ValueState<TaxiRide> taxiRideValueState;
+        private ValueState<TaxiFare> taxiFareValueState;
+        private ValueState<Boolean> processedValueState;
+
+        /***
+         *
+         * Initializes the two states. One state for the taxiRide and another one for the taxiFare
+         *
+         * @param config The configuration containing the parameters attached to the contract.
+         * @throws Exception
+         */
         @Override
         public void open(Configuration config) throws Exception {
-            throw new MissingSolutionException();
+            taxiRideValueState = getRuntimeContext().getState(new ValueStateDescriptor<TaxiRide>("taxiRide", TaxiRide.class));
+            taxiFareValueState = getRuntimeContext().getState(new ValueStateDescriptor<TaxiFare>("taxiFare", TaxiFare.class));
+            processedValueState = getRuntimeContext().getState(new ValueStateDescriptor<Boolean>("processed", Boolean.class));
         }
 
+        /**
+         *
+         * In case a taxiRide stream element arrives and a taxiFare of the same key (rideId) is stored in the state, then we can add a new {@link RideAndFare} element to the output stream
+         * Finally we clear both states (taxiFare and taxiRide) to avoid duplicates
+         *
+         * @param ride The stream element
+         * @param out The collector to emit resulting elements to
+         * @throws Exception
+         */
         @Override
         public void flatMap1(TaxiRide ride, Collector<RideAndFare> out) throws Exception {
-            throw new MissingSolutionException();
+            if(Boolean.TRUE.equals(processedValueState.value())) {
+                return;
+            }
+            TaxiFare taxiFare = taxiFareValueState.value();
+            if (taxiFare != null) {
+                clearState();
+                out.collect(new RideAndFare(ride, taxiFare));
+                processedValueState.update(true);
+            } else {
+                taxiRideValueState.update(ride);
+            }
         }
 
+        /**
+         * In case a taxiFare stream element arrives and a taxiRide of the same key (rideId) is stored in the state, then we can add a new {@link RideAndFare} element to the output stream
+         * Finally we clear both states (taxiFare and taxiRide) to avoid duplicates
+         * @param fare The stream element
+         * @param out The collector to emit resulting elements to
+         * @throws Exception
+         */
         @Override
         public void flatMap2(TaxiFare fare, Collector<RideAndFare> out) throws Exception {
-            throw new MissingSolutionException();
+            if(Boolean.TRUE.equals(processedValueState.value())) {
+                return;
+            }
+            TaxiRide taxiRide = taxiRideValueState.value();
+            if (taxiRide != null) {
+                clearState();
+                out.collect(new RideAndFare(taxiRide, fare));
+                processedValueState.update(true);
+            } else {
+                taxiFareValueState.update(fare);
+            }
+        }
+
+        private void clearState() {
+            taxiRideValueState.clear();
+            taxiFareValueState.clear();
         }
     }
 }

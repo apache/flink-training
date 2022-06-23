@@ -76,6 +76,36 @@ public class RidesAndFaresIntegrationTest extends RidesAndFaresTestBase {
                         new RideAndFare(ride4, fare4));
     }
 
+
+    @Test
+    public void testDuplicateRidesAndFaresMixedTogether() throws Exception {
+        final TaxiRide ride1 = testRide(1);
+        final TaxiFare fare1 = testFare(1);
+
+        final TaxiRide ride2 = testRide(2);
+        final TaxiFare fare2 = testFare(2);
+
+        final TaxiRide ride3 = testRide(3);
+        final TaxiFare fare3 = testFare(3);
+
+        final TaxiRide ride4 = testRide(4);
+        final TaxiFare fare4 = testFare(4);
+
+
+        ParallelTestSource<TaxiRide> rides = new ParallelTestSource<>(ride1, ride1, ride4, ride1, ride3, ride2);
+        ParallelTestSource<TaxiFare> fares = new ParallelTestSource<>(fare2, fare4, fare1, fare1, fare1, fare3);
+        TestSink<RideAndFare> sink = new TestSink<>();
+
+        JobExecutionResult jobResult = ridesAndFaresPipeline().execute(rides, fares, sink);
+        assertThat(sink.getResults(jobResult))
+              .containsExactlyInAnyOrder(
+                    new RideAndFare(ride1, fare1),
+                    new RideAndFare(ride2, fare2),
+                    new RideAndFare(ride3, fare3),
+                    new RideAndFare(ride4, fare4));
+    }
+
+
     protected ComposedTwoInputPipeline<TaxiRide, TaxiFare, RideAndFare> ridesAndFaresPipeline() {
         ExecutableTwoInputPipeline<TaxiRide, TaxiFare, RideAndFare> exercise =
                 (rides, fares, sink) -> (new RidesAndFaresExercise(rides, fares, sink)).execute();
