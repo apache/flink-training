@@ -37,5 +37,5 @@ jobs:
       - name: Build without Scala
         run: ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=false
 
-      - name: Build without Scala
+      - name: Build with Scala
         run: ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=true
