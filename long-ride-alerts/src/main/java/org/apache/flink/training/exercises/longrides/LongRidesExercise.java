@@ -21,6 +21,8 @@ package org.apache.flink.training.exercises.longrides;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -97,18 +99,61 @@ public class LongRidesExercise {
 
     @VisibleForTesting
     public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
-
+        private ValueState<TaxiRide> rideState;
         @Override
         public void open(Configuration config) throws Exception {
-            throw new MissingSolutionException();
+            ValueStateDescriptor<TaxiRide> rideStateDescriptor =
+                    new ValueStateDescriptor<>("ride event", TaxiRide.class);
+            rideState = getRuntimeContext().getState(rideStateDescriptor);
         }
 
         @Override
         public void processElement(TaxiRide ride, Context context, Collector<Long> out)
-                throws Exception {}
+                throws Exception {
+            TaxiRide firstRideEvent = rideState.value();
+
+            if (firstRideEvent == null) {
+                // whatever event comes first, remember it
+                rideState.update(ride);
+
+                if (ride.isStart) {
+                    context.timerService().registerEventTimeTimer(getTimerTime(ride));
+                }
+            } else {
+                if (ride.isStart) {
+                    if (rideTooLong(ride, firstRideEvent)) {
+                        out.collect(ride.rideId);
+                    }
+                } else {
+                    context.timerService().deleteEventTimeTimer(getTimerTime(firstRideEvent));
+
+                    if (rideTooLong(firstRideEvent, ride)) {
+                        out.collect(ride.rideId);
+                    }
+                }
+
+                rideState.clear();
+            }
+        }
 
         @Override
         public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out)
-                throws Exception {}
+                throws Exception {
+            out.collect(rideState.value().rideId);
+            rideState.clear();
+        }
+        private boolean rideTooLong(TaxiRide startEvent, TaxiRide endEvent) {
+            return Duration.between(startEvent.eventTime, endEvent.eventTime)
+                    .compareTo(Duration.ofHours(2))
+                    > 0;
+        }
+
+        private long getTimerTime(TaxiRide ride) throws RuntimeException {
+            if (ride.isStart) {
+                return ride.eventTime.plusSeconds(120 * 60).toEpochMilli();
+            } else {
+                throw new RuntimeException("Can not get start time from END event.");
+            }
+        }
     }
 }
