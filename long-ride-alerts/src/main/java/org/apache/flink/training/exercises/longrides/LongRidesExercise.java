@@ -49,6 +49,8 @@ public class LongRidesExercise {
     private final SourceFunction<TaxiRide> source;
     private final SinkFunction<Long> sink;
 
+    private static final long serialVersionUID = 1L;
+
     /** Creates a job using the source and sink provided. */
     public LongRidesExercise(SourceFunction<TaxiRide> source, SinkFunction<Long> sink) {
         this.source = source;
@@ -99,7 +101,7 @@ public class LongRidesExercise {
 
     @VisibleForTesting
     public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
-        private ValueState<TaxiRide> rideState;
+        private transient ValueState<TaxiRide> rideState;
         @Override
         public void open(Configuration config) throws Exception {
             ValueStateDescriptor<TaxiRide> rideStateDescriptor =
