@@ -23,7 +23,7 @@ import org.apache.flink.api.common.functions.FilterFunction
 import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException
+import org.apache.flink.training.exercises.common.utils.{GeoUtils, MissingSolutionException}
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide
 
@@ -43,11 +43,11 @@ object RideCleansingExercise {
   }
 
   class RideCleansingJob(source: SourceFunction[TaxiRide], sink: SinkFunction[TaxiRide]) {
-
     /** Creates and executes the ride cleansing pipeline.
       */
     @throws[Exception]
     def execute(): JobExecutionResult = {
+
       val env = StreamExecutionEnvironment.getExecutionEnvironment
 
       // set up the pipeline
@@ -63,7 +63,8 @@ object RideCleansingExercise {
 
   /** Keep only those rides and both start and end in NYC. */
   class NYCFilter extends FilterFunction[TaxiRide] {
-    override def filter(taxiRide: TaxiRide): Boolean =
-      throw new MissingSolutionException()
+    override def filter(taxiRide: TaxiRide): Boolean = {
+      GeoUtils.isInNYC(taxiRide.startLon, taxiRide.startLat) && GeoUtils.isInNYC(taxiRide.endLon, taxiRide.endLat)
+    }
   }
 }
