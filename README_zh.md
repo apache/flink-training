@@ -134,7 +134,7 @@ org.gradle.project.enable_scala = true
 
 本项目应作为 gradle 项目导入到IDE中。
 
-然后应该可以打开 [`RideCleansingTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingTest.java) 并运行此测试。
+然后应该可以打开 [`RideCleansingTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingUnitTest.java) 并运行此测试。
 
 > **:information_source: Scala 用户须知:** 需要将 IntelliJ 与 JetBrains Scala 插件一起使用，并且需要将 Scala 2.12 SDK 添加到项目结构的全局库部分以及工作模块中。
 > 当打开 Scala 文件时，IntelliJ 会要求提供后者(JetBrains Scala 插件)。
