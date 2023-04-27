@@ -19,6 +19,8 @@
 package org.apache.flink.training.exercises.ridesandfares;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -31,7 +33,6 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
 
 /**
@@ -45,7 +46,9 @@ public class RidesAndFaresExercise {
     private final SourceFunction<TaxiFare> fareSource;
     private final SinkFunction<RideAndFare> sink;
 
-    /** Creates a job using the sources and sink provided. */
+    /**
+     * Creates a job using the sources and sink provided.
+     */
     public RidesAndFaresExercise(
             SourceFunction<TaxiRide> rideSource,
             SourceFunction<TaxiFare> fareSource,
@@ -57,10 +60,26 @@ public class RidesAndFaresExercise {
     }
 
     /**
-     * Creates and executes the pipeline using the StreamExecutionEnvironment provided.
+     * Main method.
      *
      * @throws Exception which occurs during job execution.
+     */
+    public static void main(String[] args) throws Exception {
+
+        RidesAndFaresExercise job =
+                new RidesAndFaresExercise(
+                        new TaxiRideGenerator(),
+                        new TaxiFareGenerator(),
+                        new PrintSinkFunction<>());
+
+        job.execute();
+    }
+
+    /**
+     * Creates and executes the pipeline using the StreamExecutionEnvironment provided.
+     *
      * @return {JobExecutionResult}
+     * @throws Exception which occurs during job execution.
      */
     public JobExecutionResult execute() throws Exception {
 
@@ -80,38 +99,37 @@ public class RidesAndFaresExercise {
         return env.execute("Join Rides with Fares");
     }
 
-    /**
-     * Main method.
-     *
-     * @throws Exception which occurs during job execution.
-     */
-    public static void main(String[] args) throws Exception {
-
-        RidesAndFaresExercise job =
-                new RidesAndFaresExercise(
-                        new TaxiRideGenerator(),
-                        new TaxiFareGenerator(),
-                        new PrintSinkFunction<>());
-
-        job.execute();
-    }
-
     public static class EnrichmentFunction
             extends RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> {
+        private transient ValueState<TaxiRide> taxiRideState;
+        private transient ValueState<TaxiFare> taxiFareState;
 
         @Override
         public void open(Configuration config) throws Exception {
-            throw new MissingSolutionException();
+            taxiRideState = getRuntimeContext().getState(new ValueStateDescriptor<>("saved taxi ride", TaxiRide.class));
+            taxiFareState = getRuntimeContext().getState(new ValueStateDescriptor<>("saved taxi fare", TaxiFare.class));
         }
 
         @Override
-        public void flatMap1(TaxiRide ride, Collector<RideAndFare> out) throws Exception {
-            throw new MissingSolutionException();
+        public void flatMap1(TaxiRide taxiRide, Collector<RideAndFare> out) throws Exception {
+            TaxiFare taxiFare = taxiFareState.value();
+            if (taxiFare != null) {
+                taxiFareState.clear();
+                out.collect(new RideAndFare(taxiRide, taxiFare));
+            } else {
+                taxiRideState.update(taxiRide);
+            }
         }
 
         @Override
-        public void flatMap2(TaxiFare fare, Collector<RideAndFare> out) throws Exception {
-            throw new MissingSolutionException();
+        public void flatMap2(TaxiFare taxiFare, Collector<RideAndFare> out) throws Exception {
+            TaxiRide taxiRide = taxiRideState.value();
+            if (taxiRide != null) {
+                taxiRideState.clear();
+                out.collect(new RideAndFare(taxiRide, taxiFare));
+            } else {
+                taxiFareState.update(taxiFare);
+            }
         }
     }
 }
