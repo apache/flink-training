@@ -24,7 +24,7 @@ description = "Flink Training Exercises"
 
 allprojects {
     group = 'org.apache.flink'
-    version = '1.16-SNAPSHOT'
+    version = '1.17-SNAPSHOT'
 
     apply plugin: 'com.diffplug.spotless'
 
@@ -95,7 +95,7 @@ subprojects {
 
     ext {
         javaVersion = '1.8'
-        flinkVersion = '1.16.0'
+        flinkVersion = '1.17.0'
         scalaBinaryVersion = '2.12'
         log4jVersion = '2.12.1'
         junitVersion = '4.13'
