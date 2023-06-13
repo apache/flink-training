@@ -19,7 +19,6 @@
 package org.apache.flink.training.exercises.ridesandfares;
 
 import org.apache.flink.api.common.JobExecutionResult;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
@@ -34,7 +33,6 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.GeoUtils;
 import org.apache.flink.util.Collector;
 
 /**
@@ -72,7 +70,6 @@ public class RidesAndFaresExercise {
         // A stream of taxi ride START events, keyed by rideId.
         DataStream<TaxiRide> rides =
                 env.addSource(rideSource)
-                        .filter(new NYCFilter())
                         .filter(ride -> ride.isStart)
                         .keyBy(ride -> ride.rideId);
 
@@ -86,14 +83,6 @@ public class RidesAndFaresExercise {
         return env.execute("Join Rides with Fares");
     }
 
-
-    private static class NYCFilter implements FilterFunction<TaxiRide> {
-
-        @Override
-        public boolean filter(TaxiRide taxiRide) {
-            return GeoUtils.isInNYC(taxiRide.startLon, taxiRide.endLat);
-        }
-    }
 
     /**
      * Main method.
@@ -116,23 +105,36 @@ public class RidesAndFaresExercise {
 
 
         private ValueState<TaxiRide> taxiRideValueState;
+        private ValueState<TaxiFare> taxiFareValueState;
 
         @Override
         public void open(Configuration config) {
             taxiRideValueState = getRuntimeContext().getState(new ValueStateDescriptor<>("taxiRideValueState", TaxiRide.class));
+            taxiFareValueState = getRuntimeContext().getState(new ValueStateDescriptor<>("taxiFareValueState", TaxiFare.class));
         }
 
 
         @Override
         public void flatMap1(TaxiRide ride, Collector<RideAndFare> out) throws Exception {
-            taxiRideValueState.update(ride);
+            TaxiFare taxiFare = taxiFareValueState.value();
+            if (taxiFare != null) {
+                out.collect(new RideAndFare(ride, taxiFare));
+                taxiFareValueState.clear();
+            } else {
+                taxiRideValueState.update(ride);
+            }
         }
 
         @Override
         public void flatMap2(TaxiFare fare, Collector<RideAndFare> out) throws Exception {
-            if (taxiRideValueState.value() != null && taxiRideValueState.value().rideId == fare.rideId) {
-                out.collect(new RideAndFare(taxiRideValueState.value(), fare));
+            TaxiRide taxiRide = taxiRideValueState.value();
+            if (taxiRide != null) {
+                out.collect(new RideAndFare(taxiRide, fare));
+                taxiRideValueState.clear();
+            } else {
+                taxiFareValueState.update(fare);
             }
         }
     }
+
 }
