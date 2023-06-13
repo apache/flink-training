@@ -92,6 +92,24 @@ public class RidesAndFaresUnitTest extends RidesAndFaresTestBase {
         assertThat(harness.getOutput()).containsExactly(expected);
     }
 
+    @Test
+    public void testRideStateCreatedButNotCleared() throws Exception {
+
+        TaxiRide ride2 = testRide(2);
+        TaxiFare fare3 = testFare(3);
+
+        // Stream in a ride and check that state was created
+        harness.processElement1(ride2.asStreamRecord());
+        assertThat(harness.numKeyedStateEntries()).isGreaterThan(0);
+
+        // The state will not be cleared as there are no matching ride
+        harness.processElement2(fare3.asStreamRecord());
+        assertThat(harness.numKeyedStateEntries()).isNotZero();
+
+        // Verify the result
+        assertThat(harness.getOutput()).isEmpty();
+    }
+
     private KeyedTwoInputStreamOperatorTestHarness<Long, TaxiRide, TaxiFare, RideAndFare>
             setupHarness(RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> function)
                     throws Exception {
