@@ -28,7 +28,7 @@ under the License.
 
 ### 输入数据
 
-此练习基于 `TaxiRide` 事件流，如[使用出租车数据流](../README.md#using-the-taxi-data-streams)中所述。
+此练习基于 `TaxiRide` 事件流，如[使用出租车数据流](../README_zh.md#using-the-taxi-data-streams)中所述。
 
 ### 期望输出
 
