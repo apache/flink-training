@@ -29,7 +29,9 @@ import org.apache.flink.training.exercises.testing.ComposedKeyedProcessFunction;
 import org.apache.flink.training.solutions.longrides.LongRidesSolution;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -50,6 +52,9 @@ public class LongRidesUnitTest extends LongRidesTestBase {
     protected ComposedKeyedProcessFunction composedAlertFunction() {
         return new ComposedKeyedProcessFunction<>(javaExercise, javaSolution);
     }
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     @Before
     public void setupTestHarness() throws Exception {
@@ -109,6 +114,17 @@ public class LongRidesUnitTest extends LongRidesTestBase {
 
         assertThat(resultingRideId()).isEqualTo(rideStarted.rideId);
     }
+
+    @Test
+    public void shouldThrowExceptionWhenIsStartFalse() throws Exception {
+        exceptionRule.expect(LongRidesException.class);
+        exceptionRule.expectMessage("Start time is not available in end event");
+        TaxiRide rideStarted = startRide(1, false, BEGINNING);
+        TaxiRide endedThreeHoursLater = endRide(rideStarted, THREE_HOURS_LATER);
+        harness.processElement(rideStarted.asStreamRecord());
+        harness.processElement(endedThreeHoursLater.asStreamRecord());
+    }
+
 
     @Test
     public void shouldAlertWithEndFirst() throws Exception {

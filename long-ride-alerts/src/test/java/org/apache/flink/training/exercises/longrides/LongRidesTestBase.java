@@ -33,6 +33,10 @@ public class LongRidesTestBase {
         return testRide(rideId, true, startTime);
     }
 
+    public static TaxiRide startRide(long rideId, boolean isStart, Instant startTime) {
+        return testRide(rideId, isStart, startTime);
+    }
+
     public static TaxiRide endRide(TaxiRide started, Instant endTime) {
         return testRide(started.rideId, false, endTime);
     }
