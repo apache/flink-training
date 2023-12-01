@@ -156,7 +156,7 @@ org.gradle.project.enable_scala = true
 
 每次车程都由两个事件表示：行程开始(trip start)和行程结束(trip end)。
 
-每个事件都由十一个字段组成：
+每个事件都由十个字段组成：
 
 ```
 rideId         : Long      // 每次车程的唯一id

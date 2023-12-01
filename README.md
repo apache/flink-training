@@ -148,7 +148,7 @@ Our taxi data set contains information about individual taxi rides in New York C
 
 Each ride is represented by two events: a trip start, and a trip end.
 
-Each event consists of eleven fields:
+Each event consists of ten fields:
 
 ```
 rideId         : Long      // a unique id for each ride
