@@ -31,7 +31,7 @@ Exercises that accompany the training content in the documentation.
 1. [Clone and build the flink-training project](#clone-and-build-the-flink-training-project)
 1. [Import the flink-training project into your IDE](#import-the-flink-training-project-into-your-ide)
 
-[**Use the taxi data streams**](#using-the-taxi-data-streams)
+[**Use the taxi data streams**](#use-the-taxi-data-streams)
 
 1. [Schema of taxi ride events](#schema-of-taxi-ride-events)
 1. [Schema of taxi fare events](#schema-of-taxi-fare-events)
@@ -148,7 +148,7 @@ Our taxi data set contains information about individual taxi rides in New York C
 
 Each ride is represented by two events: a trip start, and a trip end.
 
-Each event consists of eleven fields:
+Each event consists of ten fields:
 
 ```
 rideId         : Long      // a unique id for each ride
@@ -189,7 +189,7 @@ We assume you have set up your development environment according to our [setup g
 ### Learn about the data
 
 The initial set of exercises are all based on data streams of events about taxi rides and taxi fares. These streams are produced by source functions which reads data from input files.
-Read the [instructions](#using-the-taxi-data-streams) to learn how to use them.
+Read the [instructions](#use-the-taxi-data-streams) to learn how to use them.
 
 ### Run and debug Flink programs in your IDE
 
