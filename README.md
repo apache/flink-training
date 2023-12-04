@@ -130,7 +130,7 @@ You can also selectively apply this plugin in a single subproject if desired.
 
 The project needs to be imported as a gradle project into your IDE.
 
-Then you should be able to open [`RideCleansingTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingTest.java) and run this test.
+Then you should be able to open [`RideCleansingUnitTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingUnitTest.java) and run this test.
 
 > **:information_source: Note for Scala users:** You will need to use IntelliJ with the JetBrains Scala plugin, and you will need to add a Scala 2.12 SDK to the Global Libraries section of the Project Structure as well as to the module you are working on.
 > IntelliJ will ask you for the latter when you open a Scala file.
