@@ -19,6 +19,9 @@
 package org.apache.flink.training.exercises.ridesandfares;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -31,8 +34,9 @@ import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
+
+import java.io.IOException;
 
 /**
  * The Stateful Enrichment exercise from the Flink training.
@@ -45,7 +49,9 @@ public class RidesAndFaresExercise {
     private final SourceFunction<TaxiFare> fareSource;
     private final SinkFunction<RideAndFare> sink;
 
-    /** Creates a job using the sources and sink provided. */
+    /**
+     * Creates a job using the sources and sink provided.
+     */
     public RidesAndFaresExercise(
             SourceFunction<TaxiRide> rideSource,
             SourceFunction<TaxiFare> fareSource,
@@ -59,8 +65,8 @@ public class RidesAndFaresExercise {
     /**
      * Creates and executes the pipeline using the StreamExecutionEnvironment provided.
      *
-     * @throws Exception which occurs during job execution.
      * @return {JobExecutionResult}
+     * @throws Exception which occurs during job execution.
      */
     public JobExecutionResult execute() throws Exception {
 
@@ -68,13 +74,18 @@ public class RidesAndFaresExercise {
 
         // A stream of taxi ride START events, keyed by rideId.
         DataStream<TaxiRide> rides =
-                env.addSource(rideSource).filter(ride -> ride.isStart).keyBy(ride -> ride.rideId);
+                env.addSource(rideSource)
+                        .filter(ride -> ride.isStart)
+                        .keyBy(ride -> ride.rideId);
 
         // A stream of taxi fare events, also keyed by rideId.
-        DataStream<TaxiFare> fares = env.addSource(fareSource).keyBy(fare -> fare.rideId);
+        DataStream<TaxiFare> fares = env.addSource(fareSource)
+                .keyBy(fare -> fare.rideId);
 
         // Create the pipeline.
-        rides.connect(fares).flatMap(new EnrichmentFunction()).addSink(sink);
+        rides.connect(fares)
+                .flatMap(new EnrichmentFunction())
+                .addSink(sink);
 
         // Execute the pipeline and return the result.
         return env.execute("Join Rides with Fares");
@@ -99,19 +110,41 @@ public class RidesAndFaresExercise {
     public static class EnrichmentFunction
             extends RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> {
 
+        private ValueState<RideAndFare> rideAndFareValueState;
+
         @Override
         public void open(Configuration config) throws Exception {
-            throw new MissingSolutionException();
+            rideAndFareValueState = getRuntimeContext()
+                    .getState(new ValueStateDescriptor<>("perRideIdDataHolder", RideAndFare.class));
         }
 
         @Override
         public void flatMap1(TaxiRide ride, Collector<RideAndFare> out) throws Exception {
-            throw new MissingSolutionException();
+            if (ride.isStart) {
+                RideAndFare rideAndFare = rideAndFareValueState.value();
+                if (rideAndFare != null) {
+                    rideAndFare.ride = ride;
+                    collectJoined(out, rideAndFare);
+                } else {
+                    rideAndFareValueState.update(new RideAndFare(ride, null));
+                }
+            } // omit END event
         }
 
         @Override
         public void flatMap2(TaxiFare fare, Collector<RideAndFare> out) throws Exception {
-            throw new MissingSolutionException();
+            RideAndFare rideAndFare = rideAndFareValueState.value();
+            if (rideAndFare != null) {
+                rideAndFare.fare = fare;
+                collectJoined(out, rideAndFare);
+            } else  {
+                rideAndFareValueState.update(new RideAndFare(null, fare));
+            }
+        }
+
+        private void collectJoined(Collector<RideAndFare> out, RideAndFare rideAndFare) {
+            out.collect(rideAndFare);
+            rideAndFareValueState.clear();
         }
     }
 }

@@ -19,15 +19,22 @@
 package org.apache.flink.training.exercises.hourlytips;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
+import org.apache.flink.util.Collector;
 
 /**
  * The Hourly Tips exercise from the Flink training.
@@ -73,21 +80,66 @@ public class HourlyTipsExercise {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // start the data generator
-        DataStream<TaxiFare> fares = env.addSource(source);
+        DataStream<TaxiFare> fares = env.addSource(source)
+                //copied
+                .assignTimestampsAndWatermarks(
+                        // taxi fares are in order
+                        WatermarkStrategy.<TaxiFare>forMonotonousTimestamps()
+                                .withTimestampAssigner(
+                                        (fare, t) -> fare.getEventTimeMillis()))
+                //copied
+                ;
 
-        // replace this with your solution
-        if (true) {
-            throw new MissingSolutionException();
-        }
+        DataStream<Tuple3<Long, Long, Float>> hourlySummedTips = fares
+                .keyBy(fare -> fare.driverId)
+                .window(TumblingEventTimeWindows.of(Time.hours(1)))
+                .process(new HourlyWindowAdder());
 
-        // the results should be sent to the sink that was passed in
-        // (otherwise the tests won't work)
-        // you can end the pipeline with something like this:
+        hourlySummedTips.map(new PrefixEnrichingMapper("Hourly Sum Per Driver"))
+            .print();
 
-        // DataStream<Tuple3<Long, Long, Float>> hourlyMax = ...
-        // hourlyMax.addSink(sink);
+        DataStream<Tuple3<Long, Long, Float>> hourlyMax = hourlySummedTips
+                .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
+                .maxBy(2);
+
+        hourlyMax.map(new PrefixEnrichingMapper("Maxxed Per Hour"))
+                .print();
+        hourlyMax.addSink(sink);
+
 
         // execute the pipeline and return the result
+        System.out.println("execute Hourly Tips");
         return env.execute("Hourly Tips");
+    }
+
+    public static class HourlyWindowAdder extends ProcessWindowFunction<
+            TaxiFare,                       // input type
+            Tuple3<Long, Long, Float>,      // output type (window end time, driverId, tipsTotal)
+            Long,                           // key type
+            TimeWindow> {                   // window type
+        @Override
+        public void process(Long key,
+                            Context context,
+                            Iterable<TaxiFare> taxiFares,
+                            Collector<Tuple3<Long, Long, Float>> out) {
+            float tipsAccumulator = 0;
+            for (TaxiFare taxiFare: taxiFares) {
+                tipsAccumulator += taxiFare.tip;
+            }
+            out.collect(new Tuple3<>(context.window().getEnd(), key, tipsAccumulator));
+        }
+    }
+
+    private static class PrefixEnrichingMapper implements MapFunction<
+            Tuple3<Long, Long, Float>,
+            Tuple4<String, Long, Long, Float>> {
+        private final String prefix;
+        PrefixEnrichingMapper(String prefix) {
+            this.prefix = prefix;
+        }
+        @Override
+        public Tuple4<String, Long, Long, Float> map(Tuple3<Long, Long, Float> t3) throws Exception {
+            return Tuple4.of(prefix, t3.f0, t3.f1, t3.f2);
+        }
     }
 }
