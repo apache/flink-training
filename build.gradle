@@ -94,8 +94,8 @@ subprojects {
     apply plugin: 'eclipse'
 
     ext {
-        javaVersion = '1.8'
-        flinkVersion = '1.15.0'
+        javaVersion = '1.16'
+        flinkVersion = '1.18.0'
         scalaBinaryVersion = '2.12'
         log4jVersion = '2.12.1'
         junitVersion = '4.13'
@@ -129,10 +129,12 @@ subprojects {
         shadow "org.apache.flink:flink-clients:${flinkVersion}"
         shadow "org.apache.flink:flink-java:${flinkVersion}"
         shadow "org.apache.flink:flink-streaming-java:${flinkVersion}"
-        shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+        //shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
 
         // allows using Flink's web UI when running in the IDE:
         shadow "org.apache.flink:flink-runtime-web:${flinkVersion}"
+        //Lombok
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
 
         if (project != project(":common")) {
             implementation project(path: ':common')

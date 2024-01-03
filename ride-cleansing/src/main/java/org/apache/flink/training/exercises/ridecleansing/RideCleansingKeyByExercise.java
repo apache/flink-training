@@ -18,17 +18,24 @@
 
 package org.apache.flink.training.exercises.ridecleansing;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ConfigurationUtils;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.training.exercises.common.datatypes.EnrichedRide;
+import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
+import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.GeoUtils;
+import org.apache.flink.util.Collector;
 
 import java.util.Properties;
 
@@ -38,15 +45,15 @@ import java.util.Properties;
  * <p>The task of this exercise is to filter a data stream of taxi ride records to keep only rides
  * that both start and end within New York City. The resulting stream should be printed.
  */
-public class RideCleansingExercise {
+public class RideCleansingKeyByExercise {
 
-    private final SourceFunction<TaxiRide> source;
-    private final SinkFunction<TaxiRide> sink;
+    private final SourceFunction<TaxiFare> source;
+    private final SinkFunction<TaxiFare> sink;
 
     /**
      * Creates a job using the source and sink provided.
      */
-    public RideCleansingExercise(SourceFunction<TaxiRide> source, SinkFunction<TaxiRide> sink) {
+    public RideCleansingKeyByExercise(SourceFunction<TaxiFare> source, SinkFunction<TaxiFare> sink) {
 
         this.source = source;
         this.sink = sink;
@@ -58,8 +65,8 @@ public class RideCleansingExercise {
      * @throws Exception which occurs during job execution.
      */
     public static void main(String[] args) throws Exception {
-        RideCleansingExercise job =
-                new RideCleansingExercise(new TaxiRideGenerator(), new PrintSinkFunction<>());
+        RideCleansingKeyByExercise job =
+                new RideCleansingKeyByExercise(new TaxiFareGenerator(), new PrintSinkFunction<>());
 
         job.execute();
     }
@@ -76,27 +83,12 @@ public class RideCleansingExercise {
         Configuration conf = ConfigurationUtils.createConfiguration(props);
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+        DataStream<TaxiFare> taxiFareDataStream = env.addSource(source);
 
-
-        // set up the pipeline
-        env.addSource(source).filter(new NYCFilter()).addSink(sink);
+        taxiFareDataStream.keyBy(taxiFare -> taxiFare.driverId).max("tip").addSink(sink);
 
         // run the pipeline and return the result
-        return env.execute("Taxi Ride Cleansing");
+        return env.execute("Taxi Ride Cleansing Map");
     }
 
-    /**
-     * Keep only those rides and both start and end in NYC.
-     */
-    public static class NYCFilter implements FilterFunction<TaxiRide> {
-        @Override
-        public boolean filter(TaxiRide taxiRide) throws Exception {
-            if (GeoUtils.isInNYC(taxiRide.startLon, taxiRide.startLat)
-                    && GeoUtils.isInNYC(taxiRide.endLon, taxiRide.endLat)) {
-                return true;
-            }
-            return false;
-            //throw new MissingSolutionException();
-        }
-    }
 }
