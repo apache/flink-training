@@ -21,6 +21,8 @@ package org.apache.flink.training.exercises.longrides;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -30,10 +32,10 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
 
 import java.time.Duration;
+import java.time.Instant;
 
 /**
  * The "Long Ride Alerts" exercise.
@@ -44,6 +46,7 @@ import java.time.Duration;
  * <p>You should eventually clear any state you create.
  */
 public class LongRidesExercise {
+
     private final SourceFunction<TaxiRide> source;
     private final SinkFunction<Long> sink;
 
@@ -98,17 +101,60 @@ public class LongRidesExercise {
     @VisibleForTesting
     public static class AlertFunction extends KeyedProcessFunction<Long, TaxiRide, Long> {
 
+        private ValueState<TaxiRide> rideState;
+        public static final Duration RIDE_TIMEOUT = Duration.ofHours(2);
+
         @Override
-        public void open(Configuration config) throws Exception {
-            throw new MissingSolutionException();
+        public void open(Configuration config) {
+            rideState =
+                    getRuntimeContext()
+                            .getState(new ValueStateDescriptor<>("rideState", TaxiRide.class));
         }
 
         @Override
         public void processElement(TaxiRide ride, Context context, Collector<Long> out)
-                throws Exception {}
+                throws Exception {
+
+            TaxiRide rideEvent = rideState.value();
+
+            if (rideEvent == null) {
+                rideState.update(ride);
+                if (ride.isStart) {
+                    context.timerService()
+                            .registerEventTimeTimer(
+                                    RIDE_TIMEOUT.toMillis() + ride.getEventTimeMillis());
+                }
+            } else {
+                if (rideEvent.isStart
+                        && !ride.isStart
+                        && isRideTimeout(rideEvent.eventTime, ride.eventTime)) {
+                    out.collect(ride.rideId);
+                }
+                if (!rideEvent.isStart
+                        && ride.isStart
+                        && isRideTimeout(ride.eventTime, rideEvent.eventTime)) {
+                    out.collect(ride.rideId);
+                }
+                context.timerService()
+                        .deleteEventTimeTimer(
+                                RIDE_TIMEOUT.toMillis()
+                                        + (rideEvent.isStart
+                                                ? rideEvent.getEventTimeMillis()
+                                                : ride.getEventTimeMillis()));
+
+                rideState.clear();
+            }
+        }
 
         @Override
         public void onTimer(long timestamp, OnTimerContext context, Collector<Long> out)
-                throws Exception {}
+                throws Exception {
+            out.collect(rideState.value().rideId);
+            rideState.clear();
+        }
+
+        private boolean isRideTimeout(Instant startTime, Instant endTime) {
+            return Duration.between(startTime, endTime).compareTo(RIDE_TIMEOUT) > 0;
+        }
     }
 }

@@ -19,15 +19,22 @@
 package org.apache.flink.training.exercises.hourlytips;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.sources.TaxiFareGenerator;
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
+import org.apache.flink.util.Collector;
+
+import java.time.Duration;
 
 /**
  * The Hourly Tips exercise from the Flink training.
@@ -72,22 +79,60 @@ public class HourlyTipsExercise {
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // start the data generator
-        DataStream<TaxiFare> fares = env.addSource(source);
+        WatermarkStrategy<TaxiFare> hourlyWatermarkStrategy =
+                WatermarkStrategy.<TaxiFare>forBoundedOutOfOrderness(Duration.ofHours(1))
+                        .withTimestampAssigner((event, timestamp) -> event.getEventTimeMillis());
 
-        // replace this with your solution
-        if (true) {
-            throw new MissingSolutionException();
-        }
-
-        // the results should be sent to the sink that was passed in
-        // (otherwise the tests won't work)
-        // you can end the pipeline with something like this:
-
-        // DataStream<Tuple3<Long, Long, Float>> hourlyMax = ...
-        // hourlyMax.addSink(sink);
+        env.addSource(source)
+                .assignTimestampsAndWatermarks(hourlyWatermarkStrategy)
+                .keyBy(fare -> fare.driverId)
+                .window(TumblingEventTimeWindows.of(Time.hours(1)))
+                .process(new HourlyTotalTips())
+                .windowAll(TumblingEventTimeWindows.of(Time.hours(1)))
+                .process(new HourlyMaxTips())
+                .addSink(sink);
 
         // execute the pipeline and return the result
         return env.execute("Hourly Tips");
+    }
+
+    public static class HourlyTotalTips
+            extends ProcessWindowFunction<TaxiFare, Tuple3<Long, Long, Float>, Long, TimeWindow> {
+
+        @Override
+        public void process(
+                Long key,
+                Context context,
+                Iterable<TaxiFare> events,
+                Collector<Tuple3<Long, Long, Float>> out) {
+
+            float tip = 0;
+            for (TaxiFare event : events) {
+                tip += event.tip;
+            }
+            out.collect(Tuple3.of(context.window().getEnd(), key, tip));
+        }
+    }
+
+    public static class HourlyMaxTips
+            extends ProcessAllWindowFunction<
+                    Tuple3<Long, Long, Float>, Tuple3<Long, Long, Float>, TimeWindow> {
+
+        @Override
+        public void process(
+                Context context,
+                Iterable<Tuple3<Long, Long, Float>> events,
+                Collector<Tuple3<Long, Long, Float>> out) {
+
+            float max = 0;
+            long maxId = 0;
+            for (Tuple3<Long, Long, Float> event : events) {
+                if (event.f2 > max) {
+                    max = event.f2;
+                    maxId = event.f1;
+                }
+            }
+            out.collect(Tuple3.of(context.window().getEnd(), maxId, max));
+        }
     }
 }
