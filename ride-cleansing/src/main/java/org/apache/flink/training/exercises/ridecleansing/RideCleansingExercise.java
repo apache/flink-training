@@ -54,7 +54,7 @@ public class RideCleansingExercise {
     public static void main(String[] args) throws Exception {
         RideCleansingExercise job =
                 new RideCleansingExercise(new TaxiRideGenerator(), new PrintSinkFunction<>());
-
+        System.out.println("-------------Lavinia test");
         job.execute();
     }
 
