@@ -70,7 +70,7 @@ public class RideCleansingExercise {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // set up the pipeline
-        env.addSource(source).filter(new NYCFilter()).addSink(sink);
+        env.addSource(source).filter((r) -> GeoUtils.isInNYC(r.startLon, r.startLat) && GeoUtils.isInNYC(r.endLon, r.endLat)).addSink(sink);
 
         // run the pipeline and return the result
         return env.execute("Taxi Ride Cleansing");
