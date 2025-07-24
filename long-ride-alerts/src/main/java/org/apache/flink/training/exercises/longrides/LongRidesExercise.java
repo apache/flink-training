@@ -22,17 +22,19 @@ import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.OpenContext;
+import org.apache.flink.api.connector.sink2.Sink;
+import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.streaming.api.functions.sink.legacy.PrintSinkFunction;
-import org.apache.flink.streaming.api.functions.sink.legacy.SinkFunction;
-import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
+import org.apache.flink.streaming.api.functions.sink.PrintSink;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
 
+import java.io.Serializable;
 import java.time.Duration;
 
 /**
@@ -43,12 +45,14 @@ import java.time.Duration;
  *
  * <p>You should eventually clear any state you create.
  */
-public class LongRidesExercise {
-    private final SourceFunction<TaxiRide> source;
-    private final SinkFunction<Long> sink;
+public class LongRidesExercise implements Serializable {
+
+    private final Source<TaxiRide, ?, ?> source;
+
+    private final Sink<Long> sink;
 
     /** Creates a job using the source and sink provided. */
-    public LongRidesExercise(SourceFunction<TaxiRide> source, SinkFunction<Long> sink) {
+    public LongRidesExercise(Source<TaxiRide, ?, ?> source, Sink<Long> sink) {
         this.source = source;
         this.sink = sink;
     }
@@ -65,7 +69,18 @@ public class LongRidesExercise {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // start the data generator
-        DataStream<TaxiRide> rides = env.addSource(source);
+        DataStream<TaxiRide> rides =
+                env.fromSource(
+                        source,
+                        new BoundedOutOfOrdernessTimestampExtractor<TaxiRide>(
+                                Duration.ofSeconds(10)) {
+
+                            @Override
+                            public long extractTimestamp(TaxiRide taxiRide) {
+                                return taxiRide.getEventTimeMillis();
+                            }
+                        },
+                        "taxi ride");
 
         // the WatermarkStrategy specifies how to extract timestamps and generate watermarks
         WatermarkStrategy<TaxiRide> watermarkStrategy =
@@ -77,7 +92,7 @@ public class LongRidesExercise {
         rides.assignTimestampsAndWatermarks(watermarkStrategy)
                 .keyBy(ride -> ride.rideId)
                 .process(new AlertFunction())
-                .addSink(sink);
+                .sinkTo(sink);
 
         // execute the pipeline and return the result
         return env.execute("Long Taxi Rides");
@@ -89,8 +104,7 @@ public class LongRidesExercise {
      * @throws Exception which occurs during job execution.
      */
     public static void main(String[] args) throws Exception {
-        LongRidesExercise job =
-                new LongRidesExercise(new TaxiRideGenerator(), new PrintSinkFunction<>());
+        LongRidesExercise job = new LongRidesExercise(new TaxiRideGenerator(), new PrintSink<>());
 
         job.execute();
     }

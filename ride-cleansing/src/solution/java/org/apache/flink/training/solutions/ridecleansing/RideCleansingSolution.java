@@ -20,13 +20,18 @@ package org.apache.flink.training.solutions.ridecleansing;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.connector.sink2.Sink;
+import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.legacy.PrintSinkFunction;
-import org.apache.flink.streaming.api.functions.sink.legacy.SinkFunction;
-import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
+import org.apache.flink.streaming.api.functions.sink.PrintSink;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
 import org.apache.flink.training.exercises.common.utils.GeoUtils;
+import org.apache.flink.training.exercises.ridecleansing.RideCleansingExercise;
+
+import java.io.Serializable;
+import java.time.Duration;
 
 /**
  * Solution to the Ride Cleansing exercise from the Flink training.
@@ -34,14 +39,13 @@ import org.apache.flink.training.exercises.common.utils.GeoUtils;
  * <p>The task of this exercise is to filter a data stream of taxi ride records to keep only rides
  * that both start and end within New York City. The resulting stream should be printed.
  */
-public class RideCleansingSolution {
+public class RideCleansingSolution implements Serializable {
 
-    private final SourceFunction<TaxiRide> source;
-    private final SinkFunction<TaxiRide> sink;
+    private final Source<TaxiRide, ?, ?> source;
+    private final Sink<TaxiRide> sink;
 
     /** Creates a job using the source and sink provided. */
-    public RideCleansingSolution(SourceFunction<TaxiRide> source, SinkFunction<TaxiRide> sink) {
-
+    public RideCleansingSolution(Source<TaxiRide, ?, ?> source, Sink<TaxiRide> sink) {
         this.source = source;
         this.sink = sink;
     }
@@ -53,7 +57,7 @@ public class RideCleansingSolution {
      */
     public static void main(String[] args) throws Exception {
         RideCleansingSolution job =
-                new RideCleansingSolution(new TaxiRideGenerator(), new PrintSinkFunction<>());
+                new RideCleansingSolution(new TaxiRideGenerator(), new PrintSink<>());
 
         job.execute();
     }
@@ -70,7 +74,19 @@ public class RideCleansingSolution {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // set up the pipeline
-        env.addSource(source).filter(new NYCFilter()).addSink(sink);
+        env.fromSource(
+                        source,
+                        new BoundedOutOfOrdernessTimestampExtractor<TaxiRide>(
+                                Duration.ofSeconds(10)) {
+
+                            @Override
+                            public long extractTimestamp(TaxiRide taxiRide) {
+                                return taxiRide.getEventTimeMillis();
+                            }
+                        },
+                        "taxi ride")
+                .filter(new RideCleansingExercise.NYCFilter())
+                .sinkTo(sink);
 
         // run the pipeline and return the result
         return env.execute("Taxi Ride Cleansing");

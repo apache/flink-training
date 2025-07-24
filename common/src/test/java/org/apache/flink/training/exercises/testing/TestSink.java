@@ -18,19 +18,37 @@
 
 package org.apache.flink.training.exercises.testing;
 
-import org.apache.flink.api.common.JobExecutionResult;
-import org.apache.flink.api.common.accumulators.ListAccumulator;
-import org.apache.flink.api.common.functions.OpenContext;
-import org.apache.flink.streaming.api.functions.sink.legacy.RichSinkFunction;
+import org.apache.flink.api.connector.sink2.Sink;
+import org.apache.flink.api.connector.sink2.SinkWriter;
+import org.apache.flink.api.connector.sink2.WriterInitContext;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class TestSink<OUT> extends RichSinkFunction<OUT> {
+public class TestSink<OUT> implements Sink<OUT> {
 
     private final String name;
 
+    private final String valueUuId;
+
+    public static final ConcurrentHashMap<String, ConcurrentLinkedQueue<Object>> RESULTS =
+            new ConcurrentHashMap<>();
+
+    public Collection<OUT> getResults() {
+        ConcurrentLinkedQueue<OUT> result = (ConcurrentLinkedQueue<OUT>) RESULTS.get(valueUuId);
+        if (result == null) {
+            return List.of();
+        }
+        return result;
+    }
+
     public TestSink(String name) {
         this.name = name;
+        valueUuId = UUID.randomUUID().toString();
     }
 
     public TestSink() {
@@ -38,16 +56,31 @@ public class TestSink<OUT> extends RichSinkFunction<OUT> {
     }
 
     @Override
-    public void open(OpenContext parameters) {
-        getRuntimeContext().addAccumulator(name, new ListAccumulator<OUT>());
+    public SinkWriter<OUT> createWriter(WriterInitContext context) throws IOException {
+        return new TestSinkWriter<>(valueUuId);
     }
 
-    @Override
-    public void invoke(OUT value, Context context) {
-        getRuntimeContext().getAccumulator(name).add(value);
-    }
+    public static class TestSinkWriter<OUT> implements SinkWriter<OUT> {
 
-    public List<OUT> getResults(JobExecutionResult jobResult) {
-        return jobResult.getAccumulatorResult(name);
+        private final String valueUuId;
+
+        public TestSinkWriter(String valueUuId) {
+            this.valueUuId = valueUuId;
+        }
+
+        @Override
+        public void write(OUT element, Context context) throws IOException, InterruptedException {
+            RESULTS.computeIfAbsent(valueUuId, k -> new ConcurrentLinkedQueue<>()).add(element);
+        }
+
+        @Override
+        public void flush(boolean endOfInput) throws IOException, InterruptedException {
+            System.out.println("TestSinkWriter.flush");
+        }
+
+        @Override
+        public void close() throws Exception {
+            System.out.println("TestSinkWriter.close");
+        }
     }
 }

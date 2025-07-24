@@ -18,69 +18,82 @@
 
 package org.apache.flink.training.exercises.common.sources;
 
-import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
+import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This SourceFunction generates a data stream of TaxiRide records.
  *
  * <p>The stream is produced out-of-order.
  */
-public class TaxiRideGenerator implements SourceFunction<TaxiRide> {
+public class TaxiRideGenerator extends DataGeneratorSource<TaxiRide> {
 
     public static final int SLEEP_MILLIS_PER_EVENT = 10;
     private static final int BATCH_SIZE = 5;
-    private volatile boolean running = true;
 
-    @Override
-    public void run(SourceContext<TaxiRide> ctx) throws Exception {
+    /** TaxiRideGenerator. */
+    public TaxiRideGenerator() {
+        super(
+                new GeneratorFunction<Long, TaxiRide>() {
 
-        PriorityQueue<TaxiRide> endEventQ = new PriorityQueue<>(100);
-        long id = 0;
-        long maxStartTime = 0;
+                    private final AtomicLong id = new AtomicLong(0);
+                    private final AtomicLong maxStartTime = new AtomicLong(0);
+                    private final PriorityQueue<TaxiRide> endEventQ = new PriorityQueue<>(100);
+                    private final ConcurrentLinkedDeque<TaxiRide> deque =
+                            new ConcurrentLinkedDeque<>();
 
-        while (running) {
+                    @Override
+                    public TaxiRide map(Long value) throws Exception {
+                        synchronized (this) {
+                            if (deque.isEmpty()) {
+                                long idLocal = id.get();
+                                // generate a batch of START events
+                                List<TaxiRide> startEvents = new ArrayList<TaxiRide>(BATCH_SIZE);
+                                for (int i = 1; i <= BATCH_SIZE; i++) {
+                                    TaxiRide ride = new TaxiRide(idLocal + i, true);
+                                    startEvents.add(ride);
+                                    // the start times may be in order, but let's not assume that
+                                    maxStartTime.set(
+                                            Math.max(
+                                                    maxStartTime.get(), ride.getEventTimeMillis()));
+                                }
+                                // enqueue the corresponding END events
+                                for (int i = 1; i <= BATCH_SIZE; i++) {
+                                    endEventQ.add(new TaxiRide(idLocal + i, false));
+                                }
 
-            // generate a batch of START events
-            List<TaxiRide> startEvents = new ArrayList<TaxiRide>(BATCH_SIZE);
-            for (int i = 1; i <= BATCH_SIZE; i++) {
-                TaxiRide ride = new TaxiRide(id + i, true);
-                startEvents.add(ride);
-                // the start times may be in order, but let's not assume that
-                maxStartTime = Math.max(maxStartTime, ride.getEventTimeMillis());
-            }
+                                // release the END events coming before the end of this new batch
+                                // (this allows a few END events to precede their matching START
+                                // event)
+                                while (endEventQ.peek().getEventTimeMillis()
+                                        <= maxStartTime.get()) {
+                                    TaxiRide ride = endEventQ.poll();
+                                    deque.push(ride);
+                                }
 
-            // enqueue the corresponding END events
-            for (int i = 1; i <= BATCH_SIZE; i++) {
-                endEventQ.add(new TaxiRide(id + i, false));
-            }
+                                // then emit the new START events (out-of-order)
+                                java.util.Collections.shuffle(startEvents, new Random(id.get()));
+                                startEvents.iterator().forEachRemaining(deque::push);
 
-            // release the END events coming before the end of this new batch
-            // (this allows a few END events to precede their matching START event)
-            while (endEventQ.peek().getEventTimeMillis() <= maxStartTime) {
-                TaxiRide ride = endEventQ.poll();
-                ctx.collect(ride);
-            }
-
-            // then emit the new START events (out-of-order)
-            java.util.Collections.shuffle(startEvents, new Random(id));
-            startEvents.iterator().forEachRemaining(r -> ctx.collect(r));
-
-            // prepare for the next batch
-            id += BATCH_SIZE;
-
-            // don't go too fast
-            Thread.sleep(BATCH_SIZE * SLEEP_MILLIS_PER_EVENT);
-        }
-    }
-
-    @Override
-    public void cancel() {
-        running = false;
+                                // prepare for the next batch
+                                id.set(id.get() + BATCH_SIZE);
+                            }
+                            return deque.poll();
+                        }
+                    }
+                },
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(200),
+                TypeInformation.of(TaxiRide.class));
     }
 }

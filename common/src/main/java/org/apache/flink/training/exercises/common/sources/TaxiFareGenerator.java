@@ -18,53 +18,69 @@
 
 package org.apache.flink.training.exercises.common.sources;
 
-import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
+import org.apache.flink.connector.datagen.source.GeneratorFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
-import org.apache.flink.training.exercises.common.utils.DataGenerator;
 
-import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This SourceFunction generates a data stream of TaxiFare records.
  *
  * <p>The stream is generated in order.
  */
-public class TaxiFareGenerator implements SourceFunction<TaxiFare> {
+public class TaxiFareGenerator extends DataGeneratorSource<TaxiFare> {
 
-    private volatile boolean running = true;
-    private Instant limitingTimestamp = Instant.MAX;
+    private static Instant limitingTimestamp = Instant.MAX;
 
-    /** Create a bounded TaxiFareGenerator that runs only for the specified duration. */
-    public static TaxiFareGenerator runFor(Duration duration) {
-        TaxiFareGenerator generator = new TaxiFareGenerator();
-        generator.limitingTimestamp = DataGenerator.BEGINNING.plus(duration);
-        return generator;
-    }
-
-    @Override
-    public void run(SourceContext<TaxiFare> ctx) throws Exception {
-
-        long id = 1;
-
-        while (running) {
-            TaxiFare fare = new TaxiFare(id);
-
+    /**
+     * build taxi fare deque.
+     *
+     * @return taxiFareDeque
+     */
+    public static ConcurrentLinkedDeque<TaxiFare> buildTaxiFareDeque() {
+        ConcurrentLinkedDeque<TaxiFare> taxiFareDeque = new ConcurrentLinkedDeque<>();
+        for (int i = 1; ; i++) {
+            TaxiFare fare = new TaxiFare(i);
             // don't emit events that exceed the specified limit
             if (fare.startTime.compareTo(limitingTimestamp) >= 0) {
                 break;
             }
-
-            ++id;
-            ctx.collect(fare);
-
-            // match our event production rate to that of the TaxiRideGenerator
-            Thread.sleep(TaxiRideGenerator.SLEEP_MILLIS_PER_EVENT);
+            taxiFareDeque.push(fare);
         }
+        return taxiFareDeque;
     }
 
-    @Override
-    public void cancel() {
-        running = false;
+    /** TaxiFareGenerator. */
+    public TaxiFareGenerator() {
+        this(buildTaxiFareDeque());
+    }
+
+    /**
+     * TaxiFareGenerator.
+     *
+     * @param taxiFareDeque taxiFareDeque
+     */
+    public TaxiFareGenerator(ConcurrentLinkedDeque<TaxiFare> taxiFareDeque) {
+        super(
+                new GeneratorFunction<Long, TaxiFare>() {
+
+                    private final AtomicLong id = new AtomicLong(0);
+                    private final AtomicLong maxStartTime = new AtomicLong(0);
+
+                    @Override
+                    public TaxiFare map(Long value) throws Exception {
+                        synchronized (this) {
+                            return taxiFareDeque.poll();
+                        }
+                    }
+                },
+                taxiFareDeque.size(),
+                RateLimiterStrategy.perSecond(200),
+                TypeInformation.of(TaxiFare.class));
     }
 }
