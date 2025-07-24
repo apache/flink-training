@@ -57,7 +57,7 @@ You will need to set up your environment in order to develop, debug, and execute
 Flink supports Linux, OS X, and Windows as development environments for Flink programs and local execution. The following software is required for a Flink development setup and should be installed on your system:
 
 - Git
-- a JDK for Java 8 or Java 11 (a JRE is not sufficient; other versions of Java are currently not supported)
+- a JDK for Java 11 or Java 17 or Java 21 (a JRE is not sufficient; other versions of Java are currently not supported)
 - an IDE for Java (and/or Scala) development with Gradle support
   - We recommend [IntelliJ](https://www.jetbrains.com/idea/), but [Eclipse](https://www.eclipse.org/downloads/) or [Visual Studio Code](https://code.visualstudio.com/) (with the [Java extension pack](https://code.visualstudio.com/docs/java/java-tutorial)) can also be used so long as you stick to Java
   - For Scala, you will need to use IntelliJ (and its [Scala plugin](https://plugins.jetbrains.com/plugin/1347-scala/))

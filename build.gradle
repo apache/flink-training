@@ -17,14 +17,14 @@
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
-    id "com.diffplug.spotless" version "6.4.2" apply false
+    id "com.diffplug.spotless" version "7.2.1" apply false
 }
 
 description = "Flink Training Exercises"
 
 allprojects {
     group = 'org.apache.flink'
-    version = '1.17-SNAPSHOT'
+    version = '2.0.0-SNAPSHOT'
 
     apply plugin: 'com.diffplug.spotless'
 
@@ -33,7 +33,7 @@ allprojects {
             target '*.gradle', '*.md', '.gitignore'
 
             trimTrailingWhitespace()
-            indentWithSpaces(4)
+            leadingTabsToSpaces(4)
             endWithNewline()
         }
 
@@ -94,8 +94,8 @@ subprojects {
     apply plugin: 'eclipse'
 
     ext {
-        javaVersion = '1.8'
-        flinkVersion = '1.17.0'
+        javaVersion = '17'
+        flinkVersion = '2.0.0'
         scalaBinaryVersion = '2.12'
         log4jVersion = '2.12.1'
         junitVersion = '4.13'
@@ -127,9 +127,12 @@ subprojects {
         shadow "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
         shadow "org.apache.flink:flink-clients:${flinkVersion}"
-        shadow "org.apache.flink:flink-java:${flinkVersion}"
+//        removed
+//        shadow "org.apache.flink:flink-java:${flinkVersion}"
+        shadow "org.apache.flink:flink-runtime:${flinkVersion}"
         shadow "org.apache.flink:flink-streaming-java:${flinkVersion}"
-        shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+//        removed
+//        shadow "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
 
         // allows using Flink's web UI when running in the IDE:
         shadow "org.apache.flink:flink-runtime-web:${flinkVersion}"
@@ -174,7 +177,7 @@ subprojects {
 
     spotless {
         java {
-            googleJavaFormat('1.7').aosp()
+            googleJavaFormat('1.28.0').aosp()
 
             // \# refers to static imports
             importOrder('org.apache.flink', 'org.apache.flink.shaded', '', 'javax', 'java', 'scala', '\\#')

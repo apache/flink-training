@@ -20,8 +20,8 @@ package org.apache.flink.training.exercises.testing;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.accumulators.ListAccumulator;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+import org.apache.flink.api.common.functions.OpenContext;
+import org.apache.flink.streaming.api.functions.sink.legacy.RichSinkFunction;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class TestSink<OUT> extends RichSinkFunction<OUT> {
     }
 
     @Override
-    public void open(Configuration parameters) {
+    public void open(OpenContext parameters) {
         getRuntimeContext().addAccumulator(name, new ListAccumulator<OUT>());
     }
 

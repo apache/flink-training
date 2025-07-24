@@ -18,7 +18,7 @@
 
 package org.apache.flink.training.exercises.common.sources;
 
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.utils.DataGenerator;
 

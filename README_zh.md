@@ -59,7 +59,7 @@ under the License.
 Linux、OS X 和 Windows 均可作为 Flink 程序和本地执行的开发环境。 Flink 开发设置需要以下软件，它们应该安装在系统上：
 
 - Git
-- Java 8 或者 Java 11 版本的 JDK (JRE不满足要求；目前不支持其他版本的Java)
+- Java 11 或者 Java 17 或者 Java 21 版本的 JDK (JRE不满足要求；目前不支持其他版本的Java)
 - 支持 Gradle 的 Java (及/或 Scala) 开发IDE
     - 推荐使用 [IntelliJ](https://www.jetbrains.com/idea/), 但 [Eclipse](https://www.eclipse.org/downloads/) 或 [Visual Studio Code](https://code.visualstudio.com/) (安装 [Java extension pack](https://code.visualstudio.com/docs/java/java-tutorial) 插件) 也可以用于Java环境
     - 为了使用 Scala, 需要使用 IntelliJ (及其 [Scala plugin](https://plugins.jetbrains.com/plugin/1347-scala/) 插件)
