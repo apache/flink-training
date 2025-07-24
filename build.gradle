@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
+    id 'com.gradleup.shadow' version '9.0.0-rc2' apply false
     id "com.diffplug.spotless" version "7.2.1" apply false
 }
 
@@ -89,7 +89,7 @@ subprojects {
     if (project.properties['org.gradle.project.enable_scala'].trim() == 'true') {
         apply plugin: 'scala'
     }
-    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'com.gradleup.shadow'
     apply plugin: 'checkstyle'
     apply plugin: 'eclipse'
 
