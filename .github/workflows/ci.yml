@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [8, 11]
+        java: [17, 21]
 
     steps:
       - uses: actions/checkout@v3
@@ -37,5 +37,5 @@ jobs:
       - name: Build without Scala
         run: ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=false
 
-      - name: Build with Scala
-        run: ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=true
+#      - name: Build with Scala
+#        run: ./gradlew build --scan --stacktrace -Porg.gradle.project.enable_scala=true

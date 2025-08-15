@@ -68,7 +68,7 @@ public class RidesAndFaresIntegrationTest extends RidesAndFaresTestBase {
         TestSink<RideAndFare> sink = new TestSink<>();
 
         JobExecutionResult jobResult = ridesAndFaresPipeline().execute(rides, fares, sink);
-        assertThat(sink.getResults(jobResult))
+        assertThat(sink.getResults())
                 .containsExactlyInAnyOrder(
                         new RideAndFare(ride1, fare1),
                         new RideAndFare(ride2, fare2),

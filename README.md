@@ -57,7 +57,7 @@ You will need to set up your environment in order to develop, debug, and execute
 Flink supports Linux, OS X, and Windows as development environments for Flink programs and local execution. The following software is required for a Flink development setup and should be installed on your system:
 
 - Git
-- a JDK for Java 8 or Java 11 (a JRE is not sufficient; other versions of Java are currently not supported)
+- a JDK for Java 11 or Java 17 or Java 21 (a JRE is not sufficient; other versions of Java are currently not supported)
 - an IDE for Java (and/or Scala) development with Gradle support
   - We recommend [IntelliJ](https://www.jetbrains.com/idea/), but [Eclipse](https://www.eclipse.org/downloads/) or [Visual Studio Code](https://code.visualstudio.com/) (with the [Java extension pack](https://code.visualstudio.com/docs/java/java-tutorial)) can also be used so long as you stick to Java
   - For Scala, you will need to use IntelliJ (and its [Scala plugin](https://plugins.jetbrains.com/plugin/1347-scala/))
@@ -130,7 +130,7 @@ You can also selectively apply this plugin in a single subproject if desired.
 
 The project needs to be imported as a gradle project into your IDE.
 
-Then you should be able to open [`RideCleansingTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingTest.java) and run this test.
+Then you should be able to open [`RideCleansingTest`](ride-cleansing/src/test/java/org/apache/flink/training/exercises/ridecleansing/RideCleansingUnitTest.java) and run this test.
 
 > **:information_source: Note for Scala users:** You will need to use IntelliJ with the JetBrains Scala plugin, and you will need to add a Scala 2.12 SDK to the Global Libraries section of the Project Structure as well as to the module you are working on.
 > IntelliJ will ask you for the latter when you open a Scala file.
@@ -240,6 +240,8 @@ For Java/Scala exercises and solutions, we provide special tasks that can be lis
 1. [`ProcessFunction` and Timers (Long Ride Alerts)](long-ride-alerts)
    - [Exercise](long-ride-alerts/README.md)
    - [Discussion](long-ride-alerts/DISCUSSION.md)
+
+<a name="contributing"></a>
 
 ## Contribute
 

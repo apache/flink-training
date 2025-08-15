@@ -19,13 +19,15 @@
 package org.apache.flink.training.exercises.ridesandfares;
 
 import org.apache.flink.api.common.JobExecutionResult;
-import org.apache.flink.configuration.Configuration;
+import org.apache.flink.api.common.functions.OpenContext;
+import org.apache.flink.api.connector.sink2.Sink;
+import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction;
-import org.apache.flink.streaming.api.functions.sink.PrintSinkFunction;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.sink.PrintSink;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.training.exercises.common.datatypes.RideAndFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
@@ -34,22 +36,25 @@ import org.apache.flink.training.exercises.common.sources.TaxiRideGenerator;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
 
+import java.io.Serializable;
+import java.time.Duration;
+
 /**
  * The Stateful Enrichment exercise from the Flink training.
  *
  * <p>The goal for this exercise is to enrich TaxiRides with fare information.
  */
-public class RidesAndFaresExercise {
+public class RidesAndFaresExercise implements Serializable {
 
-    private final SourceFunction<TaxiRide> rideSource;
-    private final SourceFunction<TaxiFare> fareSource;
-    private final SinkFunction<RideAndFare> sink;
+    private final Source<TaxiRide, ?, ?> rideSource;
+    private final Source<TaxiFare, ?, ?> fareSource;
+    private final Sink<RideAndFare> sink;
 
     /** Creates a job using the sources and sink provided. */
     public RidesAndFaresExercise(
-            SourceFunction<TaxiRide> rideSource,
-            SourceFunction<TaxiFare> fareSource,
-            SinkFunction<RideAndFare> sink) {
+            Source<TaxiRide, ?, ?> rideSource,
+            Source<TaxiFare, ?, ?> fareSource,
+            Sink<RideAndFare> sink) {
 
         this.rideSource = rideSource;
         this.fareSource = fareSource;
@@ -67,14 +72,39 @@ public class RidesAndFaresExercise {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // A stream of taxi ride START events, keyed by rideId.
+
         DataStream<TaxiRide> rides =
-                env.addSource(rideSource).filter(ride -> ride.isStart).keyBy(ride -> ride.rideId);
+                env.fromSource(
+                                rideSource,
+                                new BoundedOutOfOrdernessTimestampExtractor<TaxiRide>(
+                                        Duration.ofSeconds(10)) {
+
+                                    @Override
+                                    public long extractTimestamp(TaxiRide taxiRide) {
+                                        return taxiRide.getEventTimeMillis();
+                                    }
+                                },
+                                "taxi ride")
+                        .filter(ride -> ride.isStart)
+                        .keyBy(ride -> ride.rideId);
 
         // A stream of taxi fare events, also keyed by rideId.
-        DataStream<TaxiFare> fares = env.addSource(fareSource).keyBy(fare -> fare.rideId);
+        KeyedStream<TaxiFare, Long> fares =
+                env.fromSource(
+                                fareSource,
+                                new BoundedOutOfOrdernessTimestampExtractor<TaxiFare>(
+                                        Duration.ofSeconds(10)) {
+
+                                    @Override
+                                    public long extractTimestamp(TaxiFare taxiFare) {
+                                        return taxiFare.getEventTimeMillis();
+                                    }
+                                },
+                                "taxi fare")
+                        .keyBy(fare -> fare.rideId);
 
         // Create the pipeline.
-        rides.connect(fares).flatMap(new EnrichmentFunction()).addSink(sink);
+        rides.connect(fares).flatMap(new EnrichmentFunction()).sinkTo(sink);
 
         // Execute the pipeline and return the result.
         return env.execute("Join Rides with Fares");
@@ -89,9 +119,7 @@ public class RidesAndFaresExercise {
 
         RidesAndFaresExercise job =
                 new RidesAndFaresExercise(
-                        new TaxiRideGenerator(),
-                        new TaxiFareGenerator(),
-                        new PrintSinkFunction<>());
+                        new TaxiRideGenerator(), new TaxiFareGenerator(), new PrintSink<>());
 
         job.execute();
     }
@@ -100,7 +128,7 @@ public class RidesAndFaresExercise {
             extends RichCoFlatMapFunction<TaxiRide, TaxiFare, RideAndFare> {
 
         @Override
-        public void open(Configuration config) throws Exception {
+        public void open(OpenContext config) throws Exception {
             throw new MissingSolutionException();
         }
 

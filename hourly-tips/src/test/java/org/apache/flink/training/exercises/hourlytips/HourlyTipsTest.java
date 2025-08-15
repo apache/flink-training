@@ -19,9 +19,9 @@
 package org.apache.flink.training.exercises.hourlytips;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.training.exercises.common.datatypes.TaxiFare;
 import org.apache.flink.training.exercises.common.utils.DataGenerator;
@@ -36,7 +36,8 @@ import org.junit.Test;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
+import java.util.Collection;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -58,11 +59,11 @@ public class HourlyTipsTest {
 
         TaxiFare one = testFare(1, t(0), 1.0F);
 
-        ParallelTestSource<TaxiFare> source = new ParallelTestSource<>(one);
+        Supplier<Source<TaxiFare, ?, ?>> sourceSupplier = () -> new ParallelTestSource<>(one);
 
         Tuple3<Long, Long, Float> expected = Tuple3.of(t(60).toEpochMilli(), 1L, 1.0F);
 
-        assertThat(results(source)).containsExactly(expected);
+        assertThat(results(sourceSupplier)).containsExactly(expected);
     }
 
     @Test
@@ -71,12 +72,13 @@ public class HourlyTipsTest {
         TaxiFare fiveIn1 = testFare(1, t(15), 5.0F);
         TaxiFare tenIn2 = testFare(1, t(90), 10.0F);
 
-        ParallelTestSource<TaxiFare> source = new ParallelTestSource<>(oneIn1, fiveIn1, tenIn2);
+        Supplier<Source<TaxiFare, ?, ?>> sourceSupplier =
+                () -> new ParallelTestSource<>(oneIn1, fiveIn1, tenIn2);
 
         Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60).toEpochMilli(), 1L, 6.0F);
         Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120).toEpochMilli(), 1L, 10.0F);
 
-        assertThat(results(source)).containsExactlyInAnyOrder(hour1, hour2);
+        assertThat(results(sourceSupplier)).containsExactlyInAnyOrder(hour1, hour2);
     }
 
     @Test
@@ -90,21 +92,22 @@ public class HourlyTipsTest {
         TaxiFare oneFor4In2 = testFare(4, t(80), 1.0F);
         TaxiFare tenFor5In2 = testFare(5, t(100), 10.0F);
 
-        ParallelTestSource<TaxiFare> source =
-                new ParallelTestSource<>(
-                        oneFor1In1,
-                        fiveFor1In1,
-                        tenFor1In2,
-                        twentyFor2In2,
-                        zeroFor3In2,
-                        zeroFor4In2,
-                        oneFor4In2,
-                        tenFor5In2);
+        Supplier<Source<TaxiFare, ?, ?>> sourceSupplier =
+                () ->
+                        new ParallelTestSource<>(
+                                oneFor1In1,
+                                fiveFor1In1,
+                                tenFor1In2,
+                                twentyFor2In2,
+                                zeroFor3In2,
+                                zeroFor4In2,
+                                oneFor4In2,
+                                tenFor5In2);
 
         Tuple3<Long, Long, Float> hour1 = Tuple3.of(t(60).toEpochMilli(), 1L, 6.0F);
         Tuple3<Long, Long, Float> hour2 = Tuple3.of(t(120).toEpochMilli(), 2L, 20.0F);
 
-        assertThat(results(source)).containsExactlyInAnyOrder(hour1, hour2);
+        assertThat(results(sourceSupplier)).containsExactlyInAnyOrder(hour1, hour2);
     }
 
     public Instant t(int minutes) {
@@ -118,19 +121,21 @@ public class HourlyTipsTest {
     private ComposedPipeline<TaxiFare, Tuple3<Long, Long, Float>> hourlyTipsPipeline() {
 
         ExecutablePipeline<TaxiFare, Tuple3<Long, Long, Float>> exercise =
-                (source, sink) -> new HourlyTipsExercise(source, sink).execute();
+                (sourceSupplier, sink) ->
+                        new HourlyTipsExercise(sourceSupplier.get(), sink).execute();
 
         ExecutablePipeline<TaxiFare, Tuple3<Long, Long, Float>> solution =
-                (source, sink) -> new HourlyTipsSolution(source, sink).execute();
+                (sourceSupplier, sink) ->
+                        new HourlyTipsSolution(sourceSupplier.get(), sink).execute();
 
         return new ComposedPipeline<>(exercise, solution);
     }
 
-    protected List<Tuple3<Long, Long, Float>> results(SourceFunction<TaxiFare> source)
-            throws Exception {
+    protected Collection<Tuple3<Long, Long, Float>> results(
+            Supplier<Source<TaxiFare, ?, ?>> sourceSupplier) throws Exception {
 
         TestSink<Tuple3<Long, Long, Float>> sink = new TestSink<>();
-        JobExecutionResult jobResult = hourlyTipsPipeline().execute(source, sink);
-        return sink.getResults(jobResult);
+        JobExecutionResult jobResult = hourlyTipsPipeline().execute(sourceSupplier, sink);
+        return sink.getResults();
     }
 }

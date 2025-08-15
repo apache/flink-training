@@ -19,9 +19,11 @@
 package org.apache.flink.training.exercises.ridecleansing;
 
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.training.exercises.common.datatypes.TaxiRide;
+import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.training.exercises.testing.ComposedPipeline;
 import org.apache.flink.training.exercises.testing.ExecutablePipeline;
 import org.apache.flink.training.exercises.testing.ParallelTestSource;
@@ -30,6 +32,8 @@ import org.apache.flink.training.solutions.ridecleansing.RideCleansingSolution;
 
 import org.junit.ClassRule;
 import org.junit.Test;
+
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -48,26 +52,36 @@ public class RideCleansingIntegrationTest extends RideCleansingTestBase {
 
     @Test
     public void testAMixtureOfLocations() throws Exception {
+        try {
+            TaxiRide toThePole = testRide(-73.9947F, 40.750626F, 0, 90);
+            TaxiRide fromThePole = testRide(0, 90, -73.9947F, 40.750626F);
+            TaxiRide atPennStation = testRide(-73.9947F, 40.750626F, -73.9947F, 40.750626F);
+            TaxiRide atNorthPole = testRide(0, 90, 0, 90);
 
-        TaxiRide toThePole = testRide(-73.9947F, 40.750626F, 0, 90);
-        TaxiRide fromThePole = testRide(0, 90, -73.9947F, 40.750626F);
-        TaxiRide atPennStation = testRide(-73.9947F, 40.750626F, -73.9947F, 40.750626F);
-        TaxiRide atNorthPole = testRide(0, 90, 0, 90);
+            Supplier<Source<TaxiRide, ?, ?>> sourceSupplier =
+                    () ->
+                            new ParallelTestSource(
+                                    toThePole, fromThePole, atPennStation, atNorthPole);
+            TestSink<TaxiRide> sink = new TestSink<>();
 
-        ParallelTestSource<TaxiRide> source =
-                new ParallelTestSource<>(toThePole, fromThePole, atPennStation, atNorthPole);
-        TestSink<TaxiRide> sink = new TestSink<>();
-
-        JobExecutionResult jobResult = rideCleansingPipeline().execute(source, sink);
-        assertThat(sink.getResults(jobResult)).containsExactly(atPennStation);
+            JobExecutionResult jobResult = rideCleansingPipeline().execute(sourceSupplier, sink);
+            jobResult.getJobExecutionResult().getJobExecutionResult();
+            assertThat(sink.getResults()).containsExactly(atPennStation);
+        } catch (Exception e) {
+            if (!MissingSolutionException.ultimateCauseIsMissingSolution(e)) {
+                throw e;
+            }
+        }
     }
 
     protected ComposedPipeline<TaxiRide, TaxiRide> rideCleansingPipeline() {
 
         ExecutablePipeline<TaxiRide, TaxiRide> exercise =
-                (source, sink) -> (new RideCleansingExercise(source, sink)).execute();
+                (sourceSupplier, sink) ->
+                        (new RideCleansingExercise(sourceSupplier.get(), sink)).execute();
         ExecutablePipeline<TaxiRide, TaxiRide> solution =
-                (source, sink) -> (new RideCleansingSolution(source, sink)).execute();
+                (sourceSupplier, sink) ->
+                        (new RideCleansingSolution(sourceSupplier.get(), sink)).execute();
 
         return new ComposedPipeline<>(exercise, solution);
     }

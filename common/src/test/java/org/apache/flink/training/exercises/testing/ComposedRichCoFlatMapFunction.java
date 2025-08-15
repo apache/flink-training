@@ -18,7 +18,7 @@
 
 package org.apache.flink.training.exercises.testing;
 
-import org.apache.flink.configuration.Configuration;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction;
 import org.apache.flink.training.exercises.common.utils.MissingSolutionException;
 import org.apache.flink.util.Collector;
@@ -50,7 +50,7 @@ public class ComposedRichCoFlatMapFunction<IN1, IN2, OUT>
     }
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(OpenContext parameters) throws Exception {
 
         try {
             exercise.setRuntimeContext(this.getRuntimeContext());
