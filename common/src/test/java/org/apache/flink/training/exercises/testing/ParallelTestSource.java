@@ -21,7 +21,7 @@ package org.apache.flink.training.exercises.testing;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import org.apache.flink.streaming.api.functions.source.legacy.RichParallelSourceFunction;
 
 public class ParallelTestSource<T> extends RichParallelSourceFunction<T>
         implements ResultTypeQueryable<T> {
@@ -37,8 +37,9 @@ public class ParallelTestSource<T> extends RichParallelSourceFunction<T>
 
     @Override
     public void run(SourceContext<T> ctx) {
-        int indexOfThisSubtask = getRuntimeContext().getIndexOfThisSubtask();
-        int numberOfParallelSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
+        int indexOfThisSubtask = getRuntimeContext().getTaskInfo().getIndexOfThisSubtask();
+        int numberOfParallelSubtasks =
+                getRuntimeContext().getTaskInfo().getNumberOfParallelSubtasks();
         int subtask = 0;
 
         // the elements of the testStream are assigned to the parallel instances in a round-robin
